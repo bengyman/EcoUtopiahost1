@@ -17,29 +17,29 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING(50),
             allowNull: false
         },
-        isDeleted: {
+        is_deleted: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
             defaultValue: false
         },
-        passwordResetCode: {
+        password_reset_code: {
             type: DataTypes.STRING,
             allowNull: true
         },
-        passwordResetExpiry: {
+        password_reset_expiry: {
             type: DataTypes.DATETIME,
             allowNull: true
         },
-        isActivated: {
+        is_activated: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
             defaultValue: false
         },
-        activationCode: {
+        activation_code: {
             type: DataTypes.STRING,
             allowNull: true,
         },
-        activationCodeExpiry: {
+        activation_code_expiry: {
             type: DataTypes.DATETIME,
             allowNull: true,
         }
