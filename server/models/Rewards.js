@@ -15,7 +15,11 @@ module.exports = (sequelize, DataTypes) => {
         },
         rewadval: {
             type: DataTypes.INTEGER,
-            allowNull: false
+            allowNull: false,
+            validate: {
+                isInt: true,
+                min: 1,
+            }
         },
         rewadpic: {
             type: DataTypes.STRING,
