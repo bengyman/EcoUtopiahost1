@@ -1,19 +1,20 @@
 module.exports = (sequelize, DataTypes) => {
     const Resident = sequelize.define("Resident", {
-        residentid: {
+        resident_id: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            autoIncrement: true
+            autoIncrement: true,
+            primaryKey: true
         },
         name: {
             type: DataTypes.STRING(100),
             allowNull: false
         },
-        mobilenum: {
+        mobile_num: {
             type: DataTypes.STRING(20),
             allowNull: true
         },
-        aboutMe: {
+        about_me: {
             type: DataTypes.STRING(500),
             allowNull: true
         },
@@ -25,4 +26,6 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         tableName: 'resident'
     });
+
+    return Resident;
 }
