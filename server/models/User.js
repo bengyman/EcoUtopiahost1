@@ -3,7 +3,8 @@ module.exports = (sequelize, DataTypes) => {
         userid: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            autoIncrement: true
+            autoIncrement: true,
+            primaryKey: true
         },
         email: {
             type: DataTypes.STRING(50),
@@ -27,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true
         },
         password_reset_expiry: {
-            type: DataTypes.DATETIME,
+            type: DataTypes.DATE,
             allowNull: true
         },
         is_activated: {
@@ -40,10 +41,12 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true,
         },
         activation_code_expiry: {
-            type: DataTypes.DATETIME,
+            type: DataTypes.DATE,
             allowNull: true,
         }
     }, {
         tableName: 'users'
     });
+
+    return User;
 }

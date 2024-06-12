@@ -1,32 +1,31 @@
 module.exports = (sequelize, DataTypes) => {
     const Rewards = sequelize.define("Rewards", {
-        rewardid: {
+        reward_id: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            autoIncrement: true
+            autoIncrement: true,
+            primaryKey: true
         },
-        name: {
+        reward_name: {
             type: DataTypes.STRING(100),
             allowNull: false
         },
-        rewadesc: {
-            type: DataTypes.STRING(20),
+        reward_description: {
+            type: DataTypes.STRING(500),
+            allowNull: true
+        },
+        reward_points: {
+            type: DataTypes.INTEGER,
             allowNull: false
         },
-        rewadval: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            validate: {
-                isInt: true,
-                min: 1,
-            }
+        reward_expiry_date: {
+            type: DataTypes.DATE,
+            allowNull: false
         },
-        rewadpic: {
-            type: DataTypes.STRING,
-            allowNull: true
-        }
 
     }, {
         tableName: 'rewards'
     });
+
+    return Rewards;
 }

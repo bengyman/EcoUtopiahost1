@@ -3,7 +3,8 @@ module.exports = (sequelize, DataTypes) => {
         staffid: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            autoIncrement: true
+            autoIncrement: true,
+            primaryKey: true
         },
         name: {
             type: DataTypes.STRING(100),
@@ -25,4 +26,6 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         tableName: 'staff'
     });
+
+    return Staff;
 }
