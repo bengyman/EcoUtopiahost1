@@ -31,6 +31,6 @@ module.exports = (sequelize, DataTypes) => {
         Orders.belongsTo(models.Resident, { foreignKey: 'userid' });
         Orders.belongsTo(models.Course, { foreignKey: 'courseid' });
     };
-    
+
     return Orders;
 }
