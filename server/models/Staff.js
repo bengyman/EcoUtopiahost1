@@ -3,7 +3,8 @@ module.exports = (sequelize, DataTypes) => {
         staffid: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            autoIncrement: true
+            autoIncrement: true,
+            primaryKey: true
         },
         name: {
             type: DataTypes.STRING(100),
@@ -20,9 +21,24 @@ module.exports = (sequelize, DataTypes) => {
         profile_pic: {
             type: DataTypes.STRING,
             allowNull: true
+        },
+        user_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'users',
+                key: 'userid'
+            },
+            onUpdate: 'CASCADE',
+            onDelete: 'CASCADE'
         }
-
     }, {
         tableName: 'staff'
     });
-}
+
+    Staff.associate = (models) => {
+        Staff.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' });
+    };
+
+    return Staff;
+};

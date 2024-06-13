@@ -3,7 +3,8 @@ module.exports = (sequelize, DataTypes) => {
         userid: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            autoIncrement: true
+            autoIncrement: true,
+            primaryKey: true
         },
         email: {
             type: DataTypes.STRING(50),
@@ -46,4 +47,11 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         tableName: 'users'
     });
-}
+
+    User.associate = (models) => {
+        User.hasOne(models.Resident, { foreignKey: 'user_id', as: 'resident' });
+        User.hasOne(models.Staff, { foreignKey: 'user_id', as: 'staff' });
+    };
+
+    return User;
+};
