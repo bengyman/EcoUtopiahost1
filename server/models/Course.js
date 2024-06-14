@@ -48,5 +48,9 @@ module.exports = (sequelize, DataTypes) => {
         tableName: 'courses',
     });
 
+    Course.associate = (models) => {
+        Course.hasMany(models.Orders, { foreignKey: 'course_id' });
+    };
+
     return Course;
 }
