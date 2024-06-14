@@ -28,5 +28,13 @@ module.exports = (sequelize, DataTypes) => {
         tableName: 'resident'
     });
 
+    Resident.associate = (models) => {
+        Resident.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' });
+    };
+
+    Resident.associate = (models) => {
+        Resident.hasMany(models.Orders, { foreignKey: 'resident_id' });
+    };
+
     return Resident;
 }
