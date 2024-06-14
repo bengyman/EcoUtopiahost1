@@ -26,6 +26,9 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         tableName: 'reports',
     });
+    Reports.associate = (models) => {
+        null
+    };
 
     return Report;
 }
