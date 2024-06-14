@@ -18,6 +18,15 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING(100),
             allowNull: false
         },
+        course_price: {
+            type: DataTypes.DECIMAL(10, 2),
+            allowNull: false
+        },
+        // Course type can be either 'Online' or 'In-Person'
+        course_type: {
+            type: DataTypes.STRING(10),
+            allowNull: false
+        },
         course_date: {
             type: DataTypes.DATE,
             allowNull: false
@@ -28,6 +37,10 @@ module.exports = (sequelize, DataTypes) => {
         },
         course_end_time: {
             type: DataTypes.TIME,
+            allowNull: false
+        },
+        course_capacity: {
+            type: DataTypes.INTEGER,
             allowNull: false
         },
 
