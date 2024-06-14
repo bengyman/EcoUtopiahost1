@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
     const User = sequelize.define("User", {
-        userid: {
+        user_id: {
             type: DataTypes.INTEGER,
             allowNull: false,
             autoIncrement: true,
@@ -28,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true
         },
         password_reset_expiry: {
-            type: DataTypes.DATETIME,
+            type: DataTypes.DATE,
             allowNull: true
         },
         is_activated: {
@@ -41,7 +41,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true,
         },
         activation_code_expiry: {
-            type: DataTypes.DATETIME,
+            type: DataTypes.DATE,
             allowNull: true,
         }
     }, {

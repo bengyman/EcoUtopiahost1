@@ -4,7 +4,8 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
             autoIncrement: true,
-            primaryKey: true
+            primaryKey: true,
+            foreignKey: true
         },
         name: {
             type: DataTypes.STRING(100),
@@ -40,5 +41,9 @@ module.exports = (sequelize, DataTypes) => {
         Resident.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' });
     };
 
+    Resident.associate = (models) => {
+        Resident.hasMany(models.Orders, { foreignKey: 'resident_id' });
+    };
+
     return Resident;
-};
+}
