@@ -13,12 +13,12 @@ app.use(cors({
 
 // Simple Route
 app.get("/", (req, res) => {
-    res.send("EcoUtiopia API");
+    res.json({ message: "Welcome to the EcoUtopia API" });
 });
 
 // Routes
-/*const tutorialRoute = require('./routes/tutorial');
-app.use("/tutorial", tutorialRoute);*/
+const courseRoute = require('./routes/course');
+app.use("/courses", courseRoute);
 
 db.sequelize.sync({ alter: true }).then(() => {
     let port = process.env.APP_PORT;
