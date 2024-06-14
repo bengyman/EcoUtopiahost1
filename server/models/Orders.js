@@ -5,14 +5,14 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true,
             autoIncrement: true
         },
-        userid: {
+        resident_id: {
             //call from resident table as foreign key
-            type: DataTypes.STRING,
+            type: DataTypes.INTEGER,
             allowNull: false
         },
-        courseid: {
+        course_id: {
             //call from course table as foreign key
-            type: DataTypes.STRING,
+            type: DataTypes.INTEGER,
             allowNull: false
         },
         order_date: {
@@ -28,8 +28,8 @@ module.exports = (sequelize, DataTypes) => {
         tableName: 'orders',
     });
     Orders.associate = (models) => {
-        Orders.belongsTo(models.Resident, { foreignKey: 'userid' });
-        Orders.belongsTo(models.Course, { foreignKey: 'courseid' });
+        Orders.belongsTo(models.Resident, { foreignKey: 'resident_id' });
+        Orders.belongsTo(models.Course, { foreignKey: 'course_id' });
     };
 
     return Orders;
