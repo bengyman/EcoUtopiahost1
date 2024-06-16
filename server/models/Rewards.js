@@ -26,6 +26,9 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         tableName: 'rewards'
     });
+    Rewards.associate = (models) => {
+        Rewards.belongsTo(models.Resident, { foreignKey: 'resident_id'})
+    };
 
     return Rewards;
 }

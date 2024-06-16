@@ -21,16 +21,6 @@ module.exports = (sequelize, DataTypes) => {
         profile_pic: {
             type: DataTypes.STRING,
             allowNull: true
-        },
-        user_id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            references: {
-                model: 'users',
-                key: 'userid'
-            },
-            onUpdate: 'CASCADE',
-            onDelete: 'CASCADE'
         }
     }, {
         tableName: 'staff'
