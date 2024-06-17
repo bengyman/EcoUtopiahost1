@@ -28,12 +28,24 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Resident.associate = (models) => {
-        Resident.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' });
+        Resident.belongsTo(models.User, { foreignKey: 'user_id' });
     };
 
     Resident.associate = (models) => {
         Resident.hasMany(models.Orders, { foreignKey: 'resident_id' });
     };
+
+    Resident.associate = (models) => {
+        Resident.hasMany(models.Post, { foreignKey: 'resident_id' });
+    };
+
+    Resident.associate = (models) => {
+        Resident.hasMany(models.Reports, { foreignKey: 'resident_id' });
+    };
+
+    Resident.associate = (models) => {
+        Resident.hasMany(models.Rewards, { foreignKey: 'resident_id' });
+    }
 
     return Resident;
 }
