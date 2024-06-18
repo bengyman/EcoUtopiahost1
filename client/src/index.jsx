@@ -1,8 +1,19 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import '@mantine/core/styles.css';
-import { MantineProvider, createTheme, rem } from '@mantine/core'
+
+// Pages and components
 import App from './pages/App.jsx'
+import TestPage from './pages/TestPage.jsx';
+import Courses from './pages/Courses.jsx';
+import Navbar from './components/Navbar.jsx';
+
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+} from 'react-router-dom'
+import '@mantine/core/styles.css';
+import { Box, MantineProvider, createTheme, rem } from '@mantine/core'
 
 const theme = createTheme({
   //primaryColor: 'violet'
@@ -35,11 +46,27 @@ const theme = createTheme({
   },
 })
 
+function Main() {
+  return (
+    <>
+      <Navbar />
+      <Box padding="xl" style={{marginTop: '70px'} } />
+      <Routes>
+        <Route path="/" element={<App />} />
+        <Route path="/courses" element={<Courses />} />
+        <Route path="/test" element={<TestPage />} />
+      </Routes>
+    </>
+  )
+}
+
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
   <React.StrictMode>
     <MantineProvider theme={theme} defaultColorScheme='auto'>
-      <App />
+      <BrowserRouter>
+        <Main />
+      </BrowserRouter>
     </MantineProvider>
   </React.StrictMode>
 )
