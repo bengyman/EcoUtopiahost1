@@ -33,6 +33,23 @@ fs.readdirSync(__dirname)
     );
     db[model.name] = model;
   });
+
+Object.keys(db).forEach((modelName) => {
+  if (db[modelName].associate) {
+    db[modelName].associate(db);
+  }
+});
+  
+// Import models
+const User = require('./models/User')(sequelize, Sequelize.DataTypes);
+const Resident = require('./models/Resident')(sequelize, Sequelize.DataTypes);
+const Staff = require('./models/Staff')(sequelize, Sequelize.DataTypes);
+  
+// Add models to db object
+db.User = User;
+db.Resident = Resident;
+db.Staff = Staff;
+
 Object.keys(db).forEach((modelName) => {
   if (db[modelName].associate) {
     db[modelName].associate(db);
