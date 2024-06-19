@@ -19,6 +19,10 @@ app.get("/", (req, res) => {
 // Routes
 /*const tutorialRoute = require('./routes/tutorial');
 app.use("/tutorial", tutorialRoute);*/
+const courseRoute = require('./routes/course');
+const userRoute = require('./routes/user');
+app.use("/courses", courseRoute);
+app.use('/users', userRoute);
 
 db.sequelize.sync({ alter: true }).then(() => {
     let port = process.env.APP_PORT;
