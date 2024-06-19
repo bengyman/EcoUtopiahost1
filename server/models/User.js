@@ -16,7 +16,8 @@ module.exports = (sequelize, DataTypes) => {
         },
         role: {
             type: DataTypes.STRING(50),
-            allowNull: false
+            allowNull: true,
+            defaultValue: "RESIDENT"
         },
         is_deleted: {
             type: DataTypes.BOOLEAN,
@@ -54,4 +55,4 @@ module.exports = (sequelize, DataTypes) => {
     };
 
     return User;
-}
+};
