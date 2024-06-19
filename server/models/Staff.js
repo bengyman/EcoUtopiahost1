@@ -22,7 +22,6 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: true
         }
-
     }, {
         tableName: 'staff'
     });
@@ -32,4 +31,5 @@ module.exports = (sequelize, DataTypes) => {
     };
 
     return Staff;
-}
+};
+

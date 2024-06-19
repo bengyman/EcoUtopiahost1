@@ -17,6 +17,7 @@ app.get("/", (req, res) => {
 });
 
 // Routes
+
 const courseRoute = require('./routes/course');
 const userRoute = require('./routes/user');
 
