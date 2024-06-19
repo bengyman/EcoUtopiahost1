@@ -50,7 +50,7 @@ function Main() {
   return (
     <>
       <Navbar />
-      <Box padding="xl" style={{marginTop: '70px'} } />
+      <Box padding="xl" style={{marginTop: '70px'}} />
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/courses" element={<Courses />} />
@@ -63,7 +63,7 @@ function Main() {
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
   <React.StrictMode>
-    <MantineProvider theme={theme} defaultColorScheme='auto'>
+    <MantineProvider theme={theme} defaultColorScheme='light'>
       <BrowserRouter>
         <Main />
       </BrowserRouter>
