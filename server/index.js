@@ -13,7 +13,7 @@ app.use(cors({
 
 // Simple Route
 app.get("/", (req, res) => {
-    res.send("EcoUtiopia API");
+    res.json({ message: "Welcome to the EcoUtopia API" });
 });
 
 // Routes
@@ -23,6 +23,8 @@ const courseRoute = require('./routes/course');
 const userRoute = require('./routes/user');
 app.use("/courses", courseRoute);
 app.use('/users', userRoute);
+const courseRoute = require('./routes/course');
+app.use("/courses", courseRoute);
 
 db.sequelize.sync({ alter: true }).then(() => {
     let port = process.env.APP_PORT;
