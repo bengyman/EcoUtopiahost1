@@ -1,4 +1,4 @@
-import { AppShell, Flex, Anchor, Button, Image } from "@mantine/core";
+import { AppShell, Flex, Anchor, Button, Text, Image } from "@mantine/core";
 import logo from "../assets/logo.png"
 
 function Navbar() {
@@ -10,6 +10,9 @@ function Navbar() {
             <Anchor href="/" style={{ textDecoration: "none" }}>
               <Image src={logo} alt="EcoUtopia" width={70} height={70} />
             </Anchor>
+          </Flex>
+          <Flex align="center">
+            <Text style={{ color: "black", fontSize: 30, fontWeight: 700 }}>Welcome to EcoUtopia</Text>
           </Flex>
           <Flex align="center">
             <Anchor href="/login" style={{ textDecoration: "none" }}>
