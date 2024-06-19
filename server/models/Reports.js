@@ -27,5 +27,9 @@ module.exports = (sequelize, DataTypes) => {
         tableName: 'reports',
     });
 
+    Report.associate = (models) => {
+        Report.belongsTo(models.Resident, { foreignKey: 'resident_id'})
+    };
+
     return Report;
 }
