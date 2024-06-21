@@ -29,7 +29,7 @@ function Login() {
       await login(values.email, values.password, recaptchaToken);
       navigate('/profile');
     } catch (err) {
-      setError('Login Failed, Credentials not Found');
+      setError('Failed to login');
     }
   };
 

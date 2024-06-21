@@ -26,7 +26,6 @@ app.use('/uploads', express.static('uploads'));
 //app.use("/courses", courseRoute);
 const userRoute = require('./routes/user');
 app.use('/user', userRoute);
-app.use('/api', userRoute);
 
 db.sequelize.sync({ alter: true }).then(() => {
     let port = process.env.APP_PORT;
