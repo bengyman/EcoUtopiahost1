@@ -11,7 +11,7 @@ import Registration from './pages/Registration';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
 import EditProfile from './pages/EditProfile';
-import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
+//import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 
 import {
   BrowserRouter,
@@ -74,13 +74,13 @@ const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
   <React.StrictMode>
     <MantineProvider theme={theme} defaultColorScheme="auto">
-      <GoogleReCaptchaProvider reCaptchaKey = {import.meta.env.VITE_RECAPTCHA_SITE_KEY}>
+      {/*<GoogleReCaptchaProvider reCaptchaKey = {import.meta.env.VITE_RECAPTCHA_SITE_KEY}> */}
         <AuthProvider>
           <BrowserRouter>
             <Main />
           </BrowserRouter>
         </AuthProvider>
-      </GoogleReCaptchaProvider>
+      {/* </GoogleReCaptchaProvider> */}
     </MantineProvider>
   </React.StrictMode>
 )

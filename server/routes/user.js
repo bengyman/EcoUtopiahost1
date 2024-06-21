@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { User } = require('../models');
+const { User, Resident } = require('../models');
 const yup = require('yup');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -8,9 +8,8 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const { Op } = require('sequelize');
 const { authenticateToken, authorizeRoles } = require('../middleware/auth');
-const verifyRecaptcha = require('../middleware/recaptcha');
+// const verifyRecaptcha = require('../middleware/recaptcha');
 const upload = require('../middleware/fileupload');
-
 
 // Input validation schema
 const userSchema = yup.object().shape({
@@ -24,21 +23,39 @@ const generateToken = (user) => {
     return jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
 };
 
-// Create a new user with input validation and Recaptcha verification
-router.post('/register', verifyRecaptcha, async (req, res) => {
+// Create a new user and resident with input validation
+router.post('/register', async (req, res) => {
+    const transaction = await User.sequelize.transaction();
     try {
         await userSchema.validate(req.body);
-        const hashedPassword = await bcrypt.hash(req.body.password, 10);
-        const newUser = await User.create({ ...req.body, password: hashedPassword });
+        const { email, password, role, firstName, lastName, contactNumber } = req.body;
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const newUser = await User.create({
+            email,
+            password: hashedPassword,
+            role
+        }, { transaction });
+
+        const newResident = await Resident.create({
+            name: `${firstName} ${lastName}`,
+            mobile_num: contactNumber,
+            user_id: newUser.user_id
+        }, { transaction });
+
+        await transaction.commit();
+
         const token = generateToken(newUser);
-        res.status(201).json({ user: newUser, token });
+        res.status(201).json({ user: newUser, resident: newResident, token });
     } catch (error) {
+        await transaction.rollback();
+        console.error('Registration error:', error);  // Add this line to log the error details
         res.status(500).json({ error: error.message });
     }
 });
 
 // Authenticate user and generate JWT token
-router.post('/login', verifyRecaptcha, async (req, res) => {
+router.post('/login', async (req, res) => {
     try {
         const user = await User.findOne({ where: { email: req.body.email } });
         if (user && await bcrypt.compare(req.body.password, user.password)) {
@@ -48,7 +65,8 @@ router.post('/login', verifyRecaptcha, async (req, res) => {
             res.status(401).json({ error: 'Invalid credentials' });
         }
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Validation error:', error.errors);
+        res.status(500).json({ error: 'Validation error', details: error.errors });
     }
 });
 
@@ -132,7 +150,7 @@ router.put('/softrestore/:id', authenticateToken, authorizeRoles('STAFF'), async
 });
 
 // Create activation code and send email
-router.post('/activate', verifyRecaptcha, async (req, res) => {
+router.post('/activate', async (req, res) => { // Removed verifyRecaptcha
     try {
         const user = await User.findOne({ where: { email: req.body.email } });
         if (!user) {
@@ -169,7 +187,7 @@ router.post('/activate', verifyRecaptcha, async (req, res) => {
 });
 
 // Reset password request
-router.post('/password-reset', verifyRecaptcha, async (req, res) => {
+router.post('/password-reset', async (req, res) => { // Removed verifyRecaptcha
     try {
         const user = await User.findOne({ where: { email: req.body.email } });
         if (!user) {
@@ -269,6 +287,5 @@ router.delete('/profile-picture', async (req, res) => {
         res.status(500).send({ message: 'Server error', error: error.message });
     }
 });
-
 
 module.exports = router;

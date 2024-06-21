@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { TextInput, PasswordInput, Button, Container, Paper, Group, Title, Box, Alert } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+import { useAuth } from '../context/AuthContext';
 
 function Registration() {
   const navigate = useNavigate();
-  const { executeRecaptcha } = useGoogleReCaptcha();
+  const { register } = useAuth();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -17,17 +16,10 @@ function Registration() {
   });
   const [error, setError] = useState('');
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!executeRecaptcha) {
-      setError('Recaptcha is not ready');
-      return;
-    }
-
+  const handleSubmit = async () => {
     try {
-      const recaptchaToken = await executeRecaptcha('register');
-      const response = await axios.post('/user/register', { ...formData, recaptchaToken });
-      navigate('/profile');
+      await register(formData);
+      navigate('/test');
     } catch (error) {
       setError('Registration failed');
       console.error('Registration failed:', error);
@@ -49,7 +41,7 @@ function Registration() {
         </ul>
       </Box>
       <Paper withBorder shadow="md" p={30} mt={30} radius="md">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
           <TextInput
             label="First Name"
             required

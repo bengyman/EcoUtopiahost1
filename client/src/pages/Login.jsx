@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+// import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useForm } from '@mantine/form';
 import { TextInput, PasswordInput, Button, Box, Title, Alert, Container, Group, Anchor, Paper } from '@mantine/core';
 import { useAuth } from '../context/AuthContext';
 
 function Login() {
-  const { executeRecaptcha } = useGoogleReCaptcha();
+  // const { executeRecaptcha } = useGoogleReCaptcha();
   const { login } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState('');
@@ -19,15 +19,16 @@ function Login() {
   });
 
   const handleSubmit = async (values) => {
-    if (!executeRecaptcha) {
-      setError('Recaptcha is not ready');
-      return;
-    }
+    // if (!executeRecaptcha) {
+    //   setError('Recaptcha is not ready');
+    //   return;
+    // }
 
     try {
-      const recaptchaToken = await executeRecaptcha('login');
-      await login(values.email, values.password, recaptchaToken);
-      navigate('/profile');
+      // const recaptchaToken = await executeRecaptcha('login');
+      await login(values.email, values.password);
+      setError(''); // Clear any previous errors
+      navigate('/test'); // Navigate to profile only on successful login
     } catch (err) {
       setError('Failed to login');
     }

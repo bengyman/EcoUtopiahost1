@@ -9,9 +9,10 @@ export const AuthProvider = ({ children }) => {
   // Set the base URL for Axios using environment variable
   axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
 
-  const login = async (email, password, recaptchaToken) => {
+  const login = async (email, password) => { // Removed recaptchaToken
     try {
-      const response = await axios.post('/user/login', { email, password, recaptchaToken });
+      // Removed recaptchaToken from the payload
+      const response = await axios.post('/user/login', { email, password });
       setUser(response.data.user);
       return response.data;
     } catch (error) {
@@ -19,9 +20,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (formData, recaptchaToken) => {
+  const register = async (formData) => { // Removed recaptchaToken
     try {
-      const response = await axios.post('/user/register', { ...formData, recaptchaToken });
+      // Removed recaptchaToken from the payload
+      const response = await axios.post('/user/register', formData);
       setUser(response.data.user);
       return response.data;
     } catch (error) {
