@@ -17,7 +17,7 @@ function Navbar() {
                 Login
               </Button>
             </Anchor>
-            <Anchor href="/signup" style={{ textDecoration: "none" }}>
+            <Anchor href="/register" style={{ textDecoration: "none" }}>
               <Button color="black" style={{ marginLeft: 10, marginRight: 10 }}>
                 Sign Up
               </Button>

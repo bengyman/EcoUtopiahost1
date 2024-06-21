@@ -3,6 +3,7 @@ const cors = require('cors');
 const db = require('./models');
 require('dotenv').config();
 
+
 const app = express();
 app.use(express.json());
 
@@ -16,6 +17,8 @@ app.get("/", (req, res) => {
     res.json({ message: "Welcome to the EcoUtopia API" });
 });
 
+app.use('/uploads', express.static('uploads'));
+
 // Routes
 //const tutorialRoute = require('./routes/tutorial');
 //app.use("/tutorial", tutorialRoute);
@@ -23,6 +26,7 @@ app.get("/", (req, res) => {
 //app.use("/courses", courseRoute);
 const userRoute = require('./routes/user');
 app.use('/user', userRoute);
+app.use('/api', userRoute);
 
 db.sequelize.sync({ alter: true }).then(() => {
     let port = process.env.APP_PORT;
