@@ -23,13 +23,16 @@ app.get("/", (req, res) => {
 app.use('/uploads', express.static('uploads'));
 
 // Routes
-//const tutorialRoute = require('./routes/tutorial');
-//app.use("/tutorial", tutorialRoute);
-//const courseRoute = require('./routes/course');
-//app.use("/courses", courseRoute);
+
+const courseRoute = require('./routes/course');
 const userRoute = require('./routes/user');
+const ordersRoute = require('./routes/orders');
+
+app.use("/courses", courseRoute);
 app.use('/user', userRoute);
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+app.use("/orders", ordersRoute);
+
 
 db.sequelize.sync({ alter: true }).then(() => {
     let port = process.env.APP_PORT;

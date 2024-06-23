@@ -56,7 +56,7 @@ function Main() {
   return (
     <>
       <Navbar />
-      <Box padding="xl" style={{marginTop: '70px'} } />
+      <Box padding="xl" style={{marginTop: '70px'}} />
       <Routes>
         <Route path="/" element={<App />} />
         {/* <Route path="/courses" element={<Courses />} />/ */}
