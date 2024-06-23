@@ -1,10 +1,14 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 
+import { AuthProvider } from './context/AuthContext.jsx';
+
 // Pages and components
 import App from './pages/App.jsx'
 import TestPage from './pages/TestPage.jsx';
 import Courses from './pages/Courses.jsx';
+import ViewCourse from './pages/ViewCourse.jsx';
+import Login from './pages/Login.jsx'
 import Navbar from './components/Navbar.jsx';
 
 import {
@@ -54,6 +58,8 @@ function Main() {
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/courses" element={<Courses />} />
+        <Route path="/course/:courseId" element={<ViewCourse />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/test" element={<TestPage />} />
       </Routes>
     </>
@@ -64,9 +70,11 @@ const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
   <React.StrictMode>
     <MantineProvider theme={theme} defaultColorScheme='light'>
-      <BrowserRouter>
-        <Main />
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <Main />
+        </BrowserRouter>
+      </AuthProvider>
     </MantineProvider>
   </React.StrictMode>
 )
