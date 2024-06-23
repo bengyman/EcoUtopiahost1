@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const db = require('./models');
 require('dotenv').config();
@@ -6,6 +7,8 @@ require('dotenv').config();
 
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(express.static('public'));
 
 // Enable CORS
 app.use(cors({
@@ -26,6 +29,7 @@ app.use('/uploads', express.static('uploads'));
 //app.use("/courses", courseRoute);
 const userRoute = require('./routes/user');
 app.use('/user', userRoute);
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 db.sequelize.sync({ alter: true }).then(() => {
     let port = process.env.APP_PORT;

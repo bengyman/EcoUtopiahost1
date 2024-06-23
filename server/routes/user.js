@@ -2,13 +2,14 @@ const express = require('express');
 const router = express.Router();
 const { User, Resident } = require('../models');
 const yup = require('yup');
+const fs = require('fs');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const { Op } = require('sequelize');
 const { authenticateToken, authorizeRoles } = require('../middleware/auth');
-// const verifyRecaptcha = require('../middleware/recaptcha');
+const verifyRecaptcha = require('../middleware/recaptcha');
 const upload = require('../middleware/fileupload');
 
 // Input validation schema
@@ -24,7 +25,7 @@ const generateToken = (user) => {
 };
 
 // Create a new user and resident with input validation
-router.post('/register', async (req, res) => {
+router.post('/register', verifyRecaptcha, async (req, res) => {
     const transaction = await User.sequelize.transaction();
     try {
         await userSchema.validate(req.body);
@@ -55,20 +56,21 @@ router.post('/register', async (req, res) => {
 });
 
 // Authenticate user and generate JWT token
-router.post('/login', async (req, res) => {
+router.post('/login', verifyRecaptcha, async (req, res) => {
     try {
-        const user = await User.findOne({ where: { email: req.body.email } });
-        if (user && await bcrypt.compare(req.body.password, user.password)) {
-            const token = generateToken(user);
-            res.status(200).json({ message: 'Authenticated successfully', role: user.role, token });
-        } else {
-            res.status(401).json({ error: 'Invalid credentials' });
-        }
+      const user = await User.findOne({ where: { email: req.body.email } });
+      if (user && await bcrypt.compare(req.body.password, user.password)) {
+        const token = generateToken(user);
+        res.status(200).json({ user, token }); // Ensure 'user' and 'token' are returned
+      } else {
+        res.status(401).json({ error: 'Invalid credentials' });
+      }
     } catch (error) {
-        console.error('Validation error:', error.errors);
-        res.status(500).json({ error: 'Validation error', details: error.errors });
+      console.error('Validation error:', error.errors);
+      res.status(500).json({ error: 'Validation error', details: error.errors });
     }
 });
+  
 
 // Read all users (accessible by STAFF only)
 router.get('/', authenticateToken, authorizeRoles('STAFF'), async (req, res) => {
@@ -80,32 +82,55 @@ router.get('/', authenticateToken, authorizeRoles('STAFF'), async (req, res) => 
     }
 });
 
-// Read a user by ID (accessible by STAFF only)
-router.get('/:id', authenticateToken, authorizeRoles('STAFF'), async (req, res) => {
+// Read a user by ID
+router.get('/:id', authenticateToken, authorizeRoles('RESIDENT', 'STAFF'), async (req, res) => {
+    try {
+      const user = await User.findByPk(req.params.id);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+  
+      const resident = await Resident.findOne({ where: { user_id: user.user_id } });
+      if (!resident) {
+        return res.status(404).json({ error: 'Resident details not found' });
+      }
+  
+      res.status(200).json({ user, resident });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+
+// Update user details
+router.put('/:id', authenticateToken, authorizeRoles('RESIDENT', 'STAFF'), async (req, res) => {
     try {
         const user = await User.findByPk(req.params.id);
+        const resident = await Resident.findOne({ where: { user_id: req.params.id } });
+
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
-        res.status(200).json(user);
+        if (!resident) {
+            return res.status(404).json({ error: 'Resident details not found' });
+        }
+
+        // Update user and resident details separately
+        const updatedUser = await user.update({
+            email: req.body.email
+        });
+
+        const updatedResident = await resident.update({
+            name: `${req.body.firstName} ${req.body.lastName}`,
+            mobile_num: req.body.mobileNumber
+        });
+
+        res.status(200).json({ user: updatedUser, resident: updatedResident });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
 
-// Update user details (accessible by STAFF only)
-router.put('/:id', authenticateToken, authorizeRoles('STAFF'), async (req, res) => {
-    try {
-        const user = await User.findByPk(req.params.id);
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-        const updatedUser = await user.update(req.body);
-        res.status(200).json(updatedUser);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
 
 // Delete a user (soft delete, accessible by STAFF only)
 router.put('/softdelete/:id', authenticateToken, authorizeRoles('STAFF'), async (req, res) => {
@@ -243,26 +268,28 @@ router.put('/password-reset/:code', async (req, res) => {
 
 // Route to upload or update a profile picture
 router.post('/profile-picture', upload.single('profilePic'), async (req, res) => {
-    const userId = req.body.userId; // Make sure the user is authenticated
+    const userId = req.body.userId; // Ensure the user is authenticated
     try {
-        const user = await User.findByPk(userId);
-        if (user) {
+        const resident = await Resident.findOne({ where: { user_id: userId } });
+        if (resident) {
             // Delete old profile picture if exists
-            if (user.profilePic && fs.existsSync(`./uploads/${user.profilePic}`)) {
-                fs.unlinkSync(`./uploads/${user.profilePic}`);
+            if (resident.profile_pic && fs.existsSync(`./public/uploads/${resident.profile_pic}`)) {
+                fs.unlinkSync(`./public/uploads/${resident.profile_pic}`);
             }
-            
+
             // Update new profile picture filename in the database
-            user.profilePic = req.file.filename;
-            await user.save();
+            resident.profile_pic = req.file.filename;
+            await resident.save();
             res.send({ message: 'Profile picture updated successfully', fileName: req.file.filename });
         } else {
-            res.status(404).send({ message: 'User not found' });
+            res.status(404).send({ message: 'Resident not found' });
         }
     } catch (error) {
         res.status(500).send({ message: 'Server error', error: error.message });
     }
 });
+
+
 
 // Route to delete a profile picture
 router.delete('/profile-picture', async (req, res) => {
@@ -272,10 +299,10 @@ router.delete('/profile-picture', async (req, res) => {
         if (user && user.profilePic) {
             // Remove file from filesystem
             const filePath = `./uploads/${user.profilePic}`;
-            if (fs.existsSync(filePath)) {
+            if (fs.existsSync(filePath)) {  
                 fs.unlinkSync(filePath);
             }
-            
+
             // Update database
             user.profilePic = null;
             await user.save();

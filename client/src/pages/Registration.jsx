@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { TextInput, PasswordInput, Button, Container, Paper, Group, Title, Box, Alert } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 function Registration() {
   const navigate = useNavigate();
   const { register } = useAuth();
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -18,7 +20,8 @@ function Registration() {
 
   const handleSubmit = async () => {
     try {
-      await register(formData);
+      const recaptchaToken = await executeRecaptcha('register');
+      await register({ ...formData, recaptchaToken });
       navigate('/test');
     } catch (error) {
       setError('Registration failed');

@@ -1,27 +1,19 @@
 const multer = require('multer');
+const path = require('path');
 
-let nanoid;
-import('nanoid').then(nanoidModule => {
-    nanoid = nanoidModule.nanoid;
-}).catch(error => {
-    console.error('Failed to load nanoid:', error);
-});
-
-// Configure multer storage with dynamic nanoid import
 const storage = multer.diskStorage({
-    destination: function(req, file, cb) {
-        cb(null, 'uploads/');
+    destination: (req, file, callback) => {
+        callback(null, './public/uploads/');
     },
-    filename: function(req, file, cb) {
-        if (!nanoid) {
-            console.error('nanoid not loaded');
-            return cb(new Error('nanoid not loaded'), '');
-        }
-        const fileExt = file.originalname.split('.').pop();
-        cb(null, `${nanoid()}.${fileExt}`);
+    filename: async (req, file, callback) => {
+        const { nanoid } = await import('nanoid');
+        const filename = nanoid(10) + path.extname(file.originalname);
+        callback(null, filename);
     }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({
+    storage: storage,
+});
 
 module.exports = upload;
