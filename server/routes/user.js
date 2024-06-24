@@ -30,6 +30,13 @@ router.post('/register', verifyRecaptcha, async (req, res) => {
     try {
         await userSchema.validate(req.body);
         const { email, password, role, firstName, lastName, contactNumber } = req.body;
+
+        // Check if email already exists
+        const existingUser = await User.findOne({ where: { email } });
+        if (existingUser) {
+            return res.status(400).json({ error: 'Email already exists' });
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const newUser = await User.create({
@@ -50,7 +57,7 @@ router.post('/register', verifyRecaptcha, async (req, res) => {
         res.status(201).json({ user: newUser, resident: newResident, token });
     } catch (error) {
         await transaction.rollback();
-        console.error('Registration error:', error);  // Add this line to log the error details
+        console.error('Registration error:', error);  // Log the error details
         res.status(500).json({ error: error.message });
     }
 });
