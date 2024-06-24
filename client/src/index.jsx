@@ -1,6 +1,5 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-
 import { AuthProvider } from './context/AuthContext.jsx';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 
@@ -14,6 +13,7 @@ import Registration from './pages/Registration';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
 import EditProfile from './pages/EditProfile';
+import ChangePassword from './pages/ChangePassword';
 
 import {
   BrowserRouter,
@@ -69,6 +69,7 @@ function Main() {
         <Route path="/login" element={<Login />} />
         <Route path="/profile/:id" element={<Profile />} />
         <Route path="/edit-profile/:id" element={<EditProfile />} />
+        <Route path="/change-password/:id" element={<ChangePassword />} />
       </Routes>
     </>
   )

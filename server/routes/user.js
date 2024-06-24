@@ -218,6 +218,35 @@ router.post('/activate', async (req, res) => { // Removed verifyRecaptcha
     }
 });
 
+// Change password
+router.put('/change-password/:id', authenticateToken, async (req, res) => {
+    const { id } = req.params;
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+  
+    try {
+      const user = await User.findByPk(id);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+  
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ error: 'Current password is incorrect' });
+      }
+  
+      if (newPassword !== confirmPassword) {
+        return res.status(400).json({ error: 'New passwords do not match' });
+      }
+  
+      user.password = await bcrypt.hash(newPassword, 10);
+      await user.save();
+  
+      res.status(200).json({ message: 'Password changed successfully' });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
 // Reset password request
 router.post('/password-reset', async (req, res) => { // Removed verifyRecaptcha
     try {

@@ -96,7 +96,7 @@ function Profile() {
           </Grid.Col>
           <Grid.Col span={8}>
             <Box>
-              <Title order={3}>User Profile</Title>
+              <Title order={3} mb="md">User Profile</Title>
               <TextInput
                 label="Email"
                 value={profileData.email}
@@ -125,6 +125,7 @@ function Profile() {
                 variant="filled"
               />
               <Button fullWidth mt="md" onClick={() => navigate(`/edit-profile/${user.user_id}`)}>Edit Profile</Button>
+              <Button fullWidth mt="md" color="red" onClick={() => navigate(`/change-password/${user.user_id}`)}>Change Password</Button>
             </Box>
           </Grid.Col>
         </Grid>
