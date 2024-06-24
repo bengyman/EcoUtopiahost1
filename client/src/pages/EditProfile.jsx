@@ -24,14 +24,25 @@ function EditProfile() {
           const response = await axios.get(`/user/${id}`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           });
-          const { user: userData, resident } = response.data;
-          setProfileData({
-            email: userData.email,
-            firstName: resident.name.split(' ')[0],
-            lastName: resident.name.split(' ')[1],
-            mobileNumber: resident.mobile_num,
-            profilePic: resident.profile_pic || ''
-          });
+          const { user: userData, resident, staff } = response.data;
+          
+          if (userData.role === 'RESIDENT' && resident) {
+            setProfileData({
+              email: userData.email,
+              firstName: resident.name.split(' ')[0],
+              lastName: resident.name.split(' ')[1],
+              mobileNumber: resident.mobile_num,
+              profilePic: resident.profile_pic || ''
+            });
+          } else if (userData.role === 'STAFF' && staff) {
+            setProfileData({
+              email: userData.email,
+              firstName: staff.name.split(' ')[0],
+              lastName: staff.name.split(' ')[1],
+              mobileNumber: staff.mobilenum,
+              profilePic: staff.profile_pic || ''
+            });
+          }
         } catch (error) {
           console.error('Error fetching profile data:', error);
         }
