@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from '@mantine/form';
-import { TextInput, PasswordInput, Button, Box, Title, Alert, Container, Group, Anchor, Paper } from '@mantine/core';
+import { TextInput, PasswordInput, Button, Title, Alert, Container, Group, Anchor, Paper } from '@mantine/core';
 import { useAuth } from '../context/AuthContext';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
@@ -28,7 +28,8 @@ function Login() {
     } catch (err) {
       setError('Failed to login');
       console.error('Login failed:', err);
-  };
+  }
+}
     
     useEffect(() => {
       document.title = 'Login - EcoUtopia';

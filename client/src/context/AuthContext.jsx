@@ -51,6 +51,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Registration failed:', error);
       throw error;
     }
+  }
 
   const logout = () => {
     setUser(null);
