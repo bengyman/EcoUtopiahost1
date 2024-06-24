@@ -9,7 +9,6 @@ import App from './pages/App.jsx'
 import TestPage from './pages/TestPage.jsx';
 import Courses from './pages/Courses.jsx';
 import ViewCourse from './pages/ViewCourse.jsx';
-import Login from './pages/Login.jsx'
 import Navbar from './components/Navbar.jsx';
 import Registration from './pages/Registration';
 import Login from './pages/Login';

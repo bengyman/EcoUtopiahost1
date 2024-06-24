@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from '@mantine/form';
 import { TextInput, PasswordInput, Button, Box, Title, Alert, Container, Group, Anchor, Paper } from '@mantine/core';
@@ -6,9 +6,9 @@ import { useAuth } from '../context/AuthContext';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 function Login() {
-  const { executeRecaptcha } = useGoogleReCaptcha();
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [error, setError] = useState('');
 
   const form = useForm({
@@ -17,7 +17,7 @@ function Login() {
       password: '',
     },
   });
-  
+
   const handleSubmit = async (values) => {
     try {
       const recaptchaToken = await executeRecaptcha('login');
@@ -28,16 +28,13 @@ function Login() {
     } catch (err) {
       setError('Failed to login');
       console.error('Login failed:', err);
+    }
   };
-    
-    useEffect(() => {
-      document.title = 'Login - EcoUtopia';
-    }, []);
 
   return (
     <Container size={420} my={40}>
       <Title align="center" style={{ color: '#003F2D', fontWeight: 700 }}>
-        Sign In
+        Welcome to EcoUtopia
       </Title>
       <Paper withBorder shadow="md" p={30} mt={30} radius="md">
         <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -60,10 +57,10 @@ function Login() {
           </Button>
         </form>
         <Group position="apart" mt="md">
-          <Anchor component="button" type="button" c="blue" size="xs">
+          <Anchor component="button" type="button" color="dimmed" size="xs">
             Forgot password?
           </Anchor>
-          <Anchor component="button" type="button" c="blue" size="xs" onClick={() => navigate('/register')}>
+          <Anchor component="button" type="button" color="dimmed" size="xs" onClick={() => navigate('/register')}>
             Create an account
           </Anchor>
         </Group>
