@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 
 import { AuthProvider } from './context/AuthContext.jsx';
+import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 
 // Pages and components
 import App from './pages/App.jsx'
@@ -10,6 +11,10 @@ import Courses from './pages/Courses.jsx';
 import ViewCourse from './pages/ViewCourse.jsx';
 import Login from './pages/Login.jsx'
 import Navbar from './components/Navbar.jsx';
+import Registration from './pages/Registration';
+import Login from './pages/Login';
+import Profile from './pages/Profile';
+import EditProfile from './pages/EditProfile';
 
 import {
   BrowserRouter,
@@ -61,6 +66,10 @@ function Main() {
         <Route path="/course/:courseId" element={<ViewCourse />} />
         <Route path="/login" element={<Login />} />
         <Route path="/test" element={<TestPage />} />
+        <Route path="/register" element={<Registration />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/profile/:id" element={<Profile />} />
+        <Route path="/edit-profile/:id" element={<EditProfile />} />
       </Routes>
     </>
   )
@@ -69,12 +78,14 @@ function Main() {
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
   <React.StrictMode>
-    <MantineProvider theme={theme} defaultColorScheme='light'>
-      <AuthProvider>
-        <BrowserRouter>
-          <Main />
-        </BrowserRouter>
-      </AuthProvider>
+    <MantineProvider theme={theme} defaultColorScheme="auto">
+      <GoogleReCaptchaProvider reCaptchaKey = {import.meta.env.VITE_RECAPTCHA_SITE_KEY}>
+        <AuthProvider>
+          <BrowserRouter>
+            <Main />
+          </BrowserRouter>
+        </AuthProvider>
+      </GoogleReCaptchaProvider>
     </MantineProvider>
   </React.StrictMode>
 )

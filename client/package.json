@@ -13,11 +13,16 @@
 		"@mantine/core": "^7.10.2",
 		"@mantine/form": "^7.10.2",
 		"@mantine/hooks": "^7.10.2",
+		"@tabler/icons-react": "^3.6.0",
 		"axios": "^1.7.2",
+		"icons-react": "^3.7.1",
+		"nanoid": "^5.0.7",
 		"dayjs": "^1.11.11",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
-		"react-router-dom": "^6.23.1"
+		"react-google-recaptcha-v3": "^1.10.1",
+		"react-router-dom": "^6.23.1",
+		"tabler": "^1.0.0-alpha.8"
 	},
 	"devDependencies": {
 		"@types/react": "^18.2.66",
