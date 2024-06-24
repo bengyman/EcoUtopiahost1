@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
 
@@ -51,7 +51,6 @@ export const AuthProvider = ({ children }) => {
       console.error('Registration failed:', error);
       throw error;
     }
-  };
 
   const logout = () => {
     setUser(null);
