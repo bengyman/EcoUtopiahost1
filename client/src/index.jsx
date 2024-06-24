@@ -14,6 +14,9 @@ import Navbar from './components/Navbar.jsx';
 import Registration from './pages/Registration';
 import Profile from './pages/Profile';
 import EditProfile from './pages/EditProfile';
+import Orders from './pages/Orders';
+import EditOrders from './pages/EditOrders';
+import AdminOrders from './pages/AdminOrders';
 
 import {
   BrowserRouter,
@@ -69,6 +72,9 @@ function Main() {
         <Route path="/login" element={<Login />} />
         <Route path="/profile/:id" element={<Profile />} />
         <Route path="/edit-profile/:id" element={<EditProfile />} />
+        <Route path="/orders" element={<Orders />} />
+        <Route path={"/editorders/:orderId"} element={<EditOrders/>} />
+        <Route path="/admin/orders" element={<AdminOrders />} />
       </Routes>
     </>
   )
@@ -78,7 +84,7 @@ function Main() {
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
   <React.StrictMode>
-    <MantineProvider theme={theme} defaultColorScheme="auto">
+    <MantineProvider theme={theme} defaultColorScheme="light">
       <GoogleReCaptchaProvider reCaptchaKey = {import.meta.env.VITE_RECAPTCHA_SITE_KEY}>
         <AuthProvider>
           <BrowserRouter>
