@@ -12,7 +12,16 @@ function Navbar() {
             </Anchor>
           </Flex>
           <Flex align="center">
-            <Text style={{ color: "black", fontSize: 30, fontWeight: 700 }}>Welcome to EcoUtopia</Text>
+            <Anchor href="/" style={{ textDecoration: "none" }}>
+              <Text tt="uppercase" fw={'500'} c="black" style={{ marginLeft: 10, marginRight: 10 }}>
+                Home
+              </Text>
+            </Anchor>
+            <Anchor href="/courses" style={{ textDecoration: "none" }}>
+              <Text tt="uppercase" fw={'500'} c="black" style={{ marginLeft: 10, marginRight: 10 }}>
+                Courses
+              </Text>
+            </Anchor>
           </Flex>
           <Flex align="center">
             <Anchor href="/login" style={{ textDecoration: "none" }}>

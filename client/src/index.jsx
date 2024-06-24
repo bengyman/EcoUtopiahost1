@@ -1,17 +1,20 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 
+import { AuthProvider } from './context/AuthContext.jsx';
+import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
+
 // Pages and components
 import App from './pages/App.jsx'
 import TestPage from './pages/TestPage.jsx';
-//import Courses from './pages/Courses.jsx';
+import Courses from './pages/Courses.jsx';
+import ViewCourse from './pages/ViewCourse.jsx';
+import Login from './pages/Login.jsx'
 import Navbar from './components/Navbar.jsx';
-import { AuthProvider } from './context/AuthContext.jsx';
 import Registration from './pages/Registration';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
 import EditProfile from './pages/EditProfile';
-import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 
 import {
   BrowserRouter,
@@ -59,7 +62,9 @@ function Main() {
       <Box padding="xl" style={{marginTop: '70px'}} />
       <Routes>
         <Route path="/" element={<App />} />
-        {/* <Route path="/courses" element={<Courses />} />/ */}
+        <Route path="/courses" element={<Courses />} />
+        <Route path="/course/:courseId" element={<ViewCourse />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/test" element={<TestPage />} />
         <Route path="/register" element={<Registration />} />
         <Route path="/login" element={<Login />} />
