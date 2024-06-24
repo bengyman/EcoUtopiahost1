@@ -12,7 +12,6 @@ import ViewCourse from './pages/ViewCourse.jsx';
 import Login from './pages/Login.jsx'
 import Navbar from './components/Navbar.jsx';
 import Registration from './pages/Registration';
-import Login from './pages/Login';
 import Profile from './pages/Profile';
 import EditProfile from './pages/EditProfile';
 
