@@ -73,7 +73,7 @@ function Main() {
         <Route path="/profile/:id" element={<Profile />} />
         <Route path="/edit-profile/:id" element={<EditProfile />} />
         <Route path="/orders" element={<Orders />} />
-        <Route path={"/editorders/:orderId"} element={<EditOrders/>} />
+        <Route path="/editorders/:orderId" element={<EditOrders/>} />
         <Route path="/admin/orders" element={<AdminOrders />} />
       </Routes>
     </>

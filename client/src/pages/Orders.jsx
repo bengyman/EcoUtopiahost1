@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
-import http from '../http';
-import './Orders.css';
+import https from '../https';
 import global from '../global';
 import dayjs from 'dayjs';
+import './orders.css';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CiEdit } from 'react-icons/ci';
 
@@ -11,9 +11,9 @@ function Orders() {
   const [filter, setFilter] = useState('Upcoming');
 
   useEffect(() => {
-    http.get('/orders').then((res) => {
+    https.get('/orders').then((res) => {
       console.log(res.data);
-      setOrdersList(res.data);
+      setOrdersList(Array.isArray(res.data) ? res.data : []);
     });
   }, []);
 
