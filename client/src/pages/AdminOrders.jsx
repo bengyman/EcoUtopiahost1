@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import http from '../http';
+import https from '../https';
 import global from '../global';
 import dayjs from 'dayjs';
 
@@ -7,7 +7,7 @@ function AdminOrders() {
   const [orderslist, setOrdersList] = useState([]);
 
   useEffect(() => {
-    http.get('/orders').then((res) => {
+    https.get('/orders').then((res) => {
       console.log(res.data);
       setOrdersList(res.data);
     });
