@@ -1,4 +1,5 @@
 import axios from 'axios';
+import PropTypes from 'prop-types';
 import { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
@@ -51,7 +52,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Registration failed:', error);
       throw error;
     }
-  }
+  };
 
   const logout = () => {
     setUser(null);
@@ -66,6 +67,10 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
+};
+
+AuthProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export const useAuth = () => useContext(AuthContext);
