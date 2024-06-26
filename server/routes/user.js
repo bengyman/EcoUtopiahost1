@@ -289,8 +289,6 @@ router.post('/profile-picture', upload.single('profilePic'), async (req, res) =>
     }
 });
 
-
-
 // Route to delete a profile picture
 router.delete('/profile-picture', async (req, res) => {
     const userId = req.body.userId; // Make sure the user is authenticated
@@ -316,4 +314,3 @@ router.delete('/profile-picture', async (req, res) => {
 });
 
 module.exports = router;
-
