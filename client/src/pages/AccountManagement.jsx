@@ -86,14 +86,14 @@ function AccountManagement() {
         <Table highlightOnHover withborder="true">
           <thead>
             <tr>
-              <th>UserID</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Name</th>
-              <th>Contact Number</th>
-              <th>Activated</th>
-              <th>Deleted</th>
-              <th>Actions</th>
+              <td>UserID</td>
+              <td>Email</td>
+              <td>Role</td>
+              <td>Name</td>
+              <td>Contact Number</td>
+              <td>Activated</td>
+              <td>Deleted</td>
+              <td>Actions</td>
             </tr>
           </thead>
           <tbody>
