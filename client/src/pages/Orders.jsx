@@ -1,19 +1,20 @@
-import https from '../https';
+import React, { useEffect, useState } from 'react';
+import http from '../http';
+import './Orders.css';
 import global from '../global';
 import dayjs from 'dayjs';
-import './orders.css';
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CiEdit } from 'react-icons/ci';
+import { FaRegEye } from "react-icons/fa6";
 
 function Orders() {
   const [orderslist, setOrdersList] = useState([]);
   const [filter, setFilter] = useState('Upcoming');
 
   useEffect(() => {
-    https.get('/orders').then((res) => {
+    http.get('/orders').then((res) => {
       console.log(res.data);
-      setOrdersList(Array.isArray(res.data) ? res.data : []);
+      setOrdersList(res.data);
     });
   }, []);
 
@@ -52,7 +53,7 @@ function Orders() {
             Refunded
           </button>
         </div>
-        <Link to="/add-orders">
+        <Link to="/courses">
           <button className="Add">Add Order</button>
         </Link>
       </div>
@@ -60,7 +61,7 @@ function Orders() {
         {filteredOrders.map((order, i) => (
           <li key={i} className={`order-item ${order.order_status.toLowerCase()}`}>
             <div className="order-item-header">
-              <h2>{order.order_id}</h2>
+              <h2>Order {order.order_id}</h2>
               {filter === 'Upcoming' && (
                 <Link to={`/editorders/${order.order_id}`}>
                   <button className="edit-button">
@@ -68,6 +69,11 @@ function Orders() {
                   </button>
                 </Link>
               )}
+              <Link to={`/orderdetails/${order.order_id}`}>
+                <button className="view-button">
+                  <FaRegEye />
+                </button>
+              </Link>
             </div>
             <p>Course Title: {order.Course.course_name}</p>
             <p>{order.order_status}</p>

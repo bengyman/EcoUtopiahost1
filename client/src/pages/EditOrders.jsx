@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import https from '../https';
+import http from '../http';
 import dayjs from 'dayjs';
 import global from '../global';
 import { Link } from 'react-router-dom';
@@ -11,14 +11,14 @@ function EditOrders() {
 
   useEffect(() => {
     if (orderId) {
-      https.get(`/orders/${orderId}`).then((res) => {
+      http.get(`/orders/${orderId}`).then((res) => {
         setOrder(res.data);
       });
     }
   }, [orderId]);
 
   const handleRefund = () => {
-    https.put(`/orders/${orderId}`).then((res) => {
+    http.put(`/orders/${orderId}`).then((res) => {
       setOrder(res.data);
     });
   };

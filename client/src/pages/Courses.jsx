@@ -1,6 +1,5 @@
 import axios from "axios";
 import dayjs from "dayjs";
-
 import {
   Container,
   Grid,
@@ -12,22 +11,14 @@ import {
   Badge,
   Button,
   Group,
-  Box,
   LoadingOverlay,
 } from "@mantine/core";
-import Navbar from "../components/Navbar.jsx";
-
 import { useState, useEffect } from "react";
 
 function Courses() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  function formatMySQLTimeString(mysqlTimeString) {
-    return mysqlTimeString.substring(0, 5); // Extracts and returns the "HH:mm" part
-  } 
-
   useEffect(() => {
     const fetchCourses = async () => {
       try {
@@ -44,15 +35,12 @@ function Courses() {
     fetchCourses();
     document.title = "Courses - EcoUtopia";
   }, []);
-
   if (loading) return <LoadingOverlay visible />;
   if (error) return <Text align="center">Error: {error.message}</Text>;
   if (courses.length === 0) return <Text align="center">No courses found</Text>;
 
   return (
     <Container size="xl" style={{ marginTop: 20 }}>
-      <Box padding="xl" style={{marginTop: '70px'}} />
-      <Navbar />
       <Text
         align="start"
         weight={700}
@@ -84,7 +72,7 @@ function Courses() {
                 {course.course_type}
               </Badge>
             </Paper>
-            <Text fw={700} c={'purple'} weight={700}>{dayjs(course.start_date).format("DD MMM YYYY")} | {formatMySQLTimeString(course.course_start_time)} - {formatMySQLTimeString(course.course_end_time)}</Text>
+            <Text fw={700} c={'purple'} weight={700}>{dayjs(course.start_date).format("DD MMM YYYY")} | {course.course_start_time} - {course.course_end_time}</Text>
             <Text align="center" fw={700} style={{ margin: 10 }}>
               {course.course_name}
             </Text>

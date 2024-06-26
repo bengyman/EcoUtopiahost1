@@ -9,7 +9,6 @@ module.exports = (sequelize, DataTypes) => {
         email: {
             type: DataTypes.STRING(50),
             allowNull: false,
-            unique: true
         },
         password: {
             type: DataTypes.STRING(100),
@@ -51,7 +50,7 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     User.associate = (models) => {
-        User.hasOne(models.Staff, { foreignKey: 'user_id', as: 'staff' });
+        User.hasMany(models.Staff, { foreignKey: 'user_id' });
         User.hasMany(models.Resident, { foreignKey: 'user_id' });
     };
 

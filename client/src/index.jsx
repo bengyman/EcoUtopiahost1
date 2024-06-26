@@ -1,6 +1,5 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-
 import { AuthProvider } from './context/AuthContext.jsx';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 
@@ -9,13 +8,15 @@ import App from './pages/App.jsx'
 import TestPage from './pages/TestPage.jsx';
 import Courses from './pages/Courses.jsx';
 import ViewCourse from './pages/ViewCourse.jsx';
-import Login from './pages/Login.jsx'
 import Navbar from './components/Navbar.jsx';
 import Registration from './pages/Registration';
+import Login from './pages/Login';
 import Profile from './pages/Profile';
 import EditProfile from './pages/EditProfile';
+import ChangePassword from './pages/ChangePassword';
 import Orders from './pages/Orders';
 import EditOrders from './pages/EditOrders';
+import OrderDetails from './pages/OrderDetails';
 import AdminOrders from './pages/AdminOrders';
 
 import {
@@ -72,14 +73,15 @@ function Main() {
         <Route path="/login" element={<Login />} />
         <Route path="/profile/:id" element={<Profile />} />
         <Route path="/edit-profile/:id" element={<EditProfile />} />
+        <Route path="/change-password/:id" element={<ChangePassword />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/editorders/:orderId" element={<EditOrders/>} />
+        <Route path="/orderdetails/:orderId" element={<OrderDetails />} />
         <Route path="/admin/orders" element={<AdminOrders />} />
       </Routes>
     </>
   )
 }
-
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(

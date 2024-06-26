@@ -23,14 +23,33 @@ function Profile() {
           const response = await axios.get(`/user/${user.user_id}`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           });
-          const { user: userData, resident } = response.data;
-          setProfileData({
-            email: userData.email,
-            firstName: resident.name.split(' ')[0],
-            lastName: resident.name.split(' ')[1],
-            mobileNumber: resident.mobile_num,
-            profilePic: resident.profile_pic || ''
-          });
+          const { user: userData, resident, staff } = response.data;
+
+          if (userData.role === 'RESIDENT' && resident) {
+            setProfileData({
+              email: userData.email,
+              firstName: resident.name.split(' ')[0] || '',
+              lastName: resident.name.split(' ')[1] || '',
+              mobileNumber: resident.mobile_num || '',
+              profilePic: resident.profile_pic || ''
+            });
+          } else if (userData.role === 'STAFF' && staff) {
+            setProfileData({
+              email: userData.email,
+              firstName: staff.name.split(' ')[0] || '',
+              lastName: staff.name.split(' ')[1] || '',
+              mobileNumber: staff.mobilenum || '',
+              profilePic: staff.profile_pic || ''
+            });
+          } else {
+            setProfileData({
+              email: userData.email,
+              firstName: '',
+              lastName: '',
+              mobileNumber: '',
+              profilePic: ''
+            });
+          }
         } catch (error) {
           console.error('Error fetching profile data:', error);
         }
@@ -91,40 +110,41 @@ function Profile() {
                 <input hidden accept="image/*" type="file" onChange={handleProfilePicChange} />
               </Button>
             </label>
-            <Button variant="outline" fullWidth mt="md" onClick={() => navigate('/order-history')}>Order History</Button>
+            <Button variant="outline" fullWidth mt="md" onClick={() => navigate('/orders')}>Order History</Button>
             <Button variant="outline" fullWidth mt="md" onClick={() => navigate('/payment-methods')}>Payment Methods</Button>
           </Grid.Col>
           <Grid.Col span={8}>
             <Box>
-              <Title order={3}>User Profile</Title>
+              <Title order={3} mb="md">User Profile</Title>
               <TextInput
                 label="Email"
-                value={profileData.email}
+                value={profileData.email || ''}
                 readOnly
                 style={{ marginBottom: '1rem' }}
                 variant="filled"
               />
               <TextInput
                 label="First Name"
-                value={profileData.firstName}
+                value={profileData.firstName || ''}
                 readOnly
                 style={{ marginBottom: '1rem' }}
                 variant="filled"
               />
               <TextInput
                 label="Last Name"
-                value={profileData.lastName}
+                value={profileData.lastName || ''}
                 readOnly
                 style={{ marginBottom: '1rem' }}
                 variant="filled"
               />
               <TextInput
                 label="Mobile Number"
-                value={profileData.mobileNumber}
+                value={profileData.mobileNumber || ''}
                 readOnly
                 variant="filled"
               />
               <Button fullWidth mt="md" onClick={() => navigate(`/edit-profile/${user.user_id}`)}>Edit Profile</Button>
+              <Button fullWidth mt="md" color="red" onClick={() => navigate(`/change-password/${user.user_id}`)}>Change Password</Button>
             </Box>
           </Grid.Col>
         </Grid>

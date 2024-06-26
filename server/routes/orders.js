@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { Orders, Course } = require('../models');
+const { Model } = require('sequelize');
+
 
 router.post("/", async (req, res) => {
     let data = req.body;
@@ -43,6 +45,22 @@ router.put("/:id", async (req, res) => {
         res.json(updatedOrder);
     } else {
         res.status(404).json({ error: 'Order not found' });
+    }
+});
+
+router.post("/addCourse", async (req, res) => {
+    try {
+        const { course_id } = req.body;
+        const order = await Orders.create({
+            course_id,
+            resident_id: 1, // Set userid to the currently logged in user
+            order_date: new Date(), // Set order_date to current date/time
+            order_status: 'Upcoming' // Set order_status to default value
+        });
+        res.status(201).json(order);
+    } catch (error) {
+        console.error("Error adding course to orders:", error);
+        res.status(500).json({ error: 'Failed to add course to orders' });
     }
 });
 

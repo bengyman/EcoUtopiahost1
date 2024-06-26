@@ -1,3 +1,5 @@
+/* Orders.css */
+
 .header-container {
     display: flex;
     align-items: center;
@@ -69,6 +71,22 @@
     position: absolute;
     top: 10px;
     right: 10px;
+}
+
+.order-item .edit-button:hover {
+    background-color: #737373;
+}
+
+.view-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    top: 10px;
+    right: 10px;
+}
+
+.order-item .view-button:hover {
+    background-color: #737373;
 }
 
 /* Status-specific styles */
