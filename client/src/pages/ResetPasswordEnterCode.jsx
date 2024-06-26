@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
 import { TextInput, Button, Container, Title, Alert } from '@mantine/core';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
 
 function ResetPasswordEnterCode() {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
+  const { email } = location.state || {};
 
-  const handleSubmit = () => {
-    // Validate the code here
-    // For simplicity, we assume code validation is done here
-    if (code === '123456') {
-      navigate('/reset-password');
-    } else {
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.post('/user/validate-reset-code', { email, code });
+      setError('');
+      navigate('/reset-password', { state: { email, code } });
+    } catch (error) {
       setError('Invalid reset code');
     }
   };

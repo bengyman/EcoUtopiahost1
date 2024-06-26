@@ -328,13 +328,31 @@ router.put('/change-password/:id', authenticateToken, async (req, res) => {
 });
 
 // Reset password
+router.post('/validate-reset-code', async (req, res) => {
+    try {
+        const { email, code } = req.body;
+        
+        const user = await User.findOne({ where: { email, password_reset_code: code, password_reset_expiry: { [Op.gt]: new Date() } } });
+        if (!user) {
+            return res.status(400).json({ error: 'Invalid or expired reset code' });
+        }
+
+        res.status(200).json({ message: 'Reset code is valid' });
+    } catch (error) {
+        console.error('Error in /validate-reset-code route:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Reset password
 router.put('/password-reset/:code', async (req, res) => {
     try {
-        const user = await User.findOne({ where: { password_reset_code: req.params.code, password_reset_expiry: { [Op.gt]: new Date() } } });
+        const { email, password } = req.body;
+        const user = await User.findOne({ where: { email, password_reset_code: req.params.code, password_reset_expiry: { [Op.gt]: new Date() } } });
         if (!user) {
             return res.status(400).json({ error: 'Invalid or expired password reset code' });
         }
-        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
         user.password = hashedPassword;
         user.password_reset_code = null;
         user.password_reset_expiry = null;
@@ -344,6 +362,7 @@ router.put('/password-reset/:code', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
 
 // Route to upload or update a profile picture
 router.post('/profile-picture', upload.single('profilePic'), async (req, res) => {

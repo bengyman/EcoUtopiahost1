@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PasswordInput, Button, Container, Title, Alert } from '@mantine/core';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 
 function ResetPassword() {
@@ -8,6 +8,8 @@ function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const location = useLocation(); 
+  const { email, code } = location.state || {}; 
 
   const handleSubmit = async () => {
     if (password !== confirmPassword) {
@@ -16,7 +18,7 @@ function ResetPassword() {
     }
 
     try {
-      await axios.put(`/password-reset/123456`, { password }); // Use the correct reset code
+      await axios.put(`/user/password-reset/${code}`, { email, password }); 
       setError('');
       navigate('/password-reset-success');
     } catch (error) {
