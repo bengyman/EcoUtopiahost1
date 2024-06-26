@@ -68,7 +68,7 @@ function Login() {
           </Button>
         </form>
         <Group position="apart" mt="md">
-          <Anchor component="button" type="button" color="dimmed" size="xs">
+          <Anchor component="button" type="button" color="dimmed" size="xs" onClick={() => navigate('/reset-password-email')}>
             Forgot password?
           </Anchor>
           <Anchor component="button" type="button" color="dimmed" size="xs" onClick={() => navigate('/register')}>

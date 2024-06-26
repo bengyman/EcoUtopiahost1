@@ -4,16 +4,20 @@ import { AuthProvider } from './context/AuthContext.jsx';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 
 // Pages and components
-import App from './pages/App.jsx'
+import App from './pages/App.jsx';
 import TestPage from './pages/TestPage.jsx';
 import Courses from './pages/Courses.jsx';
 import ViewCourse from './pages/ViewCourse.jsx';
 import Navbar from './components/Navbar.jsx';
-import Registration from './pages/Registration';
-import Login from './pages/Login';
-import Profile from './pages/Profile';
-import EditProfile from './pages/EditProfile';
-import ChangePassword from './pages/ChangePassword';
+import Registration from './pages/Registration.jsx';
+import Login from './pages/Login.jsx';
+import Profile from './pages/Profile.jsx';
+import EditProfile from './pages/EditProfile.jsx';
+import ChangePassword from './pages/ChangePassword.jsx';
+import ResetPasswordEnterEmail from './pages/ResetPasswordEnterEmail.jsx';
+import ResetPasswordEnterCode from './pages/ResetPasswordEnterCode.jsx';
+import ResetPassword from './pages/ResetPassword.jsx';
+import PasswordResetSuccess from './pages/ResetPasswordSuccess.jsx';
 
 import {
   BrowserRouter,
@@ -70,6 +74,10 @@ function Main() {
         <Route path="/profile/:id" element={<Profile />} />
         <Route path="/edit-profile/:id" element={<EditProfile />} />
         <Route path="/change-password/:id" element={<ChangePassword />} />
+        <Route path="/reset-password-email" element={<ResetPasswordEnterEmail />} />
+        <Route path="/reset-password-code" element={<ResetPasswordEnterCode />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
       </Routes>
     </>
   )

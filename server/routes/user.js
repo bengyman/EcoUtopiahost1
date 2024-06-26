@@ -274,25 +274,31 @@ router.put('/change-password/:id', authenticateToken, async (req, res) => {
     }
   });
 
-// Reset password request
-router.post('/password-reset', async (req, res) => { // Removed verifyRecaptcha
+  router.post('/password-reset', async (req, res) => {
     try {
+        console.log("Request received to /password-reset with email:", req.body.email);
+        
         const user = await User.findOne({ where: { email: req.body.email } });
         if (!user) {
+            console.log("User not found for email:", req.body.email);
             return res.status(404).json({ error: 'User not found' });
         }
+
         const resetCode = crypto.randomBytes(20).toString('hex');
         user.password_reset_code = resetCode;
         user.password_reset_expiry = new Date(Date.now() + 1800000); // 30 minutes expiry
         await user.save();
 
-        // Set up Nodemailer
+        console.log("Password reset code generated and saved for user:", user.email);
+
+        // Set up Nodemailer with permanent Ethereal account credentials
         const transporter = nodemailer.createTransport({
             host: 'smtp.ethereal.email',
             port: 587,
+            secure: false, // true for 465, false for other ports
             auth: {
-                user: process.env.ETHEREAL_USER,
-                pass: process.env.ETHEREAL_PASS
+                user: process.env.ETHEREAL_USER, // your Ethereal user
+                pass: process.env.ETHEREAL_PASS  // your Ethereal password
             }
         });
 
@@ -304,9 +310,19 @@ router.post('/password-reset', async (req, res) => { // Removed verifyRecaptcha
             text: `Your password reset code is: ${resetCode}`
         };
 
-        await transporter.sendMail(mailOptions);
-        res.status(200).json({ message: 'Password reset code sent' });
+        transporter.sendMail(mailOptions, (err, info) => {
+            if (err) {
+                console.log('Error occurred. ' + err.message);
+                return res.status(500).json({ error: 'Failed to send email' });
+            }
+
+            console.log('Message sent: %s', info.messageId);
+            console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+
+            res.status(200).json({ message: 'Password reset code sent', previewUrl: nodemailer.getTestMessageUrl(info) });
+        });
     } catch (error) {
+        console.error('Error in /password-reset route:', error.message);
         res.status(500).json({ error: error.message });
     }
 });
