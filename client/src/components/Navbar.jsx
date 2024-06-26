@@ -1,9 +1,17 @@
 import { AppShell, Flex, Anchor, Button, Text, Image } from "@mantine/core";
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import logo from "../assets/logo.png";
 
 function Navbar() {
   const location = useLocation();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
     <AppShell header={{ height: 50 }} navbar={{ width: 200, breakpoint: "xl" }}>
@@ -54,6 +62,11 @@ function Navbar() {
                   Sign Up
                 </Button>
               </Anchor>
+            )}
+            {location.pathname === '/account-management' && user && (
+              <Button color="red" style={{ marginLeft: 10, marginRight: 10 }} onClick={handleLogout}>
+                Logout
+              </Button>
             )}
           </Flex>
         </Flex>
