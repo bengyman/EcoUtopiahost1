@@ -82,7 +82,18 @@ router.post('/login', verifyRecaptcha, async (req, res) => {
 // Read all users (accessible by STAFF only)
 router.get('/', authenticateToken, authorizeRoles('STAFF'), async (req, res) => {
     try {
-        const users = await User.findAll();
+        const users = await User.findAll({
+            include: [
+                {
+                    model: Staff,
+                    attributes: ['name', 'mobilenum']
+                },
+                {
+                    model: Resident,
+                    attributes: ['name', 'mobile_num']
+                }
+            ]
+        });
         res.status(200).json(users);
     } catch (error) {
         res.status(500).json({ error: error.message });

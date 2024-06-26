@@ -35,7 +35,14 @@ function Login() {
       const user = await login(values.email, values.password, recaptchaToken);
       setError(''); // Clear any previous errors
       console.log('Login successful, redirecting to profile:', user.user_id);
-      navigate(`/profile/${user.user_id}`); // Navigate to profile with user ID
+      
+      // Redirect based on user role
+      if (user.role === 'STAFF') {
+        navigate('/account-management'); // Navigate to Account Management page for staff
+      } else {
+        navigate(`/profile/${user.user_id}`); // Navigate to profile with user ID for other users
+      }
+      
     } catch (err) {
       setError('Failed to login');
       console.error('Login failed:', err);

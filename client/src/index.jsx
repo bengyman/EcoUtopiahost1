@@ -18,6 +18,7 @@ import ResetPasswordEnterEmail from './pages/ResetPasswordEnterEmail.jsx';
 import ResetPasswordEnterCode from './pages/ResetPasswordEnterCode.jsx';
 import ResetPassword from './pages/ResetPassword.jsx';
 import PasswordResetSuccess from './pages/ResetPasswordSuccess.jsx';
+import AccountManagement from './pages/AccountManagement.jsx';
 
 import {
   BrowserRouter,
@@ -26,6 +27,7 @@ import {
 } from 'react-router-dom'
 import '@mantine/core/styles.css';
 import { Box, MantineProvider, createTheme, rem } from '@mantine/core'
+
 
 const theme = createTheme({
   //primaryColor: 'violet'
@@ -78,6 +80,7 @@ function Main() {
         <Route path="/reset-password-code" element={<ResetPasswordEnterCode />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
+        <Route path="/account-management" element={<AccountManagement/>} />
       </Routes>
     </>
   )
