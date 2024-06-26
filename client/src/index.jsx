@@ -79,13 +79,11 @@ const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
   <React.StrictMode>
     <MantineProvider theme={theme} defaultColorScheme="auto">
-      <GoogleReCaptchaProvider reCaptchaKey = {import.meta.env.VITE_RECAPTCHA_SITE_KEY}>
         <AuthProvider>
           <BrowserRouter>
             <Main />
           </BrowserRouter>
         </AuthProvider>
-      </GoogleReCaptchaProvider>
     </MantineProvider>
   </React.StrictMode>
 )

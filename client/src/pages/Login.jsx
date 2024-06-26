@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from '@mantine/form';
-import { TextInput, PasswordInput, Button, Box, Title, Alert, Container, Group, Anchor, Paper } from '@mantine/core';
+import { TextInput, PasswordInput, Button, Title, Alert, Container, Group, Anchor, Paper } from '@mantine/core';
 import { useAuth } from '../context/AuthContext';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+import withRecaptcha from '../components/withRecaptcha';
 
 function Login() {
   const { login } = useAuth();
@@ -20,7 +21,17 @@ function Login() {
 
   const handleSubmit = async (values) => {
     try {
+      if (!executeRecaptcha) {
+        setError('ReCaptcha not ready');
+        return;
+      }
+
       const recaptchaToken = await executeRecaptcha('login');
+      if (!recaptchaToken) {
+        setError('ReCaptcha failed');
+        return;
+      }
+
       const user = await login(values.email, values.password, recaptchaToken);
       setError(''); // Clear any previous errors
       console.log('Login successful, redirecting to profile:', user.user_id);
@@ -69,4 +80,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default withRecaptcha(Login);

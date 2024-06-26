@@ -3,31 +3,51 @@ import { TextInput, PasswordInput, Button, Container, Paper, Group, Title, Box, 
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import withRecaptcha from '../components/withRecaptcha';
 
 function Registration() {
   const navigate = useNavigate();
   const { register } = useAuth();
   const { executeRecaptcha } = useGoogleReCaptcha();
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    contactNumber: ''
-  });
   const [error, setError] = useState('');
 
-  const handleSubmit = async () => {
-    try {
-      const recaptchaToken = await executeRecaptcha('register');
-      await register({ ...formData, recaptchaToken });
-      navigate('/test');
-    } catch (error) {
-      setError('Registration failed');
-      console.error('Registration failed:', error);
+  const formik = useFormik({
+    initialValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      contactNumber: ''
+    },
+    validationSchema: Yup.object({
+      firstName: Yup.string().required('First Name is required'),
+      lastName: Yup.string().required('Last Name is required'),
+      email: Yup.string().email('Invalid email address').required('Email is required'),
+      password: Yup.string()
+        .min(8, 'Password must be at least 8 characters')
+        .matches(/[a-z]/, 'Password must contain at least one lowercase character')
+        .matches(/[A-Z]/, 'Password must contain at least one uppercase character')
+        .matches(/[0-9]/, 'Password must contain at least one number')
+        .required('Password is required'),
+      confirmPassword: Yup.string()
+        .oneOf([Yup.ref('password'), null], 'Passwords must match')
+        .required('Confirm Password is required'),
+      contactNumber: Yup.string().required('Contact Number is required')
+    }),
+    onSubmit: async (values) => {
+      try {
+        const recaptchaToken = await executeRecaptcha('register');
+        await register({ ...values, recaptchaToken });
+        navigate('/test');
+      } catch (error) {
+        setError('Registration failed');
+        console.error('Registration failed:', error);
+      }
     }
-  };
+  });
 
   return (
     <Container size="xs" my={40}>
@@ -44,42 +64,60 @@ function Registration() {
         </ul>
       </Box>
       <Paper withBorder shadow="md" p={30} mt={30} radius="md">
-        <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+        <form onSubmit={formik.handleSubmit}>
           <TextInput
             label="First Name"
+            name="firstName"
             required
-            value={formData.firstName}
-            onChange={(event) => setFormData({ ...formData, firstName: event.target.value })}
+            value={formik.values.firstName}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.firstName && formik.errors.firstName}
           />
           <TextInput
             label="Last Name"
+            name="lastName"
             required
-            value={formData.lastName}
-            onChange={(event) => setFormData({ ...formData, lastName: event.target.value })}
+            value={formik.values.lastName}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.lastName && formik.errors.lastName}
           />
           <TextInput
             label="Email"
+            name="email"
             required
-            value={formData.email}
-            onChange={(event) => setFormData({ ...formData, email: event.target.value })}
+            value={formik.values.email}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.email && formik.errors.email}
           />
           <PasswordInput
             label="Password"
+            name="password"
             required
-            value={formData.password}
-            onChange={(event) => setFormData({ ...formData, password: event.target.value })}
+            value={formik.values.password}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.password && formik.errors.password}
           />
           <PasswordInput
             label="Confirm Password"
+            name="confirmPassword"
             required
-            value={formData.confirmPassword}
-            onChange={(event) => setFormData({ ...formData, confirmPassword: event.target.value })}
+            value={formik.values.confirmPassword}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.confirmPassword && formik.errors.confirmPassword}
           />
           <TextInput
             label="Contact Number"
+            name="contactNumber"
             required
-            value={formData.contactNumber}
-            onChange={(event) => setFormData({ ...formData, contactNumber: event.target.value })}
+            value={formik.values.contactNumber}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.contactNumber && formik.errors.contactNumber}
           />
           {error && <Alert title="Error" color="red" mt="md">{error}</Alert>}
           <Group position="center" mt="md">
@@ -98,4 +136,4 @@ function Registration() {
   );
 }
 
-export default Registration;
+export default withRecaptcha(Registration);
