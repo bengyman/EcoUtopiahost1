@@ -51,6 +51,7 @@ router.post("/createCourse", async (req, res) => {
       .number()
       .required("Course capacity is required")
       .integer("Capacity must be a whole number")
+      .typeError("Capacity must be a number")
       .min(1, "Capacity must be at least 1"),
   });
 
@@ -187,6 +188,76 @@ router.put("/updateCourse/:id", async (req, res) => {
     res.json(course);
   }
   catch (error) {
+    if (error instanceof Sequelize.ValidationError) {
+      return res.status(400).json({ error: error.errors });
+    }
+    res.status(400).json({ error: error.errors });
+  }
+});
+
+router.patch("/updateCourse/:id", async (req, res) => {
+  try {
+    const course = await Course.findByPk(req.params.id);
+    if (!course) {
+      return res.status(404).json({ error: "Course not found" });
+    }
+    const coursePatchUpdate = {};
+    for (const key in req.body) {
+      if (req.body[key] !== course[key]) {
+        coursePatchUpdate[key] = req.body[key];
+      }
+    }
+
+    if (Object.keys(coursePatchUpdate).length === 0) {
+      return res.status(400).json({ error: "No changes detected" });
+    }
+
+    const coursePatchSchema = yup.object().shape({
+      course_name: yup.string().required("Course name is required"),
+      course_description: yup.string(), 
+      course_instructor: yup.string(), 
+      course_price: yup.number().required("Price is required").typeError("Price must be a number"),
+      course_type: yup
+        .string()
+        .oneOf(
+          ["Online", "Physical"],
+          'Course type must be either "Online" or "Physical"'
+        ), 
+      course_date: yup.date().min(new Date(), "Course date cannot be in the past").typeError("Invalid date format. Please use YYYY-MM-DD."),
+      course_start_time: yup
+        .string() 
+        .matches(
+          /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/,
+          "Invalid time format. Please use HH:MM (24-hour format)."
+        ),
+      course_end_time: yup
+        .string()
+        .test(
+          "end-time-after-start-time",
+          "End time must be after start time",
+          function (value) {
+            const startTime = this.parent.course_start_time;
+            if (!startTime || !value) return true; // Allow if either time is missing
+            return (
+              new Date(`2000-01-01 ${value}`) >
+              new Date(`2000-01-01 ${startTime}`)
+            );
+          }
+        )
+        .matches(
+          /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/,
+          "Invalid time format. Please use HH:MM (24-hour format)."
+        ), 
+      course_capacity: yup
+        .number()
+        .integer("Capacity must be a whole number")
+        .min(1, "Capacity must be at least 1"),
+    });
+
+    await coursePatchSchema.validate(coursePatchUpdate, { abortEarly: false });
+
+    await course.update(coursePatchUpdate);
+  } catch (error) {
     if (error instanceof Sequelize.ValidationError) {
       return res.status(400).json({ error: error.errors });
     }
