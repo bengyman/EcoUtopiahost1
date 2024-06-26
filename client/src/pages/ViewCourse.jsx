@@ -1,15 +1,18 @@
 import axios from 'axios';
 import { 
   Container,
+  Stack,
   Text,
   Button,
   LoadingOverlay,
   Paper,
   Grid,
   Image,
-  Group,
   Title,
+  Box,
 } from '@mantine/core';
+import Navbar from "../components/Navbar.jsx";
+
 import { useState, useEffect } from "react"
 import { useParams } from 'react-router-dom';
 
@@ -55,9 +58,11 @@ function ViewCourse() {
 
   return (
     <Container size="xl">
+      <Box padding="xl" style={{marginTop: '70px'}} /> 
+      <Navbar />
       <Paper padding="xl" shadow="xs" style={{ marginTop: 20 }}>
-        <Grid>
-          <Grid.Col span={6}>
+        <Grid justify="center">
+          <Grid.Col span={{ base: 12, md: 6, lg: 6 }}>
             <Image
               //src={course.image}
               alt={course.course_name}
@@ -67,8 +72,8 @@ function ViewCourse() {
               fit="cover"
             />
           </Grid.Col>
-          <Grid.Col span={6}>
-            <Group direction="column" align="flex-start">
+          <Grid.Col span={{ base: 12, md: 6, lg: 6 }}>
+            <Stack direction="column" align="left" spacing="md">
               <Title order={1}>{course.course_name}</Title>
               <Text size="xl" style={{ marginTop: 10 }}>
                 {course.course_description}
@@ -76,15 +81,18 @@ function ViewCourse() {
               <Text size="xl" style={{ marginTop: 10 }}>
                 Price: ${course.course_price}
               </Text>
-              <Button
-                component="a"
-                href={`/checkout/${course.course_id}`}
-                size="lg"
-                style={{ marginTop: 20 }}
-              >
-                Buy Course
-              </Button>
-            </Group>
+              <Box style={{ width: 'auto', maxWidth: '200px' }}>
+                {/* Add a button to initiate the checkout process */}
+                <Button
+                  component="a"
+                  href={`/checkout/${course.course_id}`}
+                  size="md"
+                  style={{ marginTop: 20 }}
+                >
+                  Buy Course
+                </Button>
+              </Box>
+            </Stack>
           </Grid.Col>
         </Grid>
       </Paper>

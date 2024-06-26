@@ -12,8 +12,11 @@ import {
   Badge,
   Button,
   Group,
+  Box,
   LoadingOverlay,
 } from "@mantine/core";
+import Navbar from "../components/Navbar.jsx";
+
 import { useState, useEffect } from "react";
 
 function Courses() {
@@ -23,7 +26,7 @@ function Courses() {
 
   function formatMySQLTimeString(mysqlTimeString) {
     return mysqlTimeString.substring(0, 5); // Extracts and returns the "HH:mm" part
-} 
+  } 
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -48,6 +51,8 @@ function Courses() {
 
   return (
     <Container size="xl" style={{ marginTop: 20 }}>
+      <Box padding="xl" style={{marginTop: '70px'}} />
+      <Navbar />
       <Text
         align="start"
         weight={700}
