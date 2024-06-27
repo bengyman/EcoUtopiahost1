@@ -1,13 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import http from '../http';
 import dayjs from 'dayjs';
 import global from '../global';
-import { Link } from 'react-router-dom';
+import {
+  Container,
+  Card,
+  Text,
+  Button,
+  Loader,
+  Modal,
+  Group,
+} from '@mantine/core';
+import { TiArrowBack } from "react-icons/ti";
 
 function EditOrders() {
   const { orderId } = useParams();
+  const navigate = useNavigate();
   const [order, setOrder] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 300); // Display loader for at least 0.3 seconds
+
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (orderId) {
@@ -20,46 +40,80 @@ function EditOrders() {
   const handleRefund = () => {
     http.put(`/orders/${orderId}`).then((res) => {
       setOrder(res.data);
+      setIsModalOpen(false); // Close the modal
+      navigate('/orders'); // Navigate back to the orders page
     });
   };
 
-  if (!order) {
-    return <div>Loading...</div>;
+  if (isLoading || !order) {
+    return <Loader size={50} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />;
   }
 
   return (
-    <div className="edit-order-container">
-      <h1>Edit Order {order.order_id}</h1>
-      <div className="order-details">
-        <p>
+    <Container size="md" style={{ marginTop: 20 }}>
+      <Group position="apart" mb={30}>
+        <Button component={Link} to="/orders" variant="link">
+          <TiArrowBack />
+        </Button>
+        <Text
+          align="start"
+          weight={700}
+          style={{ fontSize: 30 }}
+          color="deepBlue"
+          fw={500}
+          size="xl"
+        >
+          Refund Order {order.order_id}
+        </Text>
+      </Group>
+
+      <Card shadow="sm" padding="lg" radius="md" withBorder>
+        <Text size="lg" weight={500}>
           <strong>Course Title:</strong> {order.Course.course_name}
-        </p>
-        <p>
+        </Text>
+        <Text size="lg" weight={500}>
           <strong>Order Status:</strong> {order.order_status}
-        </p>
-        <p>
+        </Text>
+        <Text size="lg" weight={500}>
           <strong>Order Date:</strong> {dayjs(order.order_date).format(global.datetimeFormat)}
-        </p>
-        <p>
+        </Text>
+        <Text size="lg" weight={500}>
           <strong>Instructor:</strong> {order.Course.course_instructor}
-        </p>
-        <p>
-          <strong>Course Description</strong> {order.Course.course_description}
-        </p>
-        <p>
+        </Text>
+        <Text size="lg" weight={500}>
+          <strong>Course Description:</strong> {order.Course.course_description}
+        </Text>
+        <Text size="lg" weight={500}>
           <strong>Course Date:</strong> {dayjs(order.Course.course_date).format(global.datetimeFormat)}
-        </p>
-        <p>
+        </Text>
+        <Text size="lg" weight={500}>
           <strong>Start Time:</strong> {order.Course.course_start_time}
-        </p>
-        <p>
+        </Text>
+        <Text size="lg" weight={500}>
           <strong>End Time:</strong> {order.Course.course_end_time}
-        </p>
-        <Link to="/orders">
-        <button onClick={handleRefund}>Refund Order</button>
-        </Link>
-      </div>
-    </div>
+        </Text>
+        <Button
+          variant="outline"
+          color="red"
+          style={{ marginTop: 20 }}
+          onClick={() => setIsModalOpen(true)}
+        >
+          Refund Order
+        </Button>
+      </Card>
+
+      <Modal
+        opened={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Confirm Refund"
+      >
+        <Text>Are you sure you want to refund this order?</Text>
+        <Group position="apart" style={{ marginTop: 20 }}>
+          <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
+          <Button color="red" onClick={handleRefund}>Confirm Refund</Button>
+        </Group>
+      </Modal>
+    </Container>
   );
 }
 

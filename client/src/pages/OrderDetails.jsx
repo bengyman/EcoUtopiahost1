@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import http from '../http';
 import dayjs from 'dayjs';
 import global from '../global';
-import { Link } from 'react-router-dom';
+import { Text, Loader, Container, Card, Button, Group } from '@mantine/core';
+import { TiArrowBack } from "react-icons/ti";
 
 function ViewOrders() {
     const { orderId } = useParams();
@@ -18,39 +19,54 @@ function ViewOrders() {
     }, [orderId]);
 
     if (!order) {
-        return <div>Loading...</div>; // or any loading indicator
+        return <Loader size={50} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />; // Centered loader
     }
 
     return (
-        <div className="view-order-container">
-            <h1>View Order {order.order_id}</h1>
-            <div className="order-details">
-                <p>
+        <Container size="md" style={{ marginTop: 20, textAlign: 'center' }}>
+            <Group position="apart" mb={30}>
+                <Button component={Link} to="/orders" variant="link">
+                    <TiArrowBack />
+                </Button>
+                <Text
+                    align="start"
+                    weight={700}
+                    style={{ fontSize: 30 }}
+                    color="deepBlue"
+                    fw={500}
+                    size="xl"
+                >
+                    View Order {order.order_id}
+                </Text>
+            </Group>
+
+            <Card shadow="sm" padding="lg" radius="md" withBorder>
+                <Text size="lg" weight={500}>
                     <strong>Course Title:</strong> {order.Course.course_name}
-                </p>
-                <p>
+                </Text>
+                <Text size="lg" weight={500}>
                     <strong>Order Status:</strong> {order.order_status}
-                </p>
-                <p>
+                </Text>
+                <Text size="lg" weight={500}>
                     <strong>Order Date:</strong> {dayjs(order.order_date).format(global.datetimeFormat)}
-                </p>
-                <p>
+                </Text>
+                <Text size="lg" weight={500}>
                     <strong>Instructor:</strong> {order.Course.course_instructor}
-                </p>
-                <p>
+                </Text>
+                <Text size="lg" weight={500}>
                     <strong>Course Description:</strong> {order.Course.course_description}
-                </p>
-                <p>
+                </Text>
+                <Text size="lg" weight={500}>
                     <strong>Course Date:</strong> {dayjs(order.Course.course_date).format(global.dateFormat)}
-                </p>
-                <p>
+                </Text>
+                <Text size="lg" weight={500}>
                     <strong>Start Time:</strong> {order.Course.course_start_time}
-                </p>
-                <p>
+                </Text>
+                <Text size="lg" weight={500}>
                     <strong>End Time:</strong> {order.Course.course_end_time}
-                </p>
-            </div>
-        </div>
+                </Text>
+            </Card>
+        </Container>
     );
 }
 
