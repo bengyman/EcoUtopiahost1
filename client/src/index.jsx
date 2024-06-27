@@ -19,6 +19,7 @@ import ResetPasswordEnterCode from './pages/ResetPasswordEnterCode.jsx';
 import ResetPassword from './pages/ResetPassword.jsx';
 import PasswordResetSuccess from './pages/ResetPasswordSuccess.jsx';
 import AccountManagement from './pages/AccountManagement.jsx';
+import AccountActivation from './pages/AccountActivation.jsx';
 
 import {
   BrowserRouter,
@@ -81,6 +82,7 @@ function Main() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
         <Route path="/account-management" element={<AccountManagement/>} />
+        <Route path="/account-activation" element={<AccountActivation/>} />
       </Routes>
     </>
   )

@@ -18,6 +18,7 @@ const seedAdmin = async () => {
           email,
           password: hashedPassword,
           role: 'STAFF',
+          is_activated: true,
         },
         { transaction }
       );

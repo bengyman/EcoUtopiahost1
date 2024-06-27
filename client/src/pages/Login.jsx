@@ -35,14 +35,16 @@ function Login() {
       const user = await login(values.email, values.password, recaptchaToken);
       setError(''); // Clear any previous errors
       console.log('Login successful, redirecting to profile:', user.user_id);
-      
-      // Redirect based on user role
-      if (user.role === 'STAFF') {
+
+      // Redirect based on user activation status and role
+      if (!user.is_activated) {
+        navigate('/account-activation'); // Navigate to Account Activation page if user is not activated
+      } else if (user.role === 'STAFF') {
         navigate('/account-management'); // Navigate to Account Management page for staff
       } else {
         navigate(`/profile/${user.user_id}`); // Navigate to profile with user ID for other users
       }
-      
+
     } catch (err) {
       setError('Failed to login');
       console.error('Login failed:', err);

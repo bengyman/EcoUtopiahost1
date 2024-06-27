@@ -12,6 +12,7 @@ function AccountManagement() {
   const [page, setPage] = useState(1);
   const [itemsPerPage] = useState(10); // Number of items per page
   const { user } = useAuth();
+  const adminEmail = 'admin@ecoutopia.com'; // Seeded admin email
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -67,6 +68,10 @@ function AccountManagement() {
     }
   };
 
+  const isGreyedOut = (email) => {
+    return email === adminEmail || user.email === email;
+  };
+
   return (
     <Container size="xl">
       <Title align="center" style={{ marginTop: 20 }}>Account Management</Title>
@@ -87,33 +92,35 @@ function AccountManagement() {
         <Table highlightOnHover withborder="true">
           <thead>
             <tr>
-              <td>UserID</td>
-              <td>Email</td>
-              <td>Role</td>
-              <td>Name</td>
-              <td>Contact Number</td>
-              <td>Activated</td>
-              <td>Deleted</td>
-              <td>Actions</td>
+              <th>UserID</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Name</th>
+              <th>Contact Number</th>
+              <th>Activated</th>
+              <th>Deleted</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {displayedUsers.length > 0 ? displayedUsers.map((user, index) => {
               const residentInfo = user.Residents.length > 0 ? user.Residents[0] : null;
               const staffInfo = user.Staffs.length > 0 ? user.Staffs[0] : null;
+              const greyedOut = isGreyedOut(user.email);
 
               return (
                 <tr key={user.user_id} style={{ backgroundColor: index % 2 === 0 ? '#f9f9f9' : '#ffffff' }}>
-                  <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>{user.user_id}</td>
-                  <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>{user.email}</td>
-                  <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>{user.role}</td>
-                  <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>{residentInfo ? residentInfo.name : (staffInfo ? staffInfo.name : 'N/A')}</td>
-                  <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>{residentInfo ? residentInfo.mobile_num : (staffInfo ? staffInfo.mobilenum : 'N/A')}</td>
-                  <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>
+                  <th style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>{user.user_id}</th>
+                  <th style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>{user.email}</th>
+                  <th style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>{user.role}</th>
+                  <th style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>{residentInfo ? residentInfo.name : (staffInfo ? staffInfo.name : 'N/A')}</th>
+                  <th style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>{residentInfo ? residentInfo.mobile_num : (staffInfo ? staffInfo.mobilenum : 'N/A')}</th>
+                  <th style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>
                     <Group align="center">
                       <Switch
                         checked={user.is_activated}
                         onChange={() => handleToggleActivate(user.user_id, !user.is_activated)}
+                        disabled={greyedOut}
                       />
                       {user.is_activated ? (
                         <Check color="green" size={16} />
@@ -121,12 +128,13 @@ function AccountManagement() {
                         <X color="red" size={16} />
                       )}
                     </Group>
-                  </td>
-                  <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>
+                  </th>
+                  <th style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>
                     <Group align="center">
                       <Switch
                         checked={user.is_deleted}
                         onChange={() => handleToggleDelete(user.user_id, !user.is_deleted)}
+                        disabled={greyedOut}
                       />
                       {user.is_deleted ? (
                         <Check color="green" size={16} />
@@ -134,10 +142,10 @@ function AccountManagement() {
                         <X color="red" size={16} />
                       )}
                     </Group>
-                  </td>
-                  <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>
-                    <Button color="blue" onClick={() => handleEdit(user.user_id)}>Edit</Button>
-                  </td>
+                  </th>
+                  <th style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>
+                    <Button color="blue" onClick={() => handleEdit(user.user_id)} disabled={greyedOut}>Edit</Button>
+                  </th>
                 </tr>
               );
             }) : (

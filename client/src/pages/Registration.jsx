@@ -35,7 +35,9 @@ function Registration() {
       confirmPassword: Yup.string()
         .oneOf([Yup.ref('password'), null], 'Passwords must match')
         .required('Confirm Password is required'),
-      contactNumber: Yup.string().required('Contact Number is required')
+      contactNumber: Yup.string()
+        .matches(/^[0-9]{8}$/, "Contact Number must be a Singapore Number and contain exactly 8 digits")
+        .required('Contact Number is required')
     }),
     onSubmit: async (values) => {
       try {
