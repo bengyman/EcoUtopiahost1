@@ -273,8 +273,6 @@ router.post('/activate', async (req, res) => {
 router.post('/activate-account', authenticateToken, async (req, res) => {
     try {
         const { email, code } = req.body;
-        console.log(email)
-        console.log(code)
         const user = await User.findOne({
             where: {
                 email,
@@ -282,7 +280,6 @@ router.post('/activate-account', authenticateToken, async (req, res) => {
                 activation_code_expiry: { [Op.gt]: new Date() }
             }
         });
-        console.log(user)
 
         if (!user) {
             return res.status(400).json({ error: 'Invalid or expired activation code' });
