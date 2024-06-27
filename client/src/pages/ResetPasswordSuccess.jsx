@@ -8,7 +8,7 @@ function PasswordResetSuccess() {
   useEffect(() => {
     const timer = setTimeout(() => {
       navigate('/login');
-    }, 5000);
+    }, 3000);
 
     return () => clearTimeout(timer);
   }, [navigate]);
