@@ -54,7 +54,8 @@ function AccountManagement() {
 
   const handleToggleDelete = async (userId, isDeleted) => {
     try {
-      await axios.put(`/user/softdelete/${userId}`, { is_deleted: isDeleted }, {
+      const endpoint = isDeleted ? `/user/softdelete/${userId}` : `/user/softrestore/${userId}`;
+      await axios.put(endpoint, { is_deleted: isDeleted }, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }

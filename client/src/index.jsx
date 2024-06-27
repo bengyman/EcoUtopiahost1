@@ -89,7 +89,7 @@ function Main() {
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
   <React.StrictMode>
-    <MantineProvider theme={theme} defaultColorScheme="auto">
+    <MantineProvider theme={theme} defaultColorScheme="light">
         <AuthProvider>
           <BrowserRouter>
             <Main />
