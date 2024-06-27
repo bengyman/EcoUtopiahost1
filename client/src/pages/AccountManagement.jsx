@@ -3,6 +3,7 @@ import { Table, Container, Button, Group, Title, Alert, TextInput, Paper, Pagina
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { Check, X } from 'tabler-icons-react';
+import { useNavigate } from 'react-router-dom';
 
 function AccountManagement() {
   const [allUsers, setAllUsers] = useState([]);
@@ -12,6 +13,7 @@ function AccountManagement() {
   const [page, setPage] = useState(1);
   const [itemsPerPage] = useState(10); // Number of items per page
   const { user } = useAuth();
+  const navigate = useNavigate();
   const adminEmail = 'admin@ecoutopia.com'; // Seeded admin email
 
   useEffect(() => {
@@ -72,6 +74,10 @@ function AccountManagement() {
     return email === adminEmail || user.email === email;
   };
 
+  const handleEdit = (userId) => {
+    navigate(`/profile/${userId}`);
+  };
+
   return (
     <Container size="xl">
       <Title align="center" style={{ marginTop: 20 }}>Account Management</Title>
@@ -110,12 +116,12 @@ function AccountManagement() {
 
               return (
                 <tr key={user.user_id} style={{ backgroundColor: index % 2 === 0 ? '#f9f9f9' : '#ffffff' }}>
-                  <th style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>{user.user_id}</th>
-                  <th style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>{user.email}</th>
-                  <th style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>{user.role}</th>
-                  <th style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>{residentInfo ? residentInfo.name : (staffInfo ? staffInfo.name : 'N/A')}</th>
-                  <th style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>{residentInfo ? residentInfo.mobile_num : (staffInfo ? staffInfo.mobilenum : 'N/A')}</th>
-                  <th style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>
+                  <td style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>{user.user_id}</td>
+                  <td style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>{user.email}</td>
+                  <td style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>{user.role}</td>
+                  <td style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>{residentInfo ? residentInfo.name : (staffInfo ? staffInfo.name : 'N/A')}</td>
+                  <td style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>{residentInfo ? residentInfo.mobile_num : (staffInfo ? staffInfo.mobilenum : 'N/A')}</td>
+                  <td style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>
                     <Group align="center">
                       <Switch
                         checked={user.is_activated}
@@ -128,8 +134,8 @@ function AccountManagement() {
                         <X color="red" size={16} />
                       )}
                     </Group>
-                  </th>
-                  <th style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>
+                  </td>
+                  <td style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>
                     <Group align="center">
                       <Switch
                         checked={user.is_deleted}
@@ -142,10 +148,10 @@ function AccountManagement() {
                         <X color="red" size={16} />
                       )}
                     </Group>
-                  </th>
-                  <th style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>
+                  </td>
+                  <td style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>
                     <Button color="blue" onClick={() => handleEdit(user.user_id)} disabled={greyedOut}>Edit</Button>
-                  </th>
+                  </td>
                 </tr>
               );
             }) : (
@@ -161,10 +167,6 @@ function AccountManagement() {
       </Paper>
     </Container>
   );
-
-  function handleEdit(userId) {
-    // Redirect to edit user page or open a modal for editing user details
-  }
 }
 
 export default AccountManagement;

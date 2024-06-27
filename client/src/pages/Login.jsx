@@ -32,7 +32,15 @@ function Login() {
         return;
       }
 
+      // Attempt to log in
       const user = await login(values.email, values.password, recaptchaToken);
+
+      // Check if the account is soft-deleted
+      if (user.is_deleted) {
+        setError('Account is Invalid');
+        return;
+      }
+
       setError(''); // Clear any previous errors
       console.log('Login successful, redirecting to profile:', user.user_id);
 

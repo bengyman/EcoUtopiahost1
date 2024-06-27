@@ -5,11 +5,10 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { IconPhoto } from '@tabler/icons-react';
 
-function Profile() {
-  const { logout } = useAuth();
+function ViewProfileAdmin() {
   const navigate = useNavigate();
-  const { userId } = useParams(); // Get userId from route parameters
-  
+  const { userId } = useParams(); // Get user_id from route parameters
+  const { logout } = useAuth(); // Assuming useAuth provides a logout function
   const [profileData, setProfileData] = useState({
     firstName: '',
     lastName: '',
@@ -19,49 +18,44 @@ function Profile() {
   });
 
   useEffect(() => {
-    console.log(userId)
-    if (userId) {
-      const fetchProfile = async () => {
-        try {
-          const response = await axios.get(`/user/${userId}`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get(`/user/${userId}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        const { user: userData, resident, staff } = response.data;
+
+        if (userData.role === 'RESIDENT' && resident) {
+          setProfileData({
+            email: userData.email,
+            firstName: resident.name.split(' ')[0] || '',
+            lastName: resident.name.split(' ')[1] || '',
+            mobileNumber: resident.mobile_num || '',
+            profilePic: resident.profile_pic || ''
           });
-          const { user: userData, resident, staff } = response.data;
-
-          if (userData.role === 'RESIDENT' && resident) {
-            setProfileData({
-              email: userData.email,
-              firstName: resident.name.split(' ')[0] || '',
-              lastName: resident.name.split(' ')[1] || '',
-              mobileNumber: resident.mobile_num || '',
-              profilePic: resident.profile_pic || '',
-              role: "RESIDENT",
-            });
-          } else if (userData.role === 'STAFF' && staff) {
-            setProfileData({
-              email: userData.email,
-              firstName: staff.name.split(' ')[0] || '',
-              lastName: staff.name.split(' ')[1] || '',
-              mobileNumber: staff.mobilenum || '',
-              profilePic: staff.profile_pic || '',
-              role: "STAFF",
-            });
-          } else {
-            setProfileData({
-              email: userData.email,
-              firstName: '',
-              lastName: '',
-              mobileNumber: '',
-              profilePic: ''
-            });
-          }
-        } catch (error) {
-          console.error('Error fetching profile data:', error);
+        } else if (userData.role === 'STAFF' && staff) {
+          setProfileData({
+            email: userData.email,
+            firstName: staff.name.split(' ')[0] || '',
+            lastName: staff.name.split(' ')[1] || '',
+            mobileNumber: staff.mobilenum || '',
+            profilePic: staff.profile_pic || ''
+          });
+        } else {
+          setProfileData({
+            email: userData.email,
+            firstName: '',
+            lastName: '',
+            mobileNumber: '',
+            profilePic: ''
+          });
         }
-      };
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
+      }
+    };
 
-      fetchProfile();
-    }
+    fetchProfile();
   }, [userId]);
 
   const handleProfilePicChange = async (event) => {
@@ -84,10 +78,6 @@ function Profile() {
       console.error('Error uploading profile picture:', error);
     }
   };
-
-  if (!userId) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <Container size="md" my={40}>
@@ -166,4 +156,4 @@ function Profile() {
   );
 }
 
-export default Profile;
+export default ViewProfileAdmin;
