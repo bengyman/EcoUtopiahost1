@@ -1,7 +1,18 @@
 import { AppShell, Flex, Anchor, Button, Text, Image } from "@mantine/core";
-import logo from "../assets/logo.png"
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import logo from "../assets/logo.png";
 
 function Navbar() {
+  const location = useLocation();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
     <AppShell header={{ height: 50 }} navbar={{ width: 200, breakpoint: "xl" }}>
       <AppShell.Header style={{ height: 50, backgroundColor: "#0F9D58" }}>
@@ -24,16 +35,39 @@ function Navbar() {
             </Anchor>
           </Flex>
           <Flex align="center">
-            <Anchor href="/login" style={{ textDecoration: "none" }}>
-              <Button color="black" style={{ marginLeft: 10, marginRight: 10 }}>
-                Login
+            {location.pathname === '/' && (
+              <>
+                <Anchor href="/login" style={{ textDecoration: "none" }}>
+                  <Button color="black" style={{ marginLeft: 10, marginRight: 10 }}>
+                    Login
+                  </Button>
+                </Anchor>
+                <Anchor href="/register" style={{ textDecoration: "none" }}>
+                  <Button color="black" style={{ marginLeft: 10, marginRight: 10 }}>
+                    Sign Up
+                  </Button>
+                </Anchor>
+              </>
+            )}
+            {location.pathname === '/register' && (
+              <Anchor href="/login" style={{ textDecoration: "none" }}>
+                <Button color="black" style={{ marginLeft: 10, marginRight: 10 }}>
+                  Login
+                </Button>
+              </Anchor>
+            )}
+            {location.pathname === '/login' && (
+              <Anchor href="/register" style={{ textDecoration: "none" }}>
+                <Button color="black" style={{ marginLeft: 10, marginRight: 10 }}>
+                  Sign Up
+                </Button>
+              </Anchor>
+            )}
+            {location.pathname === '/account-management' && user && (
+              <Button color="red" style={{ marginLeft: 10, marginRight: 10 }} onClick={handleLogout}>
+                Logout
               </Button>
-            </Anchor>
-            <Anchor href="/register" style={{ textDecoration: "none" }}>
-              <Button color="black" style={{ marginLeft: 10, marginRight: 10 }}>
-                Sign Up
-              </Button>
-            </Anchor>
+            )}
           </Flex>
         </Flex>
       </AppShell.Header>
