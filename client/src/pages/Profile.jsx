@@ -6,63 +6,84 @@ import { useAuth } from '../context/AuthContext';
 import { IconPhoto } from '@tabler/icons-react';
 
 function Profile() {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const navigate = useNavigate();
-  const { userId } = useParams(); // Get userId from route parameters
+  const { paramId } = useParams(); // Get paramId from route parameters
   
   const [profileData, setProfileData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     mobileNumber: '',
-    profilePic: ''
+    profilePic: '',
+    role: ''
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log(userId)
-    if (userId) {
-      const fetchProfile = async () => {
-        try {
-          const response = await axios.get(`/user/${userId}`, {
+    const fetchProfile = async () => {
+      try {
+        if (!user || !paramId) {
+          console.log('User or paramId is not defined', { user, paramId });
+          return;
+        }
+        
+        let response;
+        if (user.user_id === parseInt(paramId)) {
+          // Fetch the personal profile data
+          response = await axios.get(`/user/${user.user_id}`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           });
-          const { user: userData, resident, staff } = response.data;
-
-          if (userData.role === 'RESIDENT' && resident) {
-            setProfileData({
-              email: userData.email,
-              firstName: resident.name.split(' ')[0] || '',
-              lastName: resident.name.split(' ')[1] || '',
-              mobileNumber: resident.mobile_num || '',
-              profilePic: resident.profile_pic || '',
-              role: "RESIDENT",
-            });
-          } else if (userData.role === 'STAFF' && staff) {
-            setProfileData({
-              email: userData.email,
-              firstName: staff.name.split(' ')[0] || '',
-              lastName: staff.name.split(' ')[1] || '',
-              mobileNumber: staff.mobilenum || '',
-              profilePic: staff.profile_pic || '',
-              role: "STAFF",
-            });
-          } else {
-            setProfileData({
-              email: userData.email,
-              firstName: '',
-              lastName: '',
-              mobileNumber: '',
-              profilePic: ''
-            });
-          }
-        } catch (error) {
-          console.error('Error fetching profile data:', error);
+        } else if (user.role === 'STAFF') {
+          // Fetch the profile data of the user with the given paramId
+          response = await axios.get(`/user/${paramId}`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          });
+        } else {
+          throw new Error('Access denied.');
         }
-      };
 
+        const { user: userData, resident, staff } = response.data;
+
+        if (userData.role === 'RESIDENT' && resident) {
+          setProfileData({
+            email: userData.email,
+            firstName: resident.name.split(' ')[0] || '',
+            lastName: resident.name.split(' ')[1] || '',
+            mobileNumber: resident.mobile_num || '',
+            profilePic: resident.profile_pic || '',
+            role: 'RESIDENT'
+          });
+        } else if (userData.role === 'STAFF' && staff) {
+          setProfileData({
+            email: userData.email,
+            firstName: staff.name.split(' ')[0] || '',
+            lastName: staff.name.split(' ')[1] || '',
+            mobileNumber: staff.mobilenum || '',
+            profilePic: staff.profile_pic || '',
+            role: 'STAFF'
+          });
+        } else {
+          setProfileData({
+            email: userData.email,
+            firstName: userData.firstName || '',
+            lastName: userData.lastName || '',
+            mobileNumber: userData.mobileNumber || '',
+            profilePic: userData.profile_pic || '',
+            role: userData.role || ''
+          });
+        }
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
+        setLoading(false);
+      }
+    };
+
+    if (user && paramId) {
       fetchProfile();
     }
-  }, [userId]);
+  }, [paramId, user]);
 
   const handleProfilePicChange = async (event) => {
     const file = event.target.files[0];
@@ -70,7 +91,7 @@ function Profile() {
 
     const formData = new FormData();
     formData.append('profilePic', file);
-    formData.append('userId', userId);
+    formData.append('userId', paramId);
 
     try {
       const response = await axios.post('/user/profile-picture', formData, {
@@ -85,7 +106,7 @@ function Profile() {
     }
   };
 
-  if (!userId) {
+  if (!paramId || loading) {
     return <div>Loading...</div>;
   }
 
@@ -148,8 +169,8 @@ function Profile() {
                 readOnly
                 variant="filled"
               />
-              <Button fullWidth mt="md" onClick={() => navigate(`/edit-profile/${userId}`)}>Edit Profile</Button>
-              <Button fullWidth mt="md" color="red" onClick={() => navigate(`/change-password/${userId}`)}>Change Password</Button>
+              <Button fullWidth mt="md" onClick={() => navigate(`/edit-profile/${paramId}`)}>Edit Profile</Button>
+              <Button fullWidth mt="md" color="red" onClick={() => navigate(`/change-password/${paramId}`)}>Change Password</Button>
             </Box>
           </Grid.Col>
         </Grid>

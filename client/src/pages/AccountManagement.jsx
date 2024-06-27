@@ -1,45 +1,101 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Container, Button, Group, Title, Alert, TextInput, Paper, Pagination, Switch } from '@mantine/core';
+import { Table, Container, Button, Group, Title, Alert, TextInput, Paper, Pagination, Switch, Modal, Select } from '@mantine/core';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { Check, X } from 'tabler-icons-react';
 import { useNavigate } from 'react-router-dom';
+import { useForm, Controller } from 'react-hook-form';
+import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
 
 function AccountManagement() {
   const [allUsers, setAllUsers] = useState([]);
   const [displayedUsers, setDisplayedUsers] = useState([]);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [sortField, setSortField] = useState('');
+  const [filterRole, setFilterRole] = useState('');
   const [page, setPage] = useState(1);
   const [itemsPerPage] = useState(10); // Number of items per page
   const { user } = useAuth();
   const navigate = useNavigate();
   const adminEmail = 'admin@ecoutopia.com'; // Seeded admin email
+  const [modalOpened, setModalOpened] = useState(false);
+
+  const validationSchema = yup.object().shape({
+    firstName: yup.string().required('First Name is required'),
+    lastName: yup.string().required('Last Name is required'),
+    email: yup.string().email('Invalid email address').required('Email is required'),
+    password: yup.string().min(8, 'Password must be at least 8 characters').required('Password is required'),
+    confirmPassword: yup.string().oneOf([yup.ref('password'), null], 'Passwords must match').required('Confirm Password is required'),
+    contactNumber: yup.string().required('Contact Number is required'),
+    role: yup.string().oneOf(['RESIDENT', 'STAFF']).required('Role is required')
+  });
+
+  const { handleSubmit, control, reset } = useForm({
+    resolver: yupResolver(validationSchema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      contactNumber: '',
+      role: 'RESIDENT'
+    }
+  });
+
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get('/user', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      console.log('API Response:', response.data); // Log API response
+      setAllUsers(response.data || []);
+      setDisplayedUsers(response.data.slice(0, itemsPerPage));
+    } catch (error) {
+      setError('Failed to fetch users');
+      console.error('Error fetching users:', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get('/user', {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        console.log('API Response:', response.data); // Log API response
-        setAllUsers(response.data || []);
-        setDisplayedUsers(response.data.slice(0, itemsPerPage));
-      } catch (error) {
-        setError('Failed to fetch users');
-        console.error('Error fetching users:', error);
-      }
-    };
-
     fetchUsers();
   }, [user]);
 
   useEffect(() => {
+    applyFilters();
+  }, [search, sortField, filterRole, page, allUsers]);
+
+  const applyFilters = () => {
+    let filteredUsers = allUsers;
+
+    if (search) {
+      filteredUsers = filteredUsers.filter(user =>
+        user.email.toLowerCase().includes(search.toLowerCase()) ||
+        user.role.toLowerCase().includes(search.toLowerCase()) ||
+        (user.Residents.length > 0 && user.Residents[0].name.toLowerCase().includes(search.toLowerCase())) ||
+        (user.Staffs.length > 0 && user.Staffs[0].name.toLowerCase().includes(search.toLowerCase()))
+      );
+    }
+
+    if (filterRole) {
+      filteredUsers = filteredUsers.filter(user => user.role === filterRole);
+    }
+
+    if (sortField) {
+      filteredUsers = filteredUsers.sort((a, b) => {
+        if (a[sortField] < b[sortField]) return -1;
+        if (a[sortField] > b[sortField]) return 1;
+        return 0;
+      });
+    }
+
     const offset = (page - 1) * itemsPerPage;
-    setDisplayedUsers(allUsers.slice(offset, offset + itemsPerPage));
-  }, [page, allUsers]);
+    setDisplayedUsers(filteredUsers.slice(offset, offset + itemsPerPage));
+  };
 
   const handleToggleActivate = async (userId, isActivated) => {
     try {
@@ -78,9 +134,44 @@ function AccountManagement() {
     navigate(`/profile/${userId}`);
   };
 
+  const onSubmit = async (data) => {
+    try {
+      const response = await axios.post('/user/register', data, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      console.log('User registered:', response.data);
+      setModalOpened(false);
+      reset(); // Reset the form values to default values after successful submission
+      fetchUsers(); // Refresh the list of users
+    } catch (error) {
+      setError('Failed to create user account');
+      console.error('Error creating user account:', error);
+    }
+  };
+
   return (
-    <Container size="xl">
+    <Container size="xl" style={{ position: 'relative' }}>
       <Title align="center" style={{ marginTop: 20 }}>Account Management</Title>
+      <Button 
+        color="green"
+        style={{ position: 'absolute', top: 20, right: 20 }} 
+        onClick={() => {
+          reset({
+            firstName: '',
+            lastName: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
+            contactNumber: '',
+            role: 'RESIDENT'
+          });
+          setModalOpened(true);
+        }}
+      >
+        Create Account
+      </Button>
       {error && <Alert title="Error" color="red" mt="md">{error}</Alert>}
       <Paper withBorder shadow="md" p={30} mt={30} radius="md">
         <Group position="apart" mb="md">
@@ -91,9 +182,16 @@ function AccountManagement() {
           />
           <Group>
             <Button onClick={() => setSortField('name')}>Sort</Button>
-            <Button>Filter</Button>
+            <Select
+              placeholder="Filter by role"
+              data={[
+                { value: 'RESIDENT', label: 'Resident' },
+                { value: 'STAFF', label: 'Staff' },
+              ]}
+              value={filterRole}
+              onChange={setFilterRole}
+            />
           </Group>
-          <Button>Add Account</Button>
         </Group>
         <Table highlightOnHover withborder="true">
           <thead>
@@ -165,6 +263,109 @@ function AccountManagement() {
           <Pagination page={page} onChange={setPage} total={Math.ceil(allUsers.length / itemsPerPage)} />
         </Group>
       </Paper>
+      
+      <Modal
+        opened={modalOpened}
+        onClose={() => setModalOpened(false)}
+        title="Create Account"
+      >
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Controller
+            name="firstName"
+            control={control}
+            render={({ field, fieldState }) => (
+              <TextInput
+                label="First Name"
+                required
+                {...field}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+          <Controller
+            name="lastName"
+            control={control}
+            render={({ field, fieldState }) => (
+              <TextInput
+                label="Last Name"
+                required
+                {...field}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+          <Controller
+            name="email"
+            control={control}
+            render={({ field, fieldState }) => (
+              <TextInput
+                label="Email"
+                required
+                {...field}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+          <Controller
+            name="password"
+            control={control}
+            render={({ field, fieldState }) => (
+              <TextInput
+                label="Password"
+                type="password"
+                required
+                {...field}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+          <Controller
+            name="confirmPassword"
+            control={control}
+            render={({ field, fieldState }) => (
+              <TextInput
+                label="Confirm Password"
+                type="password"
+                required
+                {...field}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+          <Controller
+            name="contactNumber"
+            control={control}
+            render={({ field, fieldState }) => (
+              <TextInput
+                label="Contact Number"
+                required
+                {...field}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+          <Controller
+            name="role"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Select
+                label="Role"
+                data={[
+                  { value: 'RESIDENT', label: 'Resident' },
+                  { value: 'STAFF', label: 'Staff' },
+                ]}
+                required
+                {...field}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+          <Group position="right" mt="md">
+            <Button onClick={() => setModalOpened(false)}>Cancel</Button>
+            <Button type="submit">Create Account</Button>
+          </Group>
+        </form>
+      </Modal>
     </Container>
   );
 }

@@ -74,7 +74,7 @@ function Main() {
         <Route path="/test" element={<TestPage />} />
         <Route path="/register" element={<Registration />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/profile/:userId" element={<Profile />} />
+        <Route path="/profile/:paramId" element={<Profile />} />
         <Route path="/edit-profile/:id" element={<EditProfile />} />
         <Route path="/change-password/:id" element={<ChangePassword />} />
         <Route path="/reset-password-email" element={<ResetPasswordEnterEmail />} />
