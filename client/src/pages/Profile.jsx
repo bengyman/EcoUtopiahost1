@@ -4,6 +4,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { IconPhoto } from '@tabler/icons-react';
+import LoaderComponent from '../components/Loader.jsx';
+
 
 function Profile() {
   const { logout, user } = useAuth();
@@ -19,6 +21,14 @@ function Profile() {
     role: ''
   });
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 300); // Display loader for at least 0.3 seconds
+
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -107,7 +117,7 @@ function Profile() {
   };
 
   if (!paramId || loading) {
-    return <div>Loading...</div>;
+    return <LoaderComponent />;
   }
 
   return (
