@@ -19,6 +19,14 @@ function ViewOrders() {
         }
     }, [orderId]);
 
+    useEffect(() => {
+        let timer = setTimeout(() => {
+            setIsLoading(false);
+        }, 300); // Display loader for at least 0.3 seconds
+
+        return () => clearTimeout(timer);
+    }, []);
+
     if (!order) {
         return <LoaderComponent />;
     }
