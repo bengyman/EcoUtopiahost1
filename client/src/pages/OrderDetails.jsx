@@ -3,13 +3,14 @@ import { useParams, Link } from 'react-router-dom';
 import http from '../http';
 import dayjs from 'dayjs';
 import global from '../global';
-import { Text, Loader, Container, Card, Button, Group } from '@mantine/core';
+import { Text, Container, Card, Button, Group } from '@mantine/core';
 import { TiArrowBack } from "react-icons/ti";
 import LoaderComponent from '../components/Loader.jsx';
 
 function ViewOrders() {
     const { orderId } = useParams();
     const [order, setOrder] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         if (orderId) {
