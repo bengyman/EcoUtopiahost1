@@ -136,7 +136,7 @@ function AccountManagement() {
 
   const onSubmit = async (data) => {
     try {
-      const response = await axios.post('/user/register', data, {
+      const response = await axios.post('/user/createaccount', data, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }

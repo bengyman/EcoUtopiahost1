@@ -24,7 +24,7 @@ const generateToken = (user) => {
     return jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
 };
 
-// Create a new user and resident with input validation
+// Create a new user and resident with input validation (This is for Registration, require reCaptcha)
 router.post('/register', verifyRecaptcha, async (req, res) => {
     const transaction = await User.sequelize.transaction();
     try {
@@ -62,7 +62,7 @@ router.post('/register', verifyRecaptcha, async (req, res) => {
     }
 });
 
-// Create a new user and resident with input validation
+// Create a new user and either resident or staff with input validation (This is for AccountManagement)
 router.post('/createaccount', authenticateToken, async (req, res) => {
     const transaction = await User.sequelize.transaction();
     try {
@@ -83,16 +83,28 @@ router.post('/createaccount', authenticateToken, async (req, res) => {
             role
         }, { transaction });
 
-        const newResident = await Resident.create({
-            name: `${firstName} ${lastName}`,
-            mobile_num: contactNumber,
-            user_id: newUser.user_id
-        }, { transaction });
+        let newUserDetails;
+
+        if (role === 'RESIDENT') {
+            newUserDetails = await Resident.create({
+                name: `${firstName} ${lastName}`,
+                mobile_num: contactNumber,
+                user_id: newUser.user_id
+            }, { transaction });
+        } else if (role === 'STAFF') {
+            newUserDetails = await Staff.create({
+                name: `${firstName} ${lastName}`,
+                mobilenum: contactNumber,
+                user_id: newUser.user_id
+            }, { transaction });
+        } else {
+            return res.status(400).json({ error: 'Invalid role' });
+        }
 
         await transaction.commit();
 
         const token = generateToken(newUser);
-        res.status(201).json({ user: newUser, resident: newResident, token });
+        res.status(201).json({ user: newUser, userDetails: newUserDetails, token });
     } catch (error) {
         await transaction.rollback();
         console.error('Registration error:', error);  // Log the error details
@@ -257,8 +269,8 @@ router.put('/softrestore/:id', authenticateToken, authorizeRoles('STAFF'), async
     }
 });
 
-// Create activation code and send email
-router.post('/activate', async (req, res) => {
+// Create activation code and send email. Token is available here since User has logged in(Email is not verified but login is still authenticated).
+router.post('/activate', authenticateToken, async (req, res) => {
     try {
         const { email } = req.body;
         console.log('Received email for activation:', email); // Debugging line to check email value
@@ -307,7 +319,7 @@ router.post('/activate', async (req, res) => {
 });
 
 
-// Verify activation code and activate account
+// Verify activation code and activate account. Token is available here since User has logged in(Email is not verified but login is still authenticated).
 router.post('/activate-account', authenticateToken, async (req, res) => {
     try {
         const { email, code } = req.body;

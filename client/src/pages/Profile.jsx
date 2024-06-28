@@ -24,7 +24,7 @@ function Profile() {
 
   useEffect(() => {
     let timer = setTimeout(() => {
-      setIsLoading(false);
+      setLoading(false);
     }, 300); // Display loader for at least 0.3 seconds
 
     return () => clearTimeout(timer);
@@ -54,6 +54,10 @@ function Profile() {
         }
 
         const { user: userData, resident, staff } = response.data;
+        console.log(userData)
+        console.log(userData.role)
+        console.log(resident)
+        console.log(staff)
 
         if (userData.role === 'RESIDENT' && resident) {
           setProfileData({
