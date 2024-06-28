@@ -14,12 +14,13 @@ import {
   Button,
   Group,
   SegmentedControl,
-  Loader,
 } from "@mantine/core";
+import LoaderComponent from '../components/Loader.jsx';
 
 function Orders() {
   const [orderslist, setOrdersList] = useState([]);
   const [filter, setFilter] = useState('Upcoming');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let timer = setTimeout(() => {
@@ -60,8 +61,8 @@ function Orders() {
     }
   };
 
-  if (!orderslist.length) {
-    return <Loader size={50} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />;
+  if (!orderslist.length && isLoading) {
+    return <LoaderComponent />;
   }
 
   return (

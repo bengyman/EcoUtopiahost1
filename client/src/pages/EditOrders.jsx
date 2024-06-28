@@ -13,6 +13,7 @@ import {
   Group,
 } from '@mantine/core';
 import { TiArrowBack } from "react-icons/ti";
+import LoaderComponent from '../components/Loader.jsx';
 
 function EditOrders() {
   const { orderId } = useParams();
@@ -46,7 +47,7 @@ function EditOrders() {
   };
 
   if (isLoading || !order) {
-    return <Loader size={50} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />;
+    return <LoaderComponent />;
   }
 
   return (

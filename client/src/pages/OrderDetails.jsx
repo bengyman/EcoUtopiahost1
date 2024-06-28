@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import global from '../global';
 import { Text, Loader, Container, Card, Button, Group } from '@mantine/core';
 import { TiArrowBack } from "react-icons/ti";
+import LoaderComponent from '../components/Loader.jsx';
 
 function ViewOrders() {
     const { orderId } = useParams();
@@ -19,7 +20,7 @@ function ViewOrders() {
     }, [orderId]);
 
     if (!order) {
-        return <Loader size={50} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />; // Centered loader
+        return <LoaderComponent />;
     }
 
     return (
