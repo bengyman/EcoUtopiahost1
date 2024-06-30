@@ -6,10 +6,8 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
-  // Set the base URL for Axios using environment variable
   axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
 
-  // Retrieve the token and user from localStorage if they exist
   useEffect(() => {
     const token = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
@@ -24,13 +22,27 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password, recaptchaToken) => {
     try {
       const response = await axios.post('/user/login', { email, password, recaptchaToken });
-      const { user, token } = response.data;
-      setUser(user);
-      localStorage.setItem('token', token); // Store the token in localStorage
-      localStorage.setItem('user', JSON.stringify(user)); // Store the user in localStorage
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`; // Set the token in Axios headers
+      const { user, token, resident, staff } = response.data;
+      const userData = {
+        ...user,
+        resident,
+        staff,
+      };
+      setUser(userData);
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userData));
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       console.log('Login successful, token stored:', token);
-      return user; // Return the user object
+      console.log('User role:', user.role);
+      if (resident) {
+        console.log('Resident ID:', resident.resident_id);
+        console.log('Resident Name:', resident.name);
+      }
+      if (staff) {
+        console.log('Staff ID:', staff.staffid);
+        console.log('Staff Name:', staff.name);
+      }
+      return user;
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
@@ -40,13 +52,27 @@ export const AuthProvider = ({ children }) => {
   const register = async (formData) => {
     try {
       const response = await axios.post('/user/register', formData);
-      const { user, token } = response.data;
-      setUser(user);
-      localStorage.setItem('token', token); // Store the token in localStorage
-      localStorage.setItem('user', JSON.stringify(user)); // Store the user in localStorage
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`; // Set the token in Axios headers
+      const { user, token, resident, staff } = response.data;
+      const userData = {
+        ...user,
+        resident,
+        staff,
+      };
+      setUser(userData);
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userData));
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       console.log('Registration successful, token stored:', token);
-      return user; // Return the user object
+      console.log('User role:', user.role);
+      if (resident) {
+        console.log('Resident ID:', resident.resident_id);
+        console.log('Resident Name:', resident.name);
+      }
+      if (staff) {
+        console.log('Staff ID:', staff.staffid);
+        console.log('Staff Name:', staff.name);
+      }
+      return user;
     } catch (error) {
       console.error('Registration failed:', error);
       throw error;
@@ -55,9 +81,9 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('token'); // Remove the token from localStorage
-    localStorage.removeItem('user'); // Remove the user from localStorage
-    delete axios.defaults.headers.common['Authorization']; // Remove the token from Axios headers
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    delete axios.defaults.headers.common['Authorization'];
     console.log('Logout successful, token removed');
   };
 

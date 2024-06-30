@@ -20,47 +20,63 @@ const userSchema = yup.object().shape({
 });
 
 // Generate JWT token
-const generateToken = (user) => {
-    return jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+const generateToken = (user, additionalInfo) => {
+    const payload = {
+      id: user.user_id,  // Ensure user ID is included correctly
+      role: user.role,
+      ...additionalInfo
+    };
+    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 };
+  
 
 // Create a new user and resident with input validation (This is for Registration, require reCaptcha)
 router.post('/register', verifyRecaptcha, async (req, res) => {
     const transaction = await User.sequelize.transaction();
     try {
-        await userSchema.validate(req.body);
-        const { email, password, role, firstName, lastName, contactNumber } = req.body;
-
-        // Check if email already exists
-        const existingUser = await User.findOne({ where: { email } });
-        if (existingUser) {
-            return res.status(400).json({ error: 'Email already exists' });
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        const newUser = await User.create({
-            email,
-            password: hashedPassword,
-            role
+      await userSchema.validate(req.body);
+      const { email, password, role, firstName, lastName, contactNumber } = req.body;
+  
+      const existingUser = await User.findOne({ where: { email } });
+      if (existingUser) {
+        return res.status(400).json({ error: 'Email already exists' });
+      }
+  
+      const hashedPassword = await bcrypt.hash(password, 10);
+  
+      const newUser = await User.create({
+        email,
+        password: hashedPassword,
+        role
+      }, { transaction });
+  
+      let newUserDetails;
+      if (role === 'RESIDENT') {
+        newUserDetails = await Resident.create({
+          name: `${firstName} ${lastName}`,
+          mobile_num: contactNumber,
+          user_id: newUser.user_id
         }, { transaction });
-
-        const newResident = await Resident.create({
-            name: `${firstName} ${lastName}`,
-            mobile_num: contactNumber,
-            user_id: newUser.user_id
+      } else if (role === 'STAFF') {
+        newUserDetails = await Staff.create({
+          name: `${firstName} ${lastName}`,
+          mobilenum: contactNumber,
+          user_id: newUser.user_id
         }, { transaction });
-
-        await transaction.commit();
-
-        const token = generateToken(newUser);
-        res.status(201).json({ user: newUser, resident: newResident, token });
+      }
+  
+      await transaction.commit();
+  
+      const token = generateToken(newUser, { resident: newUserDetails });
+      res.status(201).json({ user: newUser, token, resident: newUserDetails });
     } catch (error) {
-        await transaction.rollback();
-        console.error('Registration error:', error);  // Log the error details
-        res.status(500).json({ error: error.message });
+      await transaction.rollback();
+      console.error('Registration error:', error);
+      res.status(500).json({ error: error.message });
     }
 });
+  
+  
 
 // Create a new user and either resident or staff with input validation (This is for AccountManagement)
 router.post('/createaccount', authenticateToken, async (req, res) => {
@@ -112,13 +128,21 @@ router.post('/createaccount', authenticateToken, async (req, res) => {
     }
 });
 
-// Authenticate user and generate JWT token
+// Create new Login Request
 router.post('/login', verifyRecaptcha, async (req, res) => {
     try {
       const user = await User.findOne({ where: { email: req.body.email } });
       if (user && await bcrypt.compare(req.body.password, user.password)) {
-        const token = generateToken(user);
-        res.status(200).json({ user, token }); // Ensure 'user' and 'token' are returned
+        let additionalInfo = {};
+        if (user.role === 'RESIDENT') {
+          const resident = await Resident.findOne({ where: { user_id: user.user_id } });
+          additionalInfo = { resident };
+        } else if (user.role === 'STAFF') {
+          const staff = await Staff.findOne({ where: { user_id: user.user_id } });
+          additionalInfo = { staff };
+        }
+        const token = generateToken(user, additionalInfo);
+        res.status(200).json({ user, token, ...additionalInfo });
       } else {
         res.status(401).json({ error: 'Invalid credentials' });
       }
@@ -127,6 +151,8 @@ router.post('/login', verifyRecaptcha, async (req, res) => {
       res.status(500).json({ error: 'Validation error', details: error.errors });
     }
 });
+  
+  
   
 
 // Read all users (accessible by STAFF only)
