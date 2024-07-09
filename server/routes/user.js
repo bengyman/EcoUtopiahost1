@@ -401,7 +401,8 @@ router.put('/change-password/:id', authenticateToken, async (req, res) => {
     }
   });
 
-  router.post('/password-reset', async (req, res) => {
+// Reset password request
+router.post('/password-reset', async (req, res) => { // Removed verifyRecaptcha
     try {
         console.log("Request received to /password-reset with email:", req.body.email);
         
@@ -525,7 +526,6 @@ router.post('/profile-picture', upload.single('profilePic'), async (req, res) =>
         res.status(500).send({ message: 'Server error', error: error.message });
     }
 });
-
 
 // Route to delete a profile picture
 router.delete('/profile-picture', async (req, res) => {

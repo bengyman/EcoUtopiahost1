@@ -19,7 +19,11 @@ import ResetPasswordEnterCode from './pages/ResetPasswordEnterCode.jsx';
 import ResetPassword from './pages/ResetPassword.jsx';
 import PasswordResetSuccess from './pages/ResetPasswordSuccess.jsx';
 import AccountManagement from './pages/AccountManagement.jsx';
-import AccountActivation from './pages/AccountActivation.jsx';
+import AccountActivation from './pages/AccountActivation.jsx'
+import Orders from './pages/Orders';
+import EditOrders from './pages/EditOrders';
+import OrderDetails from './pages/OrderDetails';
+import AdminOrders from './pages/AdminOrders';
 
 import {
   BrowserRouter,
@@ -83,6 +87,10 @@ function Main() {
         <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
         <Route path="/account-management" element={<AccountManagement/>} />
         <Route path="/account-activation" element={<AccountActivation/>} />
+        <Route path="/orders" element={<Orders />} />
+        <Route path="/editorders/:orderId" element={<EditOrders/>} />
+        <Route path="/orderdetails/:orderId" element={<OrderDetails />} />
+        <Route path="/admin/orders" element={<AdminOrders />} />
       </Routes>
     </>
   )
@@ -92,6 +100,7 @@ const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
   <React.StrictMode>
     <MantineProvider theme={theme} defaultColorScheme="light">
+      <GoogleReCaptchaProvider reCaptchaKey = {import.meta.env.VITE_RECAPTCHA_SITE_KEY}>
         <AuthProvider>
           <BrowserRouter>
             <Main />

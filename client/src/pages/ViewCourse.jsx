@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { 
+import {
   Container,
   Text,
   Button,
@@ -10,48 +10,60 @@ import {
   Group,
   Title,
 } from '@mantine/core';
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
 import { useParams } from 'react-router-dom';
 
 function ViewCourse() {
-    const { courseId } = useParams()
-    const [course, setCourse] = useState(null)
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
-    
-    useEffect(() => {
-        document.title = 'Course Details - EcoUtopia'
-        const fetchCourse = async () => {
-            try {
-                const response = await axios.get(`http://localhost:3000/api/courses/getCourse/${courseId}`)
-                setCourse(response.data)
-                setLoading(false)
-            } catch (error) {
-                setError(error)
-            } finally {
-                setLoading(false)
-            }
-        }
-        fetchCourse()
-    }, [courseId])
+  const { courseId } = useParams();
+  const [course, setCourse] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-    if (loading) {
-        return (
-            <Container size="xl">
-                <LoadingOverlay visible />
-            </Container>
-        )
-    }
+  useEffect(() => {
+    document.title = 'Course Details - EcoUtopia';
+    const fetchCourse = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3000/api/courses/getCourse/${courseId}`);
+        setCourse(response.data);
+        setLoading(false);
+      } catch (error) {
+        setError(error);
+        setLoading(false);
+      }
+    };
+    fetchCourse();
+  }, [courseId]);
 
-    if (error) {
-        return (
-            <Container size="xl">
-                <Text c={'red'} align="center" size="xl" style={{ marginTop: 20 }}>
-                    {error.message} 
-                </Text>
-            </Container>
-        )
-    }
+  if (loading) {
+    return (
+      <Container size="xl">
+        <LoadingOverlay visible />
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container size="xl">
+        <Text color="red" align="center" size="xl" style={{ marginTop: 20 }}>
+          {error.message}
+        </Text>
+      </Container>
+    );
+  }
+
+  const handleAddToOrder = () => {
+    axios.post('/orders/addCourse', { course_id: courseId })
+      .then((res) => {
+        //go to the order page
+        window.location.href = '/orders';
+      })
+      .catch((error) => {
+        console.error("There was an error adding the course to the order!", error);
+      });
+  };
+
+  if (!course) return <p>Loading...</p>;
 
   return (
     <Container size="xl">
@@ -59,7 +71,7 @@ function ViewCourse() {
         <Grid>
           <Grid.Col span={6}>
             <Image
-              //src={course.image}
+              src={course.image}
               alt={course.course_name}
               fallbackSrc="https://placehold.co/600x400?text=Placeholder"
               height={300}
@@ -78,7 +90,7 @@ function ViewCourse() {
               </Text>
               <Button
                 component="a"
-                href={`/checkout/${course.course_id}`}
+                onClick={handleAddToOrder}
                 size="lg"
                 style={{ marginTop: 20 }}
               >
@@ -89,7 +101,7 @@ function ViewCourse() {
         </Grid>
       </Paper>
     </Container>
-  )
+  );
 }
 
-export default ViewCourse
+export default ViewCourse;
