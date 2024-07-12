@@ -120,7 +120,7 @@ router.post('/createaccount', authenticateToken, async (req, res) => {
 });
 
 // Create new Login Request
-router.post('/login', verifyRecaptcha, authenticateToken, async (req, res) => {
+router.post('/login', verifyRecaptcha, async (req, res) => {
     try {
       const user = await User.findOne({ where: { email: req.body.email } });
       if (user && await bcrypt.compare(req.body.password, user.password)) {
