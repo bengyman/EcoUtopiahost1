@@ -1,24 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import http from '../http';
-import global from '../global';
+import axios from 'axios';
 import dayjs from 'dayjs';
 import { Link } from 'react-router-dom';
 import { CiEdit } from 'react-icons/ci';
 import { FaRegEye } from "react-icons/fa6";
-import {
-  Container,
-  Grid,
-  Anchor,
-  Card,
-  Text,
-  Button,
-  Group,
-  SegmentedControl,
-} from "@mantine/core";
+import { Container, Grid, Anchor, Card, Text, Button, Group, SegmentedControl } from "@mantine/core";
 import LoaderComponent from '../components/Loader.jsx';
 
+const DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss'; // Define your date format here
+
 function Orders() {
-  const [orderslist, setOrdersList] = useState([]);
+  const [ordersList, setOrdersList] = useState([]);
   const [filter, setFilter] = useState('Upcoming');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -31,17 +23,27 @@ function Orders() {
   }, []);
 
   useEffect(() => {
-    http.get('/orders').then((res) => {
-      console.log(res.data);
-      setOrdersList(res.data);
-    });
+    const fetchOrders = async () => {
+      try {
+        const response = await axios.get('/orders', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        setOrdersList(response.data);
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+      }
+    };
+
+    fetchOrders();
   }, []);
 
   const handleFilterChange = (newFilter) => {
     setFilter(newFilter);
   };
 
-  const filteredOrders = orderslist.filter((order) => {
+  const filteredOrders = ordersList.filter((order) => {
     if (filter === 'Upcoming') return order.order_status === 'Upcoming';
     if (filter === 'Completed') return order.order_status === 'Completed';
     if (filter === 'Refunded') return order.order_status === 'Refunded';
@@ -61,20 +63,13 @@ function Orders() {
     }
   };
 
-  if (!orderslist.length && isLoading) {
+  if (!ordersList.length && isLoading) {
     return <LoaderComponent />;
   }
 
   return (
     <Container size="xl" style={{ marginTop: 20 }}>
-      <Text
-        align="start"
-        weight={700}
-        style={{ fontSize: 30, marginBottom: 20 }}
-        color="deepBlue"
-        fw={500}
-        size="xl"
-      >
+      <Text align="start" weight={700} style={{ fontSize: 30, marginBottom: 20 }} color="deepBlue" fw={500} size="xl">
         Orders
       </Text>
       <Group position="apart" style={{ marginBottom: 20 }}>
@@ -94,24 +89,25 @@ function Orders() {
       <Grid>
         {filteredOrders.map((order, i) => (
           <Grid.Col span={4} key={i}>
-            <Card shadow="sm" padding="lg" radius="md" withBorder style={{ ...getCardStyle(order.order_status), height: '100%' }}>              <Group position="apart">
-              <Text weight={500} size="lg" style={{ color: 'white' }}>Order {order.order_id}</Text>
-              {filter === 'Upcoming' && (
-                <Anchor component={Link} to={`/editorders/${order.order_id}`} style={{ textDecoration: 'none' }}>
+            <Card shadow="sm" padding="lg" radius="md" withBorder style={{ ...getCardStyle(order.order_status), height: '100%' }}>
+              <Group position="apart">
+                <Text weight={500} size="lg" style={{ color: 'white' }}>Order {order.order_id}</Text>
+                {filter === 'Upcoming' && (
+                  <Anchor component={Link} to={`/editorders/${order.order_id}`} style={{ textDecoration: 'none' }}>
+                    <Button size="xs" color="white" variant="outline">
+                      <CiEdit />
+                    </Button>
+                  </Anchor>
+                )}
+                <Anchor component={Link} to={`/orderdetails/${order.order_id}`} style={{ textDecoration: 'none' }}>
                   <Button size="xs" color="white" variant="outline">
-                    <CiEdit />
+                    <FaRegEye />
                   </Button>
                 </Anchor>
-              )}
-              <Anchor component={Link} to={`/orderdetails/${order.order_id}`} style={{ textDecoration: 'none' }}>
-                <Button size="xs" color="white" variant="outline">
-                  <FaRegEye />
-                </Button>
-              </Anchor>
-            </Group>
+              </Group>
               <Text mt="sm" style={{ color: 'white' }}>Course Title: {order.Course.course_name}</Text>
               <Text style={{ color: 'white' }}>Status: {order.order_status}</Text>
-              <Text style={{ color: 'white' }}>Date: {dayjs(order.order_date).format(global.datetimeFormat)}</Text>
+              <Text style={{ color: 'white' }}>Date: {dayjs(order.order_date).format(DATE_FORMAT)}</Text>
             </Card>
           </Grid.Col>
         ))}
