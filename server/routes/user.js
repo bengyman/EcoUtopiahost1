@@ -49,21 +49,12 @@ router.post('/register', verifyRecaptcha, async (req, res) => {
         password: hashedPassword,
         role
       }, { transaction });
-  
-      let newUserDetails;
-      if (role === 'RESIDENT') {
-        newUserDetails = await Resident.create({
-          name: `${firstName} ${lastName}`,
-          mobile_num: contactNumber,
-          user_id: newUser.user_id
-        }, { transaction });
-      } else if (role === 'STAFF') {
-        newUserDetails = await Staff.create({
-          name: `${firstName} ${lastName}`,
-          mobilenum: contactNumber,
-          user_id: newUser.user_id
-        }, { transaction });
-      }
+
+      newUserDetails = await Resident.create({
+        name: `${firstName} ${lastName}`,
+        mobile_num: contactNumber,
+        user_id: newUser.user_id
+      }, { transaction });
   
       await transaction.commit();
   

@@ -201,7 +201,6 @@ function AccountManagement() {
               <th>Role</th>
               <th>Name</th>
               <th>Contact Number</th>
-              <th>Activated</th>
               <th>Deleted</th>
               <th>Actions</th>
             </tr>
@@ -219,20 +218,6 @@ function AccountManagement() {
                   <td style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>{user.role}</td>
                   <td style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>{residentInfo ? residentInfo.name : (staffInfo ? staffInfo.name : 'N/A')}</td>
                   <td style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>{residentInfo ? residentInfo.mobile_num : (staffInfo ? staffInfo.mobilenum : 'N/A')}</td>
-                  <td style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>
-                    <Group align="center">
-                      <Switch
-                        checked={user.is_activated}
-                        onChange={() => handleToggleActivate(user.user_id, !user.is_activated)}
-                        disabled={greyedOut}
-                      />
-                      {user.is_activated ? (
-                        <Check color="green" size={16} />
-                      ) : (
-                        <X color="red" size={16} />
-                      )}
-                    </Group>
-                  </td>
                   <td style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>
                     <Group align="center">
                       <Switch
