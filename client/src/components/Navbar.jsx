@@ -1,6 +1,7 @@
-import { AppShell, Flex, Anchor, Button, Text, Image } from "@mantine/core";
+import { AppShell, Flex, Anchor, Button, Text, Image, Menu, Avatar } from "@mantine/core";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { IconUser, IconGift, IconLogout } from '@tabler/icons-react';
 import logo from "../assets/logo.png";
 
 function Navbar() {
@@ -12,6 +13,8 @@ function Navbar() {
     logout();
     navigate('/login');
   };
+
+  const isProfilePage = user && location.pathname === `/profile/${user.user_id}`;
 
   return (
     <AppShell header={{ height: 50 }} navbar={{ width: 200, breakpoint: "xl" }}>
@@ -38,40 +41,44 @@ function Navbar() {
                 Orders
               </Text>
             </Anchor>
+            <Anchor href="/posts" style={{ textDecoration: "none" }}>
+              <Text tt="uppercase" fw={'500'} c="black" style={{ marginLeft: 10, marginRight: 10 }}>
+                Posts
+              </Text>
+            </Anchor>
           </Flex>
           <Flex align="center">
-            {location.pathname === '/' && (
-              <>
-                <Anchor href="/login" style={{ textDecoration: "none" }}>
-                  <Button color="black" style={{ marginLeft: 10, marginRight: 10 }}>
-                    Login
-                  </Button>
-                </Anchor>
-                <Anchor href="/register" style={{ textDecoration: "none" }}>
-                  <Button color="black" style={{ marginLeft: 10, marginRight: 10 }}>
-                    Sign Up
-                  </Button>
-                </Anchor>
-              </>
-            )}
-            {location.pathname === '/register' && (
+            {!user && location.pathname !== '/login' && (
               <Anchor href="/login" style={{ textDecoration: "none" }}>
                 <Button color="black" style={{ marginLeft: 10, marginRight: 10 }}>
                   Login
                 </Button>
               </Anchor>
             )}
-            {location.pathname === '/login' && (
+            {!user && location.pathname !== '/register' && (
               <Anchor href="/register" style={{ textDecoration: "none" }}>
                 <Button color="black" style={{ marginLeft: 10, marginRight: 10 }}>
                   Sign Up
                 </Button>
               </Anchor>
             )}
-            {location.pathname === '/account-management' && user && (
-              <Button color="red" style={{ marginLeft: 10, marginRight: 10 }} onClick={handleLogout}>
-                Logout
-              </Button>
+            {user && !isProfilePage && (
+              <Menu shadow="md" width={200}>
+                <Menu.Target>
+                  <Avatar variant="filled" radius="xl" src="" style={{ marginRight: '2rem' }}/>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Item icon={<IconUser size={14} />} onClick={() => navigate(`/profile/${user.user_id}`)}>
+                    Profile
+                  </Menu.Item>
+                  <Menu.Item icon={<IconGift size={14} />} onClick={() => navigate('/rewards')}>
+                    Rewards
+                  </Menu.Item>
+                  <Menu.Item icon={<IconLogout size={14} />} onClick={handleLogout} >
+                    Log Out
+                  </Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
             )}
           </Flex>
         </Flex>
