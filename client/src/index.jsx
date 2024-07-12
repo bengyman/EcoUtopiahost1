@@ -101,11 +101,12 @@ root.render(
   <React.StrictMode>
     <MantineProvider theme={theme} defaultColorScheme="light">
       <GoogleReCaptchaProvider reCaptchaKey = {import.meta.env.VITE_RECAPTCHA_SITE_KEY}>
-        <AuthProvider>
-          <BrowserRouter>
-            <Main />
-          </BrowserRouter>
-        </AuthProvider>
+          <AuthProvider>
+            <BrowserRouter>
+              <Main />
+            </BrowserRouter>
+          </AuthProvider>
+        </GoogleReCaptchaProvider>
     </MantineProvider>
   </React.StrictMode>
 )
