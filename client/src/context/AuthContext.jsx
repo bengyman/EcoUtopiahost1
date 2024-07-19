@@ -9,8 +9,8 @@ export const AuthProvider = ({ children }) => {
   axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
+    const token = sessionStorage.getItem('token');
+    const storedUser = sessionStorage.getItem('user');
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       if (storedUser) {
@@ -29,8 +29,8 @@ export const AuthProvider = ({ children }) => {
         staff,
       };
       setUser(userData);
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(userData));
+      sessionStorage.setItem('token', token);
+      sessionStorage.setItem('user', JSON.stringify(userData));
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       console.log('Login successful, token stored:', token);
       console.log('User role:', user.role);
@@ -59,8 +59,8 @@ export const AuthProvider = ({ children }) => {
         staff,
       };
       setUser(userData);
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(userData));
+      sessionStorage.setItem('token', token);
+      sessionStorage.setItem('user', JSON.stringify(userData));
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       console.log('Registration successful, token stored:', token);
       console.log('User role:', user.role);
@@ -81,8 +81,8 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
     delete axios.defaults.headers.common['Authorization'];
     console.log('Logout successful, token removed');
   };

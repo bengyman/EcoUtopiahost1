@@ -69,8 +69,6 @@ function Profile() {
         const { user: userData, resident, staff } = response.data;
         console.log(userData);
         console.log(userData.role);
-        console.log(resident);
-        console.log(staff);
 
         if (userData.role === "RESIDENT" && resident) {
           setProfileData({
