@@ -16,6 +16,8 @@ function Navbar() {
 
   const isProfilePage = user && location.pathname === `/profile/${user.user_id}`;
 
+  console.log(user)
+
   return (
     <AppShell header={{ height: 50 }} navbar={{ width: 200, breakpoint: "xl" }}>
       <AppShell.Header style={{ height: 50, backgroundColor: "#0F9D58" }}>
