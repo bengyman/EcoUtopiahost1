@@ -52,14 +52,14 @@ function Profile() {
           // Fetch the personal profile data
           response = await axios.get(`/user/${user.user_id}`, {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Authorization: `Bearer ${sessionStorage.getItem("token")}`,
             },
           });
         } else if (user.role === "STAFF") {
           // Fetch the profile data of the user with the given paramId
           response = await axios.get(`/user/${paramId}`, {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Authorization: `Bearer ${sessionStorage.getItem("token")}`,
             },
           });
         } else {
@@ -120,7 +120,7 @@ function Profile() {
 
     try {
       const response = await axios.post("/user/profile-picture", formData, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
       });
       setProfileData((prevData) => ({
         ...prevData,
