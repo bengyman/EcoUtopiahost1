@@ -29,7 +29,12 @@ const Posts = () => {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/api/posts/posts'); // Adjust URL as needed
+                const token = localStorage.getItem('token');
+                const response = await axios.get('/posts/posts', {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
                 setPosts(response.data);
                 setLoading(false);
             } catch (error) {

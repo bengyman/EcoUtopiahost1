@@ -15,15 +15,6 @@ const postSchema = yup.object().shape({
     resident_id: yup.number().required()
 });
 
-// Generate JWT token (if needed, you can adjust based on your actual requirements)
-const generateToken = (post) => {
-    const payload = {
-        id: post.id,
-        title: post.title
-    };
-    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
-};
-
 // Create a new post
 router.post('/create-post', authenticateToken, async (req, res) => {
     const transaction = await Post.sequelize.transaction();
