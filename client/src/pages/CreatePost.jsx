@@ -14,9 +14,9 @@ import { useAuth } from "../context/AuthContext";
 import LoaderComponent from "../components/Loader.jsx";
 
 function CreatePost() {
-  const { user, token } = useAuth(); // Get token from AuthContext
+  const { user } = useAuth(); // Get user from AuthContext
   const navigate = useNavigate();
-  
+
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [image, setImage] = useState(null);
@@ -32,6 +32,7 @@ function CreatePost() {
       return;
     }
 
+    const token = sessionStorage.getItem('token');
     const formData = new FormData();
     formData.append("title", title);
     formData.append("content", content);
@@ -40,7 +41,24 @@ function CreatePost() {
     try {
       if (!token) throw new Error("No token found");
 
-      await axios.post("/posts/createPost", formData, {
+      const residentId = user?.resident?.resident_id;
+      const residentName = user?.resident?.name;
+
+      console.log("Resident ID:", residentId);
+      console.log("Resident Name:", residentName);
+
+      if (!residentId) throw new Error("No resident ID found");
+      if (!residentName) throw new Error("No resident name found");
+
+      formData.append("resident_id", residentId);
+      formData.append("residentName", residentName);
+
+      console.log("FormData entries:");
+      formData.forEach((value, key) => {
+        console.log(key, value);
+      });
+
+      await axios.post("/posts/create-post", formData, {
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
@@ -82,7 +100,7 @@ function CreatePost() {
           />
           <FileInput
             label="Image"
-            onChange={(e) => setImage(e.target.files[0])}
+            onChange={setImage} // Update this line to directly set the image
             mb="md"
           />
           <Group position="right" mt="md">

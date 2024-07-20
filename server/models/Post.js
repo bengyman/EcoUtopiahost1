@@ -40,7 +40,7 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Post.associate = function (models) {
-        Post.belongsTo(models.Resident, { foreignKey: 'resident_id', as: 'resident', onDelete: 'SET NULL' });
+        Post.belongsTo(models.Resident, { foreignKey: 'resident_id'});
         Post.hasMany(models.Comment, { foreignKey: 'post_id' });
     };
 

@@ -16,29 +16,32 @@ const postSchema = yup.object().shape({
 });
 
 // Create a new post
-router.post('/create-post', authenticateToken, async (req, res) => {
+router.post('/create-post', authenticateToken, upload.single('image'), async (req, res) => {
     const transaction = await Post.sequelize.transaction();
     try {
-        await postSchema.validate(req.body);
-        const { title, content, image, resident_id } = req.body;
-
-        const newPost = await Post.create({
-            title,
-            content,
-            image,
-            resident_id
-        }, { transaction });
-
-        await transaction.commit();
-        
-        const token = generateToken(newPost); // Assuming you need to generate a token for the post
-        res.status(201).json({ post: newPost, token });
+      const { title, content, resident_id, residentName } = req.body;
+      const image = req.file ? req.file.path : null; // Path to the uploaded image
+  
+      // Validate the other fields
+      await postSchema.validate({ title, content, resident_id, residentName });
+  
+      const newPost = await Post.create({
+        title,
+        content,
+        imageUrl: image,
+        resident_id,
+        residentName,
+      }, { transaction });
+  
+      await transaction.commit();
+  
+      res.status(201).json({ post: newPost });
     } catch (error) {
-        await transaction.rollback();
-        console.error('Post creation error:', error);
-        res.status(500).json({ error: error.message });
+      await transaction.rollback();
+      console.error('Post creation error:', error);
+      res.status(500).json({ error: error.message });
     }
-});
+  });
 
 // Fetch all posts
 router.get('/posts', authenticateToken, async (req, res) => {

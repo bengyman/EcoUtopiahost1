@@ -12,9 +12,32 @@ const Posts = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedPostId, setSelectedPostId] = useState(null);
 
+    
+    const fetchPosts = async () => {
+        try {
+            const token = sessionStorage.getItem('token');
+            const response = await axios.get('/posts/posts', {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            setPosts(response.data);
+            setLoading(false);
+        } catch (error) {
+            console.error('Error fetching posts:', error);
+            setError('Failed to fetch posts');
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchPosts();
+        document.title = "Posts - EcoUtopia";
+    }, []);
+
     const handleReport = async (postId) => {
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
             const response = await axios.post(`http://localhost:3000/api/posts/${postId}/report`, {}, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -26,31 +49,10 @@ const Posts = () => {
         }
     };
 
-    useEffect(() => {
-        const fetchPosts = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                const response = await axios.get('/posts/posts', {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                setPosts(response.data);
-                setLoading(false);
-            } catch (error) {
-                console.error('Error fetching posts:', error);
-                setError('Failed to fetch posts');
-                setLoading(false);
-            }
-        };
-        fetchPosts();
-        document.title = "Posts - EcoUtopia";
-    }, []);
-
     const handleDelete = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.delete(`http://localhost:3000/api/posts/getPost/${selectedPostId}`, {
+            const token = sessionStorage.getItem('token');
+            const response = await axios.delete(`/posts/posts/${selectedPostId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -72,7 +74,7 @@ const Posts = () => {
             Posts
         </Text>
         <Button variant="light" style={{ marginLeft: 20 }}>
-            <Link to="/create">Create Post</Link>
+            <Link to="/createPost">Create Post</Link>
         </Button>
         <Container>
             <Stack className="posts-container" spacing="md">
@@ -98,7 +100,7 @@ const Posts = () => {
                                     </Link>
                                 </Group>
                                 <Group position="right">
-                                    <Text size="sm" color="dimmed">{post.resident ? post.resident.name : 'Anonymous'}</Text>
+                                    <Text size="sm" color="dimmed">{post.residentName ? post.residentName : 'Anonymous'}</Text>
                                     <Text size="sm">{new Date(post.createdAt).toLocaleString()}</Text>
                                 </Group>
                             </Group>
