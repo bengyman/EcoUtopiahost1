@@ -32,14 +32,24 @@ function EditOrders() {
 
   useEffect(() => {
     if (orderId) {
-      http.get(`/orders/${orderId}`).then((res) => {
+      const token = sessionStorage.getItem('token');
+      http.get(`/orders/${orderId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }).then((res) => {
         setOrder(res.data);
       });
     }
   }, [orderId]);
 
   const handleRefund = () => {
-    http.put(`/orders/${orderId}`).then((res) => {
+    const token = sessionStorage.getItem('token');
+    http.put(`/orders/${orderId}`, {}, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }).then((res) => {
       setOrder(res.data);
       setIsModalOpen(false); // Close the modal
       navigate('/orders'); // Navigate back to the orders page

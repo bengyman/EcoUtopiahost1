@@ -14,7 +14,12 @@ function ViewOrders() {
 
     useEffect(() => {
         if (orderId) {
-            http.get(`/orders/${orderId}`).then((res) => {
+            const token = sessionStorage.getItem('token');
+            http.get(`/orders/${orderId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }).then((res) => {
                 setOrder(res.data);
             });
         }

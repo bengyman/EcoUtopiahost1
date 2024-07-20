@@ -25,7 +25,7 @@ function ChangePassword() {
   const handleSubmit = async (values) => {
     try {
       await axios.put(`/user/change-password/${id}`, values, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }
       });
       setSuccess('Password changed successfully');
       setError('');

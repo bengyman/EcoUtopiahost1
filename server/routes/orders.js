@@ -1,15 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const { Orders, Course, Resident } = require('../models');
-const { authenticateToken } = require('../middleware/auth');
+const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 
-router.post("/", authenticateToken, async (req, res) => {
+router.post("/", authenticateToken, authorizeRoles('STAFF', 'RESIDENT'), async (req, res) => {
   let data = req.body;
   let result = await Orders.create(data);
   res.json(result);
 });
 
-router.get("/", authenticateToken, async (req, res) => {
+router.get("/", authenticateToken, authorizeRoles('STAFF', 'RESIDENT'), async (req, res) => {
   try {
     let list;
     if (req.user.role === 'STAFF') {
@@ -43,7 +43,7 @@ router.get("/", authenticateToken, async (req, res) => {
   }
 });
 
-router.get("/:id", authenticateToken, async (req, res) => {
+router.get("/:id", authenticateToken, authorizeRoles('STAFF', 'RESIDENT'), async (req, res) => {
   try {
     let id = req.params.id;
     let result = await Orders.findByPk(id, {
@@ -58,7 +58,7 @@ router.get("/:id", authenticateToken, async (req, res) => {
   }
 });
 
-router.put("/:id", authenticateToken, async (req, res) => {
+router.put("/:id", authenticateToken, authorizeRoles('STAFF'), async (req, res) => {
   let id = req.params.id;
   let order = await Orders.findByPk(id);
   if (order) {
@@ -75,7 +75,7 @@ router.put("/:id", authenticateToken, async (req, res) => {
   }
 });
 
-router.post("/addCourse", authenticateToken, async (req, res) => {
+router.post("/addCourse", authenticateToken, authorizeRoles('RESIDENT'), async (req, res) => {
   try {
     const { course_id } = req.body;
     const resident = await Resident.findOne({ where: { user_id: req.user.id } });
