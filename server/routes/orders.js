@@ -58,7 +58,7 @@ router.get("/:id", authenticateToken, authorizeRoles('STAFF', 'RESIDENT'), async
   }
 });
 
-router.put("/:id", authenticateToken, authorizeRoles('STAFF'), async (req, res) => {
+router.put("/:id", authenticateToken, authorizeRoles('STAFF', 'RESIDENT'), async (req, res) => {
   let id = req.params.id;
   let order = await Orders.findByPk(id);
   if (order) {
