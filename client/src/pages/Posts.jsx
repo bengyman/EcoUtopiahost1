@@ -12,7 +12,6 @@ const Posts = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedPostId, setSelectedPostId] = useState(null);
 
-    
     const fetchPosts = async () => {
         try {
             const token = sessionStorage.getItem('token');
@@ -52,7 +51,7 @@ const Posts = () => {
     const handleDelete = async () => {
         try {
             const token = sessionStorage.getItem('token');
-            const response = await axios.delete(`/posts/posts/${selectedPostId}`, {
+            const response = await axios.delete(`/posts/${selectedPostId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -110,7 +109,7 @@ const Posts = () => {
                                 <Image
                                     w={400}
                                     h={400}
-                                    src={`http://localhost:3001${post.imageUrl}`}
+                                    src={`http://localhost:3001/${post.imageUrl}`}
                                 />
                             )}
                             <Text mt="md">{post.content}</Text>

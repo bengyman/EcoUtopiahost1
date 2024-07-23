@@ -26,6 +26,7 @@ import OrderDetails from './pages/OrderDetails';
 import AdminOrders from './pages/AdminOrders';
 import Posts from './pages/Posts';
 import CreatePost from './pages/CreatePost.jsx';
+import EditPost from './pages/EditPost.jsx';
 
 import {
   BrowserRouter,
@@ -95,6 +96,8 @@ function Main() {
         <Route path="/admin/orders" element={<AdminOrders />} />
         <Route path="/posts" element={<Posts />} />
         <Route path="/createPost" element = {<CreatePost />} />
+        <Route path="/edit/:id" element={<EditPost />} />
+
       </Routes>
     </>
   )
