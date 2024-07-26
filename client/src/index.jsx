@@ -2,6 +2,8 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { AuthProvider } from './context/AuthContext.jsx';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 
 // Pages and components
 import App from './pages/App.jsx';
@@ -24,6 +26,7 @@ import Orders from './pages/Orders';
 import EditOrders from './pages/EditOrders';
 import OrderDetails from './pages/OrderDetails';
 import AdminOrders from './pages/AdminOrders';
+import Payment from './pages/Payment';
 
 import {
   BrowserRouter,
@@ -33,6 +36,7 @@ import {
 import '@mantine/core/styles.css';
 import { Box, MantineProvider, createTheme, rem } from '@mantine/core'
 
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 const theme = createTheme({
   //primaryColor: 'violet'
@@ -69,7 +73,7 @@ function Main() {
   return (
     <>
       <Navbar />
-      <Box padding="xl" style={{marginTop: '70px'}} />
+      <Box padding="xl" style={{ marginTop: '70px' }} />
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/courses" element={<Courses />} />
@@ -85,12 +89,13 @@ function Main() {
         <Route path="/reset-password-code" element={<ResetPasswordEnterCode />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
-        <Route path="/account-management" element={<AccountManagement/>} />
-        <Route path="/account-activation" element={<AccountActivation/>} />
+        <Route path="/account-management" element={<AccountManagement />} />
+        <Route path="/account-activation" element={<AccountActivation />} />
         <Route path="/orders" element={<Orders />} />
-        <Route path="/editorders/:orderId" element={<EditOrders/>} />
+        <Route path="/editorders/:orderId" element={<EditOrders />} />
         <Route path="/orderdetails/:orderId" element={<OrderDetails />} />
         <Route path="/admin/orders" element={<AdminOrders />} />
+        <Route path="/payment" element={<Payment />} />
       </Routes>
     </>
   )
@@ -100,13 +105,15 @@ const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
   <React.StrictMode>
     <MantineProvider theme={theme} defaultColorScheme="light">
-      <GoogleReCaptchaProvider reCaptchaKey = {import.meta.env.VITE_RECAPTCHA_SITE_KEY}>
-          <AuthProvider>
+      <GoogleReCaptchaProvider reCaptchaKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}>
+        <AuthProvider>
+          <Elements stripe={stripePromise}>
             <BrowserRouter>
               <Main />
             </BrowserRouter>
-          </AuthProvider>
-        </GoogleReCaptchaProvider>
+          </Elements>
+        </AuthProvider>
+      </GoogleReCaptchaProvider>
     </MantineProvider>
   </React.StrictMode>
 )

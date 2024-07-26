@@ -4,9 +4,14 @@ const { Orders, Course, Resident } = require('../models');
 const { authenticateToken } = require('../middleware/auth');
 
 router.post("/", authenticateToken, async (req, res) => {
-  let data = req.body;
-  let result = await Orders.create(data);
-  res.json(result);
+  try {
+    let data = req.body;
+    let result = await Orders.create(data);
+    res.json(result);
+  } catch (error) {
+    console.error("Error creating order:", error);
+    res.status(500).json({ error: 'Failed to create order' });
+  }
 });
 
 router.get("/", authenticateToken, async (req, res) => {
@@ -43,7 +48,7 @@ router.get("/", authenticateToken, async (req, res) => {
   }
 });
 
-router.get("/:id", authenticateToken, async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     let id = req.params.id;
     let result = await Orders.findByPk(id, {
@@ -58,7 +63,7 @@ router.get("/:id", authenticateToken, async (req, res) => {
   }
 });
 
-router.put("/:id", authenticateToken, async (req, res) => {
+router.put("/:id", async (req, res) => {
   let id = req.params.id;
   let order = await Orders.findByPk(id);
   if (order) {

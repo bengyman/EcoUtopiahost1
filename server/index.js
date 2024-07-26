@@ -26,11 +26,13 @@ app.use('/uploads', express.static('uploads'));
 const courseRoute = require('./routes/course');
 const userRoute = require('./routes/user');
 const ordersRoute = require('./routes/orders');
+const paymentRoute = require('./routes/payment');
 
 app.use("/courses", courseRoute);
 app.use('/user', userRoute);
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 app.use("/orders", ordersRoute);
+app.use("/payment", paymentRoute);
 
 db.sequelize.sync({ alter: true }).then(async () => {
     await seedAdmin(); // Seed the admin user
