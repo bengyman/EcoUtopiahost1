@@ -77,7 +77,7 @@ function Orders() {
           value={filter}
           onChange={handleFilterChange}
           data={[
-            { label: 'Upcoming', value: 'Upcoming' },
+            { label: 'Paid', value: 'Upcoming' },
             { label: 'Completed', value: 'Completed' },
             { label: 'Refunded', value: 'Refunded' },
           ]}
