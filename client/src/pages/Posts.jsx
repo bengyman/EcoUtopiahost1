@@ -4,8 +4,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import LoaderComponent from '../components/Loader';
 import Navbar from '../components/Navbar';
 import { Card, Button, Text, Group, Image, Stack, Container, Modal } from '@mantine/core';
+import { useAuth } from '../context/AuthContext';
 
 const Posts = () => {
+    const { user } = useAuth(); // Get user from AuthContext
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -69,6 +71,14 @@ const Posts = () => {
     if (loading) return <LoaderComponent />;
     if (error) return <Text align="center">Error: {error}</Text>;
 
+    const isImage = (url) => {
+        return /\.(jpg|jpeg|png|gif)$/i.test(url);
+    };
+
+    const isVideo = (url) => {
+        return /\.(mp4|webm|ogg)$/i.test(url);
+    };
+
     return (
         <>
             <Navbar />
@@ -92,22 +102,24 @@ const Posts = () => {
                                 style={{ cursor: 'pointer' }}
                             >
                                 <Group position="apart">
-                                    <Group position="left">
-                                        <Button
-                                            variant="outline"
-                                            color="red"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setSelectedPostId(post.post_id);
-                                                setIsModalOpen(true);
-                                            }}
-                                        >
-                                            Delete
-                                        </Button>
-                                        <Link to={`/edit/${post.post_id}`}>
-                                            <Button variant="outline" onClick={(e) => e.stopPropagation()}>Edit</Button>
-                                        </Link>
-                                    </Group>
+                                    {post.resident_id === user?.resident?.resident_id && (
+                                        <Group position="left">
+                                            <Button
+                                                variant="outline"
+                                                color="red"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedPostId(post.post_id);
+                                                    setIsModalOpen(true);
+                                                }}
+                                            >
+                                                Delete
+                                            </Button>
+                                            <Link to={`/edit/${post.post_id}`}>
+                                                <Button variant="outline" onClick={(e) => e.stopPropagation()}>Edit</Button>
+                                            </Link>
+                                        </Group>
+                                    )}
                                     <Group position="right">
                                         <Text size="sm" color="dimmed">{post.residentName ? post.residentName : 'Anonymous'}</Text>
                                         <Text size="sm">{new Date(post.createdAt).toLocaleString()}</Text>
@@ -116,11 +128,21 @@ const Posts = () => {
                                 <Text weight={500} size="lg" mt="md">{post.title}</Text>
                                 <Text size="sm" color="dimmed">{post.tags ? post.tags : 'No Tags'}</Text>
                                 {post.imageUrl && (
-                                    <Image
-                                        w={400}
-                                        h={400}
-                                        src={`http://localhost:3001/${post.imageUrl}`}
-                                    />
+                                    <>
+                                        {isImage(post.imageUrl) && (
+                                            <Image
+                                                w={400}
+                                                h={400}
+                                                src={`http://localhost:3001/${post.imageUrl}`}
+                                            />
+                                        )}
+                                        {isVideo(post.imageUrl) && (
+                                            <video width="400" controls>
+                                                <source src={`http://localhost:3001/${post.imageUrl}`} type="video/mp4" />
+                                                Your browser does not support the video tag.
+                                            </video>
+                                        )}
+                                    </>
                                 )}
                                 <Text mt="md">{post.content}</Text>
                                 <Group position="right" mt="md">
