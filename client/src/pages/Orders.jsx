@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { Container, Grid, Anchor, Card, Text, Button, Group, SegmentedControl, Badge, Image, Modal } from "@mantine/core";
 import LoaderComponent from '../components/Loader.jsx';
 
-const DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss'; // Define your date format here
+const DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 function Orders() {
   const [ordersList, setOrdersList] = useState([]);
@@ -17,7 +17,7 @@ function Orders() {
   useEffect(() => {
     let timer = setTimeout(() => {
       setIsLoading(false);
-    }, 300); // Display loader for at least 0.3 seconds
+    }, 300);
 
     return () => clearTimeout(timer);
   }, []);
@@ -51,15 +51,15 @@ function Orders() {
   const handleRefund = async () => {
     try {
       const token = sessionStorage.getItem('token');
-      const response = await axios.put(`/orders/${currentOrderId}`, {}, {
+      const response = await axios.put(`/orders/refund/${currentOrderId}`, {}, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
-      // Update the orders list to reflect the refunded order
+      // Update the orders list to reflect the pending refund order
       setOrdersList((prevOrdersList) => 
         prevOrdersList.map((order) =>
-          order.order_id === currentOrderId ? { ...order, order_status: 'Refunded' } : order
+          order.order_id === currentOrderId ? { ...order, order_status: 'Pending' } : order
         )
       );
       setIsModalOpen(false);
@@ -72,6 +72,7 @@ function Orders() {
     if (filter === 'Upcoming') return order.order_status === 'Upcoming';
     if (filter === 'Completed') return order.order_status === 'Completed';
     if (filter === 'Refunded') return order.order_status === 'Refunded';
+    if (filter === 'Pending') return order.order_status === 'Pending';
     return true;
   });
 
@@ -92,6 +93,7 @@ function Orders() {
             { label: 'Paid', value: 'Upcoming' },
             { label: 'Completed', value: 'Completed' },
             { label: 'Refunded', value: 'Refunded' },
+            { label: 'Pending', value: 'Pending' },
           ]}
         />
       </Group>
@@ -109,7 +111,7 @@ function Orders() {
 
               <Group position="apart" mt="md" mb="xs">
                 <Text fw={500} style={{ color: '#1F51FF' }}>Order {order.order_id}</Text>
-                <Badge color={order.order_status === 'Upcoming' ? 'blue' : order.order_status === 'Completed' ? 'green' : 'red'}>
+                <Badge color={order.order_status === 'Upcoming' ? 'blue' : order.order_status === 'Completed' ? 'green' : order.order_status === 'Refunded' ? 'red' : 'yellow'}>
                   {order.order_status}
                 </Badge>
               </Group>
