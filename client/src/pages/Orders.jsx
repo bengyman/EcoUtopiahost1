@@ -2,9 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import { Link } from 'react-router-dom';
-import { CiEdit } from 'react-icons/ci';
-import { FaRegEye } from "react-icons/fa6";
-import { Container, Grid, Anchor, Card, Text, Button, Group, SegmentedControl } from "@mantine/core";
+import { Container, Grid, Anchor, Card, Text, Button, Group, SegmentedControl, Badge, Image } from "@mantine/core";
 import LoaderComponent from '../components/Loader.jsx';
 
 const DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss'; // Define your date format here
@@ -50,19 +48,6 @@ function Orders() {
     return true;
   });
 
-  const getCardStyle = (status) => {
-    switch (status) {
-      case 'Upcoming':
-        return { backgroundColor: '#1F51FF' };
-      case 'Completed':
-        return { backgroundColor: '#0f9d58' };
-      case 'Refunded':
-        return { backgroundColor: 'red' };
-      default:
-        return {};
-    }
-  };
-
   if (!ordersList.length && isLoading) {
     return <LoaderComponent />;
   }
@@ -82,32 +67,47 @@ function Orders() {
             { label: 'Refunded', value: 'Refunded' },
           ]}
         />
-        <Anchor component={Link} to="/courses">
-          <Button color="deepBlue" style={{ marginLeft: 'auto' }}>Add Order</Button>
-        </Anchor>
       </Group>
       <Grid>
         {filteredOrders.map((order, i) => (
           <Grid.Col span={4} key={i}>
-            <Card shadow="sm" padding="lg" radius="md" withBorder style={{ ...getCardStyle(order.order_status), height: '100%' }}>
-              <Group position="apart">
-                <Text weight={500} size="lg" style={{ color: 'white' }}>Order {order.order_id}</Text>
+            <Card shadow="sm" padding="lg" radius="md" withBorder>
+              <Card.Section>
+                <Image
+                  src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/images/bg-8.png"
+                  height={160}
+                  alt="Course Image"
+                />
+              </Card.Section>
+
+              <Group position="apart" mt="md" mb="xs">
+                <Text fw={500} style={{ color: '#1F51FF' }}>Order {order.order_id}</Text>
+                <Badge color={order.order_status === 'Upcoming' ? 'pink' : order.order_status === 'Completed' ? 'green' : 'red'}>
+                  {order.order_status}
+                </Badge>
+              </Group>
+
+              <Text size="sm" c="dimmed">
+                Course Title: {order.Course.course_name}
+              </Text>
+              <Text size="sm" c="dimmed">
+                Date: {dayjs(order.order_date).format(DATE_FORMAT)}
+              </Text>
+
+              <Group mt="md">
                 {filter === 'Upcoming' && (
-                  <Anchor component={Link} to={`/editorders/${order.order_id}`} style={{ textDecoration: 'none' }}>
-                    <Button size="xs" color="white" variant="outline">
-                      <CiEdit />
+                  <Anchor component={Link} to={`/editorders/${order.order_id}`} style={{ textDecoration: 'none', width: '100%' }}>
+                    <Button color="blue" fullWidth mt="md" radius="md">
+                      Edit Order
                     </Button>
                   </Anchor>
                 )}
-                <Anchor component={Link} to={`/orderdetails/${order.order_id}`} style={{ textDecoration: 'none' }}>
-                  <Button size="xs" color="white" variant="outline">
-                    <FaRegEye />
+                <Anchor component={Link} to={`/orderdetails/${order.order_id}`} style={{ textDecoration: 'none', width: '100%' }}>
+                  <Button color="blue" fullWidth radius="md">
+                    View Order
                   </Button>
                 </Anchor>
               </Group>
-              <Text mt="sm" style={{ color: 'white' }}>Course Title: {order.Course.course_name}</Text>
-              <Text style={{ color: 'white' }}>Status: {order.order_status}</Text>
-              <Text style={{ color: 'white' }}>Date: {dayjs(order.order_date).format(DATE_FORMAT)}</Text>
             </Card>
           </Grid.Col>
         ))}
