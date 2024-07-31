@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
+const cron = require('node-cron');
 const db = require('./models');
 const seedAdmin = require('./initialize'); // Adjust the path as needed
 require('dotenv').config();
@@ -28,6 +29,7 @@ const userRoute = require('./routes/user');
 // const rewardsRoute = require('./routes/rewards'); // Remove this line
 const ordersRoute = require('./routes/orders');
 const postsRoute = require('./routes/post');
+const pointRecordRoutes = require('./routes/pointrecord');
 
 app.use("/courses", courseRoute);
 app.use('/user', userRoute);
@@ -35,6 +37,13 @@ app.use('/user', userRoute);
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 app.use("/orders", ordersRoute);    
 app.use("/posts", postsRoute);
+app.use('/pointrecords', pointRecordRoutes);
+
+// Schedule the job to run every 15 minutes
+cron.schedule('*/15 * * * *', async () => {
+    console.log('Running the point record status update job...');
+    await updatePointRecordStatus();
+});
 
 db.sequelize.sync({ alter: true }).then(async () => {
     await seedAdmin(); // Seed the admin user
