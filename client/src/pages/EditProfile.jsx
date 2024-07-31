@@ -22,7 +22,7 @@ function EditProfile() {
       const fetchProfile = async () => {
         try {
           const response = await axios.get(`/user/${id}`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }
           });
           const { user: userData, resident, staff } = response.data;
           
@@ -62,7 +62,7 @@ function EditProfile() {
 
     try {
       const response = await axios.post('/user/profile-picture', formData, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }
       });
       setProfileData((prevData) => ({
         ...prevData,
@@ -89,7 +89,7 @@ function EditProfile() {
         email: profileData.email,
         mobileNumber: profileData.mobileNumber,
       }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }
       });
       navigate(`/profile/${id}`);
     } catch (error) {

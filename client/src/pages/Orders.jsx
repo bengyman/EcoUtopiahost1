@@ -25,7 +25,7 @@ function Orders() {
       try {
         const response = await axios.get('/orders', {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
+            Authorization: `Bearer ${sessionStorage.getItem('token')}`
           }
         });
         setOrdersList(response.data);

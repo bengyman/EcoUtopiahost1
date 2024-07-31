@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { Orders, Course, Resident } = require('../models');
-const { authenticateToken } = require('../middleware/auth');
+const { authenticateToken, authorizeRoles } = require('../middleware/auth');
+
 
 router.post("/", authenticateToken, async (req, res) => {
   try {
@@ -14,7 +15,7 @@ router.post("/", authenticateToken, async (req, res) => {
   }
 });
 
-router.get("/", authenticateToken, async (req, res) => {
+router.get("/", authenticateToken, authorizeRoles('STAFF', 'RESIDENT'), async (req, res) => {
   try {
     let list;
     if (req.user.role === 'STAFF') {
@@ -48,6 +49,7 @@ router.get("/", authenticateToken, async (req, res) => {
   }
 });
 
+
 router.get("/:id", async (req, res) => {
   try {
     let id = req.params.id;
@@ -80,7 +82,7 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.post("/addCourse", authenticateToken, async (req, res) => {
+router.post("/addCourse", authenticateToken, authorizeRoles('RESIDENT'), async (req, res) => {
   try {
     const { course_id } = req.body;
     const resident = await Resident.findOne({ where: { user_id: req.user.id } });

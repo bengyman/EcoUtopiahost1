@@ -49,7 +49,7 @@ function AccountManagement() {
     try {
       const response = await axios.get('/user', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${sessionStorage.getItem('token')}`
         }
       });
       console.log('API Response:', response.data); // Log API response
@@ -101,7 +101,7 @@ function AccountManagement() {
     try {
       await axios.put(`/user/activate/${userId}`, { is_activated: isActivated }, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${sessionStorage.getItem('token')}`
         }
       });
       setAllUsers(allUsers.map(user => user.user_id === userId ? { ...user, is_activated: isActivated } : user));
@@ -116,7 +116,7 @@ function AccountManagement() {
       const endpoint = isDeleted ? `/user/softdelete/${userId}` : `/user/softrestore/${userId}`;
       await axios.put(endpoint, { is_deleted: isDeleted }, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${sessionStorage.getItem('token')}`
         }
       });
       setAllUsers(allUsers.map(user => user.user_id === userId ? { ...user, is_deleted: isDeleted } : user));
@@ -138,7 +138,7 @@ function AccountManagement() {
     try {
       const response = await axios.post('/user/createaccount', data, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${sessionStorage.getItem('token')}`
         }
       });
       console.log('User registered:', response.data);

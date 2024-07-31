@@ -21,7 +21,7 @@ function ViewProfileAdmin() {
     const fetchProfile = async () => {
       try {
         const response = await axios.get(`/user/${userId}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }
         });
         const { user: userData, resident, staff } = response.data;
 
@@ -68,7 +68,7 @@ function ViewProfileAdmin() {
 
     try {
       const response = await axios.post('/user/profile-picture', formData, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }
       });
       setProfileData((prevData) => ({
         ...prevData,

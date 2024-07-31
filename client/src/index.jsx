@@ -27,6 +27,8 @@ import EditOrders from './pages/EditOrders';
 import OrderDetails from './pages/OrderDetails';
 import AdminOrders from './pages/AdminOrders';
 import Success from './pages/Success.jsx';
+import Posts from './pages/Posts';
+import CreatePost from './pages/CreatePost.jsx';
 
 import {
   BrowserRouter,
@@ -96,6 +98,8 @@ function Main() {
         <Route path="/orderdetails/:orderId" element={<OrderDetails />} />
         <Route path="/admin/orders" element={<AdminOrders />} />
         <Route path="/success" element={<Success />} />
+        <Route path="/posts" element={<Posts />} />
+        <Route path="/createPost" element = {<CreatePost />} />
       </Routes>
     </>
   )
@@ -105,15 +109,13 @@ const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
   <React.StrictMode>
     <MantineProvider theme={theme} defaultColorScheme="light">
-      <GoogleReCaptchaProvider reCaptchaKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}>
-        <AuthProvider>
-          <Elements stripe={stripePromise}>
-            <BrowserRouter>
-              <Main />
-            </BrowserRouter>
-          </Elements>
-        </AuthProvider>
-      </GoogleReCaptchaProvider>
+          <AuthProvider>
+            <Elements stripe={stripePromise}>
+              <BrowserRouter>
+                <Main />
+              </BrowserRouter>
+            </Elements>
+          </AuthProvider>
     </MantineProvider>
   </React.StrictMode>
 )
