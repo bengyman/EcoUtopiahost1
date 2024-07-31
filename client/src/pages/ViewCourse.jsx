@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
   Container,
@@ -11,7 +11,6 @@ import {
   Group,
   Title,
 } from '@mantine/core';
-import { useState, useEffect } from "react";
 import { useParams } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { useStripe } from '@stripe/react-stripe-js';
@@ -70,6 +69,7 @@ function ViewCourse() {
           { name: course.course_name, price: course.course_price * 100, quantity: 1 },
         ],
         course_id: course.course_id,
+        cancel_url: `${window.location.origin}/course/${courseId}`, // Set cancel URL
       });
 
       const { error } = await stripe.redirectToCheckout({ sessionId: id });
