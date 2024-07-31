@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import { Link } from 'react-router-dom';
-import { Container, Grid, Anchor, Card, Text, Button, Group, SegmentedControl, Badge, Image } from "@mantine/core";
+import { Container, Grid, Anchor, Card, Text, Button, Group, SegmentedControl, Badge, Image, Modal } from "@mantine/core";
 import LoaderComponent from '../components/Loader.jsx';
 
 const DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss'; // Define your date format here
@@ -11,6 +11,8 @@ function Orders() {
   const [ordersList, setOrdersList] = useState([]);
   const [filter, setFilter] = useState('Upcoming');
   const [isLoading, setIsLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentOrderId, setCurrentOrderId] = useState(null);
 
   useEffect(() => {
     let timer = setTimeout(() => {
@@ -39,6 +41,31 @@ function Orders() {
 
   const handleFilterChange = (newFilter) => {
     setFilter(newFilter);
+  };
+
+  const handleRefundClick = (orderId) => {
+    setCurrentOrderId(orderId);
+    setIsModalOpen(true);
+  };
+
+  const handleRefund = async () => {
+    try {
+      const token = sessionStorage.getItem('token');
+      const response = await axios.put(`/orders/${currentOrderId}`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      // Update the orders list to reflect the refunded order
+      setOrdersList((prevOrdersList) => 
+        prevOrdersList.map((order) =>
+          order.order_id === currentOrderId ? { ...order, order_status: 'Refunded' } : order
+        )
+      );
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error('Error processing refund:', error);
+    }
   };
 
   const filteredOrders = ordersList.filter((order) => {
@@ -74,7 +101,7 @@ function Orders() {
             <Card shadow="sm" padding="lg" radius="md" withBorder>
               <Card.Section>
                 <Image
-                  src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/images/bg-8.png"
+                  src="https://th.bing.com/th/id/OIP.Pneh22uyXw_rJ8leBae8VwHaHa?w=195&h=195&c=7&r=0&o=5&dpr=1.5&pid=1.7"
                   height={160}
                   alt="Course Image"
                 />
@@ -82,7 +109,7 @@ function Orders() {
 
               <Group position="apart" mt="md" mb="xs">
                 <Text fw={500} style={{ color: '#1F51FF' }}>Order {order.order_id}</Text>
-                <Badge color={order.order_status === 'Upcoming' ? 'pink' : order.order_status === 'Completed' ? 'green' : 'red'}>
+                <Badge color={order.order_status === 'Upcoming' ? 'blue' : order.order_status === 'Completed' ? 'green' : 'red'}>
                   {order.order_status}
                 </Badge>
               </Group>
@@ -96,11 +123,9 @@ function Orders() {
 
               <Group mt="md">
                 {filter === 'Upcoming' && (
-                  <Anchor component={Link} to={`/editorders/${order.order_id}`} style={{ textDecoration: 'none', width: '100%' }}>
-                    <Button color="blue" fullWidth mt="md" radius="md">
-                      Edit Order
-                    </Button>
-                  </Anchor>
+                  <Button color="red" fullWidth mt="md" radius="md" onClick={() => handleRefundClick(order.order_id)}>
+                    Refund Course
+                  </Button>
                 )}
                 <Anchor component={Link} to={`/orderdetails/${order.order_id}`} style={{ textDecoration: 'none', width: '100%' }}>
                   <Button color="blue" fullWidth radius="md">
@@ -112,6 +137,18 @@ function Orders() {
           </Grid.Col>
         ))}
       </Grid>
+
+      <Modal
+        opened={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Confirm Refund"
+      >
+        <Text>Are you sure you want to refund this order?</Text>
+        <Group position="apart" style={{ marginTop: 20 }}>
+          <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
+          <Button color="red" onClick={handleRefund}>Confirm Refund</Button>
+        </Group>
+      </Modal>
     </Container>
   );
 }

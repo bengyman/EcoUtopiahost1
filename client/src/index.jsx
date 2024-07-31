@@ -23,7 +23,6 @@ import PasswordResetSuccess from './pages/ResetPasswordSuccess.jsx';
 import AccountManagement from './pages/AccountManagement.jsx';
 import AccountActivation from './pages/AccountActivation.jsx'
 import Orders from './pages/Orders';
-import EditOrders from './pages/EditOrders';
 import OrderDetails from './pages/OrderDetails';
 import AdminOrders from './pages/AdminOrders';
 import Success from './pages/Success.jsx';
@@ -94,7 +93,6 @@ function Main() {
         <Route path="/account-management" element={<AccountManagement />} />
         <Route path="/account-activation" element={<AccountActivation />} />
         <Route path="/orders" element={<Orders />} />
-        <Route path="/editorders/:orderId" element={<EditOrders />} />
         <Route path="/orderdetails/:orderId" element={<OrderDetails />} />
         <Route path="/admin/orders" element={<AdminOrders />} />
         <Route path="/success" element={<Success />} />
