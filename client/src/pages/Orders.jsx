@@ -101,7 +101,7 @@ function Orders() {
             <Card shadow="sm" padding="lg" radius="md" withBorder>
               <Card.Section>
                 <Image
-                  src="https://th.bing.com/th/id/OIP.Pneh22uyXw_rJ8leBae8VwHaHa?w=195&h=195&c=7&r=0&o=5&dpr=1.5&pid=1.7"
+                  src={order.Course.course_image_url || 'https://www.svgrepo.com/show/508699/landscape-placeholder.svg'}
                   height={160}
                   alt="Course Image"
                 />
