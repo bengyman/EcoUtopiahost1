@@ -43,6 +43,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false
         },
+        course_image_url: {
+            type: DataTypes.STRING(500),
+            allowNull: true
+        },
 
     }, {
         tableName: 'courses',
