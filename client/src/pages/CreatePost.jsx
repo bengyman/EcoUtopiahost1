@@ -7,6 +7,7 @@ import {
   TextInput,
   FileInput,
   Group,
+  Select,
 } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -20,14 +21,15 @@ function CreatePost() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [image, setImage] = useState(null);
+  const [tags, setTags] = useState(""); // State for tags
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
 
-    if (!title || !content) {
-      alert("Title and content are required");
+    if (!title || !content || !tags) {
+      alert("Title, content, and tags are required");
       setLoading(false);
       return;
     }
@@ -37,6 +39,7 @@ function CreatePost() {
     formData.append("title", title);
     formData.append("content", content);
     if (image) formData.append("image", image);
+    formData.append("tags", tags);
 
     try {
       if (!token) throw new Error("No token found");
@@ -95,6 +98,18 @@ function CreatePost() {
             label="Content"
             value={content}
             onChange={(e) => setContent(e.target.value)}
+            required
+            mb="md"
+          />
+          <Select
+            label="Tag"
+            value={tags}
+            onChange={setTags}
+            data={[
+              { value: "Advice", label: "Advice" },
+              { value: "Discussion", label: "Discussion" },
+              { value: "Tips", label: "Tips" },
+            ]}
             required
             mb="md"
           />

@@ -41,7 +41,7 @@ module.exports = (sequelize, DataTypes) => {
 
     Post.associate = function (models) {
         Post.belongsTo(models.Resident, { foreignKey: 'resident_id'});
-        Post.hasMany(models.Comment, { foreignKey: 'post_id' });
+        Post.hasMany(models.Comment, { foreignKey: 'post_id', onDelete: 'CASCADE' });
     };
 
     return Post;
