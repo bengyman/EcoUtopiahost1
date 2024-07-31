@@ -102,4 +102,38 @@ router.post("/addCourse", authenticateToken, authorizeRoles('RESIDENT'), async (
   }
 });
 
+router.put("/refund/:id", authenticateToken, authorizeRoles('RESIDENT'), async (req, res) => {
+  let id = req.params.id;
+  let order = await Orders.findByPk(id);
+  if (order) {
+    order.order_status = 'Pending';
+    await order.save();
+    let updatedOrder = await Orders.findByPk(id, {
+      include: {
+        model: Course,
+      }
+    });
+    res.json(updatedOrder);
+  } else {
+    res.status(404).json({ error: 'Order not found' });
+  }
+});
+
+router.put("/approveRefund/:id", authenticateToken, authorizeRoles('ADMIN'), async (req, res) => {
+  let id = req.params.id;
+  let order = await Orders.findByPk(id);
+  if (order && order.order_status === 'Pending') {
+    order.order_status = 'Refunded';
+    await order.save();
+    let updatedOrder = await Orders.findByPk(id, {
+      include: {
+        model: Course,
+      }
+    });
+    res.json(updatedOrder);
+  } else {
+    res.status(404).json({ error: 'Order not found or not in pending status' });
+  }
+});
+
 module.exports = router;
