@@ -26,7 +26,7 @@ import Orders from './pages/Orders';
 import EditOrders from './pages/EditOrders';
 import OrderDetails from './pages/OrderDetails';
 import AdminOrders from './pages/AdminOrders';
-import Payment from './pages/Payment';
+
 
 import {
   BrowserRouter,
@@ -95,7 +95,6 @@ function Main() {
         <Route path="/editorders/:orderId" element={<EditOrders />} />
         <Route path="/orderdetails/:orderId" element={<OrderDetails />} />
         <Route path="/admin/orders" element={<AdminOrders />} />
-        <Route path="/payment" element={<Payment />} />
       </Routes>
     </>
   )
