@@ -3,10 +3,16 @@ const router = express.Router();
 const { Orders, Course, Resident } = require('../models');
 const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 
-router.post("/", authenticateToken, authorizeRoles('STAFF', 'RESIDENT'), async (req, res) => {
-  let data = req.body;
-  let result = await Orders.create(data);
-  res.json(result);
+
+router.post("/", authenticateToken, async (req, res) => {
+  try {
+    let data = req.body;
+    let result = await Orders.create(data);
+    res.json(result);
+  } catch (error) {
+    console.error("Error creating order:", error);
+    res.status(500).json({ error: 'Failed to create order' });
+  }
 });
 
 router.get("/", authenticateToken, authorizeRoles('STAFF', 'RESIDENT'), async (req, res) => {
@@ -43,7 +49,8 @@ router.get("/", authenticateToken, authorizeRoles('STAFF', 'RESIDENT'), async (r
   }
 });
 
-router.get("/:id", authenticateToken, authorizeRoles('STAFF', 'RESIDENT'), async (req, res) => {
+
+router.get("/:id", async (req, res) => {
   try {
     let id = req.params.id;
     let result = await Orders.findByPk(id, {
@@ -58,7 +65,7 @@ router.get("/:id", authenticateToken, authorizeRoles('STAFF', 'RESIDENT'), async
   }
 });
 
-router.put("/:id", authenticateToken, authorizeRoles('STAFF', 'RESIDENT'), async (req, res) => {
+router.put("/:id", async (req, res) => {
   let id = req.params.id;
   let order = await Orders.findByPk(id);
   if (order) {

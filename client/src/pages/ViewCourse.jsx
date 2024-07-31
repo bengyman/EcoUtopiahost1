@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
   Container,
@@ -10,14 +11,19 @@ import {
   Group,
   Title,
 } from '@mantine/core';
-import { useState, useEffect } from "react";
 import { useParams } from 'react-router-dom';
+import { loadStripe } from '@stripe/stripe-js';
+import { useStripe } from '@stripe/react-stripe-js';
+
+// Load your Stripe public key
+const stripePromise = loadStripe('your-publishable-key-here');
 
 function ViewCourse() {
   const { courseId } = useParams();
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const stripe = useStripe();
 
   useEffect(() => {
     document.title = 'Course Details - EcoUtopia';
@@ -52,15 +58,28 @@ function ViewCourse() {
     );
   }
 
-  const handleAddToOrder = () => {
-    axios.post('/orders/addCourse', { course_id: courseId })
-      .then((res) => {
-        //go to the order page
-        window.location.href = '/orders';
-      })
-      .catch((error) => {
-        console.error("There was an error adding the course to the order!", error);
+  const handleAddToOrder = async () => {
+    if (!stripe) {
+      return;
+    }
+
+    try {
+      const { data: { id } } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/payment/create-checkout-session`, {
+        items: [
+          { name: course.course_name, price: course.course_price * 100, quantity: 1 },
+        ],
+        course_id: course.course_id,
+        cancel_url: `${window.location.origin}/course/${courseId}`, // Set cancel URL
       });
+
+      const { error } = await stripe.redirectToCheckout({ sessionId: id });
+
+      if (error) {
+        console.error('Stripe checkout error:', error);
+      }
+    } catch (error) {
+      console.error('There was an error creating the checkout session!', error);
+    }
   };
 
   if (!course) return <p>Loading...</p>;
