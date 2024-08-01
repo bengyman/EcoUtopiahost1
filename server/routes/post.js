@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path'); // Import the path module
 const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 const upload = require('../middleware/fileupload');
+const parsefile = require('../middleware/fileparser');
 
 
 const reportedPosts = {};
@@ -36,14 +37,14 @@ const deleteFile = (filePath) => {
 };
 
 // Create a new post
-router.post('/create-post', authenticateToken, upload.single('image'), async (req, res) => {
+router.post('/create-post', authenticateToken, parsefile, async (req, res) => {
     const transaction = await Post.sequelize.transaction();
     try {
       const { title, content, resident_id, residentName, tags } = req.body;
       let image = req.file ? req.file.path : null; // Path to the uploaded image
 
       if (image) {
-        image = image.replace(/\\/g, '/').replace('public/', '');
+        image = image.replace(/\\/g, '/').replace('ecoutopia-bucket/', '');
       }
   
       // Validate the other fields
@@ -57,6 +58,8 @@ router.post('/create-post', authenticateToken, upload.single('image'), async (re
         residentName,
         tags,
       }, { transaction });
+
+      console.log('New post:', newPost);
   
       await transaction.commit();
   
