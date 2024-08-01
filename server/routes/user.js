@@ -34,32 +34,37 @@ const generateToken = (user, additionalInfo) => {
     return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 };
 
-// Google Login Route
-router.post('/google-login', async (req, res) => {
-    const { token } = req.body;
+// OAuth login endpoint
+router.post('/oauth-login', async (req, res) => {
+    const transaction = await User.sequelize.transaction();
     try {
-      const ticket = await googleClient.verifyIdToken({
-        idToken: token,
-        audience: process.env.GOOGLE_CLIENT_ID
-      });
-      const payload = ticket.getPayload();
-  
-      let user = await User.findOne({ where: { email: payload.email } });
-      if (!user) {
-        // Register new user if not found
-        user = await User.create({
-          email: payload.email,
-          role: 'RESIDENT', // Default role
-          is_activated: true // Automatically activate since it's from a trusted provider
-        });
-      }
-  
-      // If user exists, generate token
-      const token = generateToken(user);
-      res.status(200).json({ user, token });
+        const { email, firstName, lastName } = req.body;
+
+        let user = await User.findOne({ where: { email } });
+
+        if (!user) {
+            user = await User.create({
+                email,
+                password: bcrypt.hashSync('OAuthPassword', 10), // Placeholder password
+                role: 'RESIDENT', // Default role
+            }, { transaction });
+
+            const newUserDetails = await Resident.create({
+                name: `${firstName} ${lastName}`,
+                mobile_num: '00000000', // Placeholder phone number
+                user_id: user.user_id,
+            }, { transaction });
+
+            await transaction.commit();
+        }
+
+        const userDetails = await Resident.findOne({ where: { user_id: user.user_id } });
+        const token = generateToken(user, { resident: userDetails });
+        res.status(200).json({ user, token, resident: userDetails });
     } catch (error) {
-      console.error('Google login error:', error);
-      res.status(500).json({ error: 'Google login failed' });
+        await transaction.rollback();
+        console.error('OAuth login error:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 

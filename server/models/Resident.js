@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: true
         },
-        EcoPoints: {
+        ecoPoints: {
             type: DataTypes.INTEGER,
             allowNull: true,
             defaultValue: 0
