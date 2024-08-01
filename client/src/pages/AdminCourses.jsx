@@ -87,7 +87,7 @@ function AdminCourses() {
             <Text fz="sm">{course.course_instructor}</Text>
           </Table.Td>
           <Table.Td>
-            <Text fz="sm">{dayjs(course.created_at).format('DD/MM/YYYY')}</Text>
+            <Text fz="sm">{dayjs(course.createdAt).format('DD/MM/YYYY')}</Text>
           </Table.Td>
           <Table.Td>
             <Text fz="sm">{course.course_capacity} students</Text>
