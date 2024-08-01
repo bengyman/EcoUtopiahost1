@@ -1,5 +1,5 @@
 // src/components/Comment.jsx
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button, TextInput, Group, Text } from '@mantine/core';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
