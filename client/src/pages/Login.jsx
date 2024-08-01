@@ -5,10 +5,11 @@ import { TextInput, PasswordInput, Button, Title, Alert, Container, Group, Ancho
 import { useAuth } from '../context/AuthContext';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import withRecaptcha from '../components/withRecaptcha';
-import { auth, googleProvider, githubProvider, signInWithPopup } from '../components/Firebase';
+import { googleProvider, githubProvider } from '../components/Firebase';
+import { FaGoogle, FaGithub } from 'react-icons/fa';
 
 function Login() {
-  const { login } = useAuth();
+  const { login, loginWithOAuth } = useAuth();
   const navigate = useNavigate();
   const { executeRecaptcha } = useGoogleReCaptcha();
   const [error, setError] = useState('');
@@ -57,27 +58,13 @@ function Login() {
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleOAuthLogin = async (provider) => {
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-      console.log('Google login successful, redirecting to profile:', user.uid);
-      navigate(`/profile/${user.uid}`);
+      const newUser = await loginWithOAuth(provider);
+      navigate(`/profile/${newUser.user_id}`);
     } catch (err) {
-      setError('Google login failed');
-      console.error('Google login failed:', err);
-    }
-  };
-
-  const handleGithubLogin = async () => {
-    try {
-      const result = await signInWithPopup(auth, githubProvider);
-      const user = result.user;
-      console.log('GitHub login successful, redirecting to profile:', user.uid);
-      navigate(`/profile/${user.uid}`);
-    } catch (err) {
-      setError('GitHub login failed');
-      console.error('GitHub login failed:', err);
+      setError(`${provider.providerId} login failed`);
+      console.error(`${provider.providerId} login failed:`, err);
     }
   };
 
@@ -106,6 +93,16 @@ function Login() {
             Sign In
           </Button>
         </form>
+        <Group position="center" mt="md" spacing="md" grow>
+          <Button onClick={() => handleOAuthLogin(googleProvider)} color="green" fullWidth>
+            <FaGoogle style={{ marginRight: 8 }} />
+            Sign In
+          </Button>
+          <Button onClick={() => handleOAuthLogin(githubProvider)} color="dark" fullWidth>
+            <FaGithub style={{ marginRight: 8 }} />
+            Sign In
+          </Button>
+        </Group>
         <Group position="apart" mt="md">
           <Anchor component="button" type="button" color="dimmed" size="xs" onClick={() => navigate('/reset-password-email')}>
             Forgot password?
@@ -113,12 +110,6 @@ function Login() {
           <Anchor component="button" type="button" color="dimmed" size="xs" onClick={() => navigate('/register')}>
             Create an account
           </Anchor>
-        </Group>
-        <Group position="center" mt="xl">
-          <Button onClick={handleGoogleLogin}>Sign in with Google</Button>
-        </Group>
-        <Group position="center" mt="xl">
-          <Button onClick={handleGithubLogin}>Sign in with GitHub</Button>
         </Group>
       </Paper>
     </Container>

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { User, Resident, Staff } = require('../models');
+const { User, Resident, Staff, Instructor } = require('../models');
 const yup = require('yup');
 const fs = require('fs');
 const bcrypt = require('bcryptjs');
@@ -21,7 +21,7 @@ const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const userSchema = yup.object().shape({
     email: yup.string().email().required(),
     password: yup.string().min(8).required(),
-    role: yup.string().oneOf(['RESIDENT', 'STAFF']).default('RESIDENT')
+    role: yup.string().oneOf(['RESIDENT', 'STAFF', 'INSTRUCTOR']).default('RESIDENT')
 });
 
 // Generate JWT token
@@ -45,16 +45,22 @@ router.post('/oauth-login', async (req, res) => {
         if (!user) {
             user = await User.create({
                 email,
-                password: bcrypt.hashSync('OAuthPassword', 10), // Placeholder password
+                password: bcrypt.hashSync('OAuthPassword', 10), // Placeholder password to fulfill non-null requirement
                 role: 'RESIDENT', // Default role
+                is_activated: true // Set is_activated to true for social media logins
             }, { transaction });
 
             const newUserDetails = await Resident.create({
                 name: `${firstName} ${lastName}`,
-                mobile_num: '00000000', // Placeholder phone number
                 user_id: user.user_id,
             }, { transaction });
 
+            await transaction.commit();
+        } else {
+            // Ensure user is activated if using social login
+            if (!user.is_activated) {
+                await user.update({ is_activated: true }, { transaction });
+            }
             await transaction.commit();
         }
 
@@ -88,7 +94,7 @@ router.post('/register', verifyRecaptcha, async (req, res) => {
         role
       }, { transaction });
 
-      newUserDetails = await Resident.create({
+      const newUserDetails = await Resident.create({
         name: `${firstName} ${lastName}`,
         mobile_num: contactNumber,
         user_id: newUser.user_id
@@ -104,10 +110,8 @@ router.post('/register', verifyRecaptcha, async (req, res) => {
       res.status(500).json({ error: error.message });
     }
 });
-  
-  
 
-// Create a new user and either resident or staff with input validation (This is for AccountManagement)
+// Create a new user and either resident, staff, or instructor with input validation (This is for AccountManagement)
 router.post('/createaccount', authenticateToken, async (req, res) => {
     const transaction = await User.sequelize.transaction();
     try {
@@ -134,6 +138,12 @@ router.post('/createaccount', authenticateToken, async (req, res) => {
             newUserDetails = await Resident.create({
                 name: `${firstName} ${lastName}`,
                 mobile_num: contactNumber,
+                user_id: newUser.user_id
+            }, { transaction });
+        } else if (role === 'INSTRUCTOR') {
+            newUserDetails = await Instructor.create({
+                name: `${firstName} ${lastName}`,
+                mobilenum: contactNumber,
                 user_id: newUser.user_id
             }, { transaction });
         } else if (role === 'STAFF') {
@@ -169,6 +179,9 @@ router.post('/login', verifyRecaptcha, async (req, res) => {
         } else if (user.role === 'STAFF') {
           const staff = await Staff.findOne({ where: { user_id: user.user_id } });
           additionalInfo = { staff };
+        } else if (user.role === 'INSTRUCTOR') {
+          const instructor = await Instructor.findOne({ where: { user_id: user.user_id } });
+          additionalInfo = { instructor };
         }
         const token = generateToken(user, additionalInfo);
         res.status(200).json({ user, token, ...additionalInfo });
@@ -181,9 +194,6 @@ router.post('/login', verifyRecaptcha, async (req, res) => {
     }
 });
   
-  
-  
-
 // Read all users (accessible by STAFF only)
 router.get('/', authenticateToken, authorizeRoles('STAFF'), async (req, res) => {
     try {
@@ -196,6 +206,10 @@ router.get('/', authenticateToken, authorizeRoles('STAFF'), async (req, res) => 
                 {
                     model: Resident,
                     attributes: ['name', 'mobile_num']
+                },
+                {
+                    model: Instructor,
+                    attributes: ['name', 'mobilenum']
                 }
             ]
         });
@@ -206,7 +220,7 @@ router.get('/', authenticateToken, authorizeRoles('STAFF'), async (req, res) => 
 });
 
 // Read a user by ID
-router.get('/:id', authenticateToken, authorizeRoles('RESIDENT', 'STAFF'), async (req, res) => {
+router.get('/:id', authenticateToken, authorizeRoles('RESIDENT', 'STAFF', 'INSTRUCTOR'), async (req, res) => {
     try {
         const user = await User.findByPk(req.params.id);
         if (!user) {
@@ -215,6 +229,7 @@ router.get('/:id', authenticateToken, authorizeRoles('RESIDENT', 'STAFF'), async
 
         let resident = null;
         let staff = null;
+        let instructor = null;
 
         if (user.role === 'RESIDENT') {
             resident = await Resident.findOne({ where: { user_id: user.user_id } });
@@ -230,22 +245,28 @@ router.get('/:id', authenticateToken, authorizeRoles('RESIDENT', 'STAFF'), async
             }
         }
 
-        res.status(200).json({ user, resident, staff });
+        if (user.role === 'INSTRUCTOR') {
+            instructor = await Instructor.findOne({ where: { user_id: user.user_id } });
+            if (!instructor) {
+                return res.status(404).json({ error: 'Instructor details not found' });
+            }
+        }
+
+        res.status(200).json({ user, resident, staff, instructor });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
 
-
 // Update user details
-router.put('/:id', authenticateToken, authorizeRoles('RESIDENT', 'STAFF'), async (req, res) => {
+router.put('/:id', authenticateToken, authorizeRoles('RESIDENT', 'STAFF', 'INSTRUCTOR'), async (req, res) => {
     try {
         const user = await User.findByPk(req.params.id);
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        let updatedUser, updatedResident, updatedStaff;
+        let updatedUser, updatedResident, updatedStaff, updatedInstructor;
 
         // Update user details
         updatedUser = await user.update({
@@ -274,13 +295,22 @@ router.put('/:id', authenticateToken, authorizeRoles('RESIDENT', 'STAFF'), async
             });
         }
 
-        res.status(200).json({ user: updatedUser, resident: updatedResident, staff: updatedStaff });
+        if (user.role === 'INSTRUCTOR') {
+            const instructor = await Instructor.findOne({ where: { user_id: req.params.id } });
+            if (!instructor) {
+                return res.status(404).json({ error: 'Instructor details not found' });
+            }
+            updatedInstructor = await instructor.update({
+                name: `${req.body.firstName} ${req.body.lastName}`,
+                mobilenum: req.body.mobileNumber
+            });
+        }
+
+        res.status(200).json({ user: updatedUser, resident: updatedResident, staff: updatedStaff, instructor: updatedInstructor });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
-
-
 
 // Delete a user (soft delete, accessible by STAFF only)
 router.put('/softdelete/:id', authenticateToken, authorizeRoles('STAFF'), async (req, res) => {
@@ -373,7 +403,6 @@ router.post('/activate', authenticateToken, async (req, res) => {
     }
 });
 
-
 // Verify activation code and activate account. Token is available here since User has logged in(Email is not verified but login is still authenticated).
 router.post('/activate-account', authenticateToken, async (req, res) => {
     try {
@@ -428,13 +457,13 @@ router.put('/change-password/:id', authenticateToken, async (req, res) => {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  });
+});
 
 // Reset password request
-router.post('/password-reset', async (req, res) => { // Removed verifyRecaptcha
+router.post('/password-reset', async (req, res) => {
     try {
         console.log("Request received to /password-reset with email:", req.body.email);
-        
+
         const user = await User.findOne({ where: { email: req.body.email } });
         if (!user) {
             console.log("User not found for email:", req.body.email);
@@ -442,11 +471,12 @@ router.post('/password-reset', async (req, res) => { // Removed verifyRecaptcha
         }
 
         const resetCode = crypto.randomBytes(20).toString('hex');
-        user.password_reset_code = resetCode;
+        const resetToken = jwt.sign({ email: user.email, resetCode }, process.env.JWT_SECRET, { expiresIn: '30m' });
+
         user.password_reset_expiry = new Date(Date.now() + 1800000); // 30 minutes expiry
         await user.save();
 
-        console.log("Password reset code generated and saved for user:", user.email);
+        console.log("Password reset token generated and saved for user:", user.email);
 
         // Set up Nodemailer with permanent Ethereal account credentials
         const transporter = nodemailer.createTransport({
@@ -464,7 +494,7 @@ router.post('/password-reset', async (req, res) => { // Removed verifyRecaptcha
             from: '"EcoUtopia" <no-reply@ecoutopia.com>',
             to: user.email,
             subject: 'Password Reset',
-            text: `Your password reset code is: ${resetCode}`
+            text: `Your password reset code is: ${resetCode}\nReset token: ${resetToken}`
         };
 
         transporter.sendMail(mailOptions, (err, info) => {
@@ -484,17 +514,26 @@ router.post('/password-reset', async (req, res) => { // Removed verifyRecaptcha
     }
 });
 
-// Reset password
+// Verify reset code
 router.post('/validate-reset-code', async (req, res) => {
     try {
-        const { email, code } = req.body;
-        
-        const user = await User.findOne({ where: { email, password_reset_code: code, password_reset_expiry: { [Op.gt]: new Date() } } });
+        const { email, code, token } = req.body;
+
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            if (decoded.email !== email || decoded.resetCode !== code) {
+                return res.status(400).json({ error: 'Invalid reset code or token' });
+            }
+        } catch (err) {
+            return res.status(400).json({ error: 'Invalid or expired reset token' });
+        }
+
+        const user = await User.findOne({ where: { email, password_reset_expiry: { [Op.gt]: new Date() } } });
         if (!user) {
             return res.status(400).json({ error: 'Invalid or expired reset code' });
         }
 
-        res.status(200).json({ message: 'Reset code is valid' });
+        res.status(200).json({ message: 'Reset code and token are valid' });
     } catch (error) {
         console.error('Error in /validate-reset-code route:', error.message);
         res.status(500).json({ error: error.message });
@@ -504,22 +543,33 @@ router.post('/validate-reset-code', async (req, res) => {
 // Reset password
 router.put('/password-reset/:code', async (req, res) => {
     try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ where: { email, password_reset_code: req.params.code, password_reset_expiry: { [Op.gt]: new Date() } } });
-        if (!user) {
-            return res.status(400).json({ error: 'Invalid or expired password reset code' });
+        const { email, password, token } = req.body;
+
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            if (decoded.email !== email || decoded.resetCode !== req.params.code) {
+                return res.status(400).json({ error: 'Invalid reset code or token' });
+            }
+        } catch (err) {
+            return res.status(400).json({ error: 'Invalid or expired reset token' });
         }
+
+        const user = await User.findOne({ where: { email, password_reset_expiry: { [Op.gt]: new Date() } } });
+        if (!user) {
+            return res.status(400).json({ error: 'Invalid or expired reset code' });
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
         user.password = hashedPassword;
         user.password_reset_code = null;
         user.password_reset_expiry = null;
         await user.save();
+
         res.status(200).json({ message: 'Password reset successfully' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
-
 
 // Route to upload or update a profile picture
 router.post('/profile-picture', upload.single('profilePic'), async (req, res) => {
@@ -593,6 +643,8 @@ router.delete('/:id', authenticateToken, authorizeRoles('STAFF'), async (req, re
             await Resident.destroy({ where: { user_id: user.user_id } });
         } else if (user.role === 'STAFF') {
             await Staff.destroy({ where: { user_id: user.user_id } });
+        } else if (user.role === 'INSTRUCTOR') {
+            await Instructor.destroy({ where: { user_id: user.user_id } });
         }
 
         await user.destroy();
@@ -603,4 +655,3 @@ router.delete('/:id', authenticateToken, authorizeRoles('STAFF'), async (req, re
 });
 
 module.exports = router;
-

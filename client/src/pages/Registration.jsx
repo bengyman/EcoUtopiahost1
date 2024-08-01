@@ -140,12 +140,14 @@ function Registration() {
             </Button>
           </Group>
         </form>
-        <Group position="center" mt="md" spacing="md">
-          <Button onClick={() => handleOAuthLogin(googleProvider)} leftIcon={<FaGoogle />} color="red">
-            Sign in with Google
+        <Group position="center" mt="md" spacing="md" grow>
+          <Button onClick={() => handleOAuthLogin(googleProvider)} color="green" fullWidth>
+            <FaGoogle style={{ marginRight: 8 }} />
+            Sign In
           </Button>
-          <Button onClick={() => handleOAuthLogin(githubProvider)} leftIcon={<FaGithub />} color="dark">
-            Sign in with GitHub
+          <Button onClick={() => handleOAuthLogin(githubProvider)} color="dark" fullWidth>
+            <FaGithub style={{ marginRight: 8 }} />
+            Sign In
           </Button>
         </Group>
         <Group position="center" mt="md">

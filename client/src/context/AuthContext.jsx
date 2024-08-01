@@ -23,11 +23,12 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password, recaptchaToken) => {
     try {
       const response = await axios.post('/user/login', { email, password, recaptchaToken });
-      const { user, token, resident, staff } = response.data;
+      const { user, token, resident, staff, instructor } = response.data;
       const userData = {
         ...user,
         resident,
         staff,
+        instructor,
       };
       setUser(userData);
       sessionStorage.setItem('token', token);
@@ -43,6 +44,10 @@ export const AuthProvider = ({ children }) => {
         console.log('Staff ID:', staff.staffid);
         console.log('Staff Name:', staff.name);
       }
+      if (instructor) {
+        console.log('Instructor ID:', instructor.instructor_id);
+        console.log('Instructor Name:', instructor.name);
+      }
       return user;
     } catch (error) {
       console.error('Login failed:', error);
@@ -53,11 +58,12 @@ export const AuthProvider = ({ children }) => {
   const register = async (formData) => {
     try {
       const response = await axios.post('/user/register', formData);
-      const { user, token, resident, staff } = response.data;
+      const { user, token, resident, staff, instructor } = response.data;
       const userData = {
         ...user,
         resident,
         staff,
+        instructor,
       };
       setUser(userData);
       sessionStorage.setItem('token', token);
@@ -73,6 +79,10 @@ export const AuthProvider = ({ children }) => {
         console.log('Staff ID:', staff.staffid);
         console.log('Staff Name:', staff.name);
       }
+      if (instructor) {
+        console.log('Instructor ID:', instructor.instructor_id);
+        console.log('Instructor Name:', instructor.name);
+      }
       return user;
     } catch (error) {
       console.error('Registration failed:', error);
@@ -80,21 +90,23 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const loginWithOAuth = async (provider, userInfo) => {
+  const loginWithOAuth = async (provider) => {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-      
+
       const response = await axios.post('/user/oauth-login', {
         email: user.email,
         firstName: user.displayName.split(' ')[0],
         lastName: user.displayName.split(' ')[1] || 'User',
       });
 
-      const { user: newUser, token, resident } = response.data;
+      const { user: newUser, token, resident, staff, instructor } = response.data;
       const userData = {
         ...newUser,
         resident,
+        staff,
+        instructor,
       };
       setUser(userData);
       sessionStorage.setItem('token', token);
