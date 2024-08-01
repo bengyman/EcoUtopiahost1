@@ -119,7 +119,7 @@ function CreateCourse() {
         <Container size="xl">
             <Box mt="lg" p="lg" style={{maxWidth: "800px", margin: "auto"}}>
                 <Title order={1}>Create Course</Title>
-                <form onSubmit={(e) => { e.preventDefault(); handleSubmit(formData); }}>
+                <form onSubmit={(e) => { e.preventDefault(); }}>
                     <TextInput
                         label="Course Name"
                         placeholder="Enter course name"
