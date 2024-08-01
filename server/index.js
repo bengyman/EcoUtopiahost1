@@ -6,6 +6,11 @@ const seedAdmin = require('./initialize'); // Adjust the path as needed
 require('dotenv').config();
 require('./middleware/cron');
 
+const { TranslateClient, TranslateTextCommand } = require('@aws-sdk/client-translate');
+
+// Initialize the AWS Translate client
+const translateClient = new TranslateClient({ region: 'us-east-1' }); // Replace with your region
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -30,6 +35,46 @@ const userRoute = require('./routes/user');
 const ordersRoute = require('./routes/orders');
 const paymentRoute = require('./routes/payment');
 const postsRoute = require('./routes/post');
+
+// Translation logic
+const translateText = async (text, targetLanguage) => {
+    if (!text || text.trim().length === 0) {
+        throw new Error('Text cannot be null or empty.');
+    }
+
+    try {
+        const command = new TranslateTextCommand({
+            Text: text,
+            SourceLanguageCode: 'en', // or detect the source language
+            TargetLanguageCode: targetLanguage,
+        });
+
+        const response = await translateClient.send(command);
+        return response.TranslatedText;
+    } catch (error) {
+        console.error('Error translating text:', error);
+        throw error;
+    }
+};
+
+// Translation route handler
+const handleTranslation = async (req, res) => {
+    const { text, targetLanguage } = req.body;
+
+    if (!text || !targetLanguage) {
+        return res.status(400).json({ error: 'Text and targetLanguage are required.' });
+    }
+
+    try {
+        const translatedText = await translateText(text, targetLanguage);
+        res.json({ translatedText });
+    } catch (error) {
+        res.status(500).json({ error: 'Error translating text.' });
+    }
+};
+
+// Define the translate route
+app.post('/api/translate', handleTranslation);
 
 app.use("/courses", courseRoute);
 app.use('/user', userRoute);

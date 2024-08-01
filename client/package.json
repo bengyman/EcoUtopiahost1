@@ -11,6 +11,8 @@
 		"start": "vite"
 	},
 	"dependencies": {
+		"@fortawesome/free-brands-svg-icons": "^6.6.0",
+		"@fortawesome/react-fontawesome": "^0.2.2",
 		"@hookform/resolvers": "^3.6.0",
 		"@mantine/core": "^7.11.0",
 		"@mantine/form": "^7.10.2",
@@ -19,6 +21,7 @@
 		"@stripe/stripe-js": "^4.1.0",
 		"@tabler/icons-react": "^3.6.0",
 		"axios": "^1.7.2",
+		"copy-to-clipboard": "^3.3.3",
 		"cors": "^2.8.5",
 		"dayjs": "^1.11.11",
 		"formik": "^2.4.6",
@@ -32,6 +35,7 @@
 		"react-hook-form": "^7.52.0",
 		"react-icons": "^5.2.1",
 		"react-router-dom": "^6.23.1",
+		"react-share": "^5.1.0",
 		"tabler": "^1.0.0-alpha.8",
 		"tabler-icons-react": "^1.56.0",
 		"yup": "^1.4.0"

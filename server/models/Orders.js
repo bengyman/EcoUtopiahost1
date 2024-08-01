@@ -32,5 +32,5 @@ module.exports = (sequelize, DataTypes) => {
         Orders.belongsTo(models.Course, { foreignKey: 'course_id' });
     };
 
-    return Orders;
+    return Orders;
 }
