@@ -144,12 +144,15 @@ function EditCourse() {
             }
 
             try {
+                const token = sessionStorage.getItem('token');
                 // Create a FormData object to handle the file upload
                 const formDataToSend = new FormData();
 
                 // Append the image file to the FormData
                 if (formData.course_img instanceof File) {
                     formDataToSend.append('course_img', formData.course_img, formData.course_img.name);
+                } else {
+                    formDataToSend.append('course_img', formData.course_img);
                 }
 
                 // Append the rest of the form data to FormData as a JSON string
@@ -163,16 +166,17 @@ function EditCourse() {
                     course_start_time: formData.course_start_time,
                     course_end_time: formData.course_end_time,
                     course_capacity: parseInt(formData.course_capacity),
-                    course_img: formData.course_img,
+                    //course_img: formData.course_img,
                 }));
 
                 // Send the request
-                /*const response = await axios.put(`http://localhost:3001/courses/updateCourse/${courseId}`, formDataToSend, {
+                const response = await axios.put(`/courses/updateCourse/${courseId}`, formDataToSend, {
                     headers: {
-                        'Content-Type': 'multipart/form-data',
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "multipart/form-data",
                     },
-                });*/
-                const response = await axios.put(`http://localhost:3000/api/courses/updateCourse/${courseId}`, formDataToSend);
+                });
+                //const response = await axios.put(`http://localhost:3000/api/courses/updateCourse/${courseId}`, formDataToSend);
                 console.log(formDataToSend);
                 console.log(`Response Data: ${JSON.stringify(response.data)}`);
                 setSuccess(true);
@@ -364,10 +368,10 @@ function EditCourse() {
                             color="teal"
                             variant="dark"
                             style={{ marginBottom: rem(1) }}
-                            onClick={() => {
+                            /*onClick={() => {
                                 console.log(formData)
                                 console.log(localStorage.getItem('fileLocation'))
-                            }}
+                            }}*/
                             type='submit'
                         >
                             Update Course

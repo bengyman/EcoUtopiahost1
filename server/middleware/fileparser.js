@@ -73,7 +73,7 @@ const parsefile = async (req, res, next) => {
                         form.emit('data', { name: "complete", value: data });
                         console.log(`Successfully uploaded ${this.originalFilename} to ${Bucket}/${data.Key}`);
                         console.log(`Location: ${data.Location}`);
-                        localStorage.setItem('fileLocation', data.Location);
+                        //localStorage.setItem('fileLocation', data.Location);
                         resolve(data.Location);
                     }).catch((err) => {
                         form.emit('error', err);
