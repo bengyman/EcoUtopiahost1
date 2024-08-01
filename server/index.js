@@ -4,6 +4,7 @@ const cors = require('cors');
 const db = require('./models');
 const seedAdmin = require('./initialize'); // Adjust the path as needed
 require('dotenv').config();
+require('./middleware/cron');
 
 const app = express();
 app.use(express.json());

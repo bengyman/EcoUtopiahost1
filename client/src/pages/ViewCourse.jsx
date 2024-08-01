@@ -15,8 +15,6 @@ import { useParams } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { useStripe } from '@stripe/react-stripe-js';
 
-// Load your Stripe public key
-const stripePromise = loadStripe('your-publishable-key-here');
 
 function ViewCourse() {
   const { courseId } = useParams();
