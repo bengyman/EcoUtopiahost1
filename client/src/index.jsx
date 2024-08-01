@@ -1,13 +1,13 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { AuthProvider } from './context/AuthContext.jsx';
-import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 
 // Pages and components
 import App from './pages/App.jsx';
 import TestPage from './pages/TestPage.jsx';
+import TestCreate from './pages/TestCreate.jsx';
 import Courses from './pages/Courses.jsx';
 import ViewCourse from './pages/ViewCourse.jsx';
 import Navbar from './components/Navbar.jsx';
@@ -24,6 +24,9 @@ import AccountManagement from './pages/AccountManagement.jsx';
 import AccountActivation from './pages/AccountActivation.jsx'
 import Orders from './pages/Orders';
 import OrderDetails from './pages/OrderDetails';
+import AdminCourses from './pages/AdminCourses';
+import CreateCourse from './pages/CreateCourse';
+import EditCourse from './pages/EditCourse.jsx';
 import AdminOrders from './pages/AdminOrders';
 import Success from './pages/Success.jsx';
 import Posts from './pages/Posts';
@@ -85,6 +88,7 @@ function Main() {
         <Route path="/course/:courseId" element={<ViewCourse />} />
         <Route path="/login" element={<Login />} />
         <Route path="/test" element={<TestPage />} />
+        <Route path="/testcreate" element={<TestCreate />} />
         <Route path="/register" element={<Registration />} />
         <Route path="/login" element={<Login />} />
         <Route path="/profile/:paramId" element={<Profile />} />
@@ -99,6 +103,9 @@ function Main() {
         <Route path="/orders" element={<Orders />} />
         <Route path="/orderdetails/:orderId" element={<OrderDetails />} />
         <Route path="/admin/orders" element={<AdminOrders />} />
+        <Route path="/admin/view-courses" element={<AdminCourses />} />
+        <Route path="/admin/create-course" element={<CreateCourse />} />
+        <Route path="/admin/edit-course/:courseId" element={<EditCourse />} />
         <Route path="/success" element={<Success />} />
         <Route path="/posts" element={<Posts />} />
         <Route path="/createPost" element = {<CreatePost />} />

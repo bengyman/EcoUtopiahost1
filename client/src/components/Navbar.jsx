@@ -15,6 +15,8 @@ function Navbar() {
   };
 
   const isProfilePage = user && location.pathname === `/profile/${user.user_id}`;
+  const isStaff = user && user.role === 'STAFF';
+  const isResident = user && user.role === 'RESIDENT';
 
   return (
     <AppShell header={{ height: 50 }} navbar={{ width: 200, breakpoint: "xl" }}>
@@ -31,21 +33,55 @@ function Navbar() {
                 Home
               </Text>
             </Anchor>
-            <Anchor href="/courses" style={{ textDecoration: "none" }}>
-              <Text tt="uppercase" fw={'500'} c="black" style={{ marginLeft: 10, marginRight: 10 }}>
-                Courses
-              </Text>
-            </Anchor>
-            <Anchor href="/orders" style={{ textDecoration: "none" }}>
-              <Text tt="uppercase" fw={'500'} c="black" style={{ marginLeft: 10, marginRight: 10 }}>
-                Orders
-              </Text>
-            </Anchor>
-            <Anchor href="/posts" style={{ textDecoration: "none" }}>
-              <Text tt="uppercase" fw={'500'} c="black" style={{ marginLeft: 10, marginRight: 10 }}>
-                Posts
-              </Text>
-            </Anchor>
+            {isResident && (
+              <Anchor href="/courses" style={{ textDecoration: "none" }}>
+                <Text tt="uppercase" fw={'500'} c="black" style={{ marginLeft: 10, marginRight: 10 }}>
+                  Courses
+                </Text>
+              </Anchor>
+            )}
+            {isResident && (
+              <Anchor href="/orders" style={{ textDecoration: "none" }}>
+                <Text tt="uppercase" fw={'500'} c="black" style={{ marginLeft: 10, marginRight: 10 }}>
+                  Orders
+                </Text>
+              </Anchor>
+            )}
+            {isStaff && (
+              <Anchor href="/admin/orders" style={{ textDecoration: "none" }}>
+                <Text tt="uppercase" fw={'500'} c="black" style={{ marginLeft: 10, marginRight: 10 }}>
+                  Admin Orders
+                </Text>
+              </Anchor>
+            )}
+            {isStaff && (
+              <Anchor href="/admin/view-courses" style={{ textDecoration: "none" }}>
+                <Text tt="uppercase" fw={'500'} c="black" style={{ marginLeft: 10, marginRight: 10 }}>
+                  Admin Courses
+                </Text>
+              </Anchor>
+            )}
+            {isStaff && (
+              <Anchor href="/admin/posts" style={{ textDecoration: "none" }}>
+                <Text tt="uppercase" fw={'500'} c="black" style={{ marginLeft: 10, marginRight: 10 }}>
+                  Admin Posts
+                </Text>
+              </Anchor>
+            )}
+            {isResident && (
+              <Anchor href="/posts" style={{ textDecoration: "none" }}>
+                <Text tt="uppercase" fw={'500'} c="black" style={{ marginLeft: 10, marginRight: 10 }}>
+                  Posts
+                </Text>
+              </Anchor>
+            )}
+            {isStaff && (
+              <Anchor href="/account-management" style={{ textDecoration: "none" }}>
+                <Text tt="uppercase" fw={'500'} c="black" style={{ marginLeft: 10, marginRight: 10 }}>
+                  Admin Users
+                </Text>
+              </Anchor>
+            )}
           </Flex>
           <Flex align="center">
             {!user && location.pathname !== '/login' && (
@@ -65,7 +101,7 @@ function Navbar() {
             {user && !isProfilePage && (
               <Menu shadow="md" width={200}>
                 <Menu.Target>
-                  <Avatar variant="filled" radius="xl" src="" style={{ marginRight: '2rem' }}/>
+                  <Avatar variant="filled" radius="xl" src="" style={{ marginRight: '2rem' }} />
                 </Menu.Target>
                 <Menu.Dropdown>
                   <Menu.Item icon={<IconUser size={14} />} onClick={() => navigate(`/profile/${user.user_id}`)}>

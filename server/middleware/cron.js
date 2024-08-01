@@ -29,8 +29,6 @@ cron.schedule('* * * * *', async () => {
       order.order_status = 'Completed';
       await order.save();
     }
-
-    console.log('Updated orders to Completed where applicable.');
   } catch (error) {
     console.error('Error updating orders:', error);
   }
