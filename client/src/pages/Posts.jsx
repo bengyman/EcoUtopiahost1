@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import LoaderComponent from '../components/Loader';
 import Navbar from '../components/Navbar';
-import { Card, Button, Text, Group, Image, Stack, Container, Modal } from '@mantine/core';
+import { Card, Button, Text, Group, Image, Stack, Container, Modal, TextInput } from '@mantine/core';
 import { useAuth } from '../context/AuthContext';
 
 const Posts = () => {
@@ -13,6 +13,7 @@ const Posts = () => {
     const [error, setError] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedPostId, setSelectedPostId] = useState(null);
+    const [search, setSearch] = useState('');
     const navigate = useNavigate();
 
     const fetchPosts = async () => {
@@ -71,13 +72,13 @@ const Posts = () => {
     if (loading) return <LoaderComponent />;
     if (error) return <Text align="center">Error: {error}</Text>;
 
-    const isImage = (url) => {
-        return /\.(jpg|jpeg|png|gif)$/i.test(url);
-    };
+    const isImage = (url) => /\.(jpg|jpeg|png|gif)$/i.test(url);
+    const isVideo = (url) => /\.(mp4|webm|ogg)$/i.test(url);
 
-    const isVideo = (url) => {
-        return /\.(mp4|webm|ogg)$/i.test(url);
-    };
+    const filteredPosts = posts.filter(post => 
+        post.title.toLowerCase().includes(search.toLowerCase()) || 
+        post.content.toLowerCase().includes(search.toLowerCase())
+    );
 
     return (
         <>
@@ -89,11 +90,17 @@ const Posts = () => {
                 <Link to="/createPost">Create Post</Link>
             </Button>
             <Container>
+                <TextInput
+                    placeholder="Search by title or content"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    style={{ margin: '20px 0' }}
+                />
                 <Stack className="posts-container" spacing="md">
-                    {posts.length === 0 ? (
+                    {filteredPosts.length === 0 ? (
                         <Text align="center">No posts found</Text>
                     ) : (
-                        posts.map(post => (
+                        filteredPosts.map(post => (
                             <Card
                                 key={post.post_id}
                                 shadow="sm"
