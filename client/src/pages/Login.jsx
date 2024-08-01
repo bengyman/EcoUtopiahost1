@@ -5,6 +5,7 @@ import { TextInput, PasswordInput, Button, Title, Alert, Container, Group, Ancho
 import { useAuth } from '../context/AuthContext';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import withRecaptcha from '../components/withRecaptcha';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 
 function Login() {
   const { login } = useAuth();
@@ -59,41 +60,75 @@ function Login() {
     }
   };
 
+  const handleGoogleLoginSuccess = async (response) => {
+    try {
+      const res = await fetch('/api/users/google-login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token: response.credential }),
+      });
+      const data = await res.json();
+      if (data.user) {
+        console.log('Google login successful, redirecting to profile:', data.user.user_id);
+        navigate(`/profile/${data.user.user_id}`);
+      } else {
+        setError('Google login failed');
+      }
+    } catch (err) {
+      setError('Google login failed');
+      console.error('Google login failed:', err);
+    }
+  };
+
+  const handleGoogleLoginError = () => {
+    setError('Google login failed');
+  };
+
   return (
-    <Container size={420} my={40}>
-      <Title align="center" style={{ color: '#003F2D', fontWeight: 700 }}>
-        Welcome to EcoUtopia
-      </Title>
-      <Paper withBorder shadow="md" p={30} mt={30} radius="md">
-        <form onSubmit={form.onSubmit(handleSubmit)}>
-          <TextInput
-            label="Email"
-            placeholder="you@example.com"
-            required
-            {...form.getInputProps('email')}
-          />
-          <PasswordInput
-            label="Password"
-            placeholder="Your password"
-            required
-            {...form.getInputProps('password')}
-            mt="md"
-          />
-          {error && <Alert title="Error" color="red" mt="md">{error}</Alert>}
-          <Button type="submit" fullWidth mt="xl" size="md">
-            Sign In
-          </Button>
-        </form>
-        <Group position="apart" mt="md">
-          <Anchor component="button" type="button" color="dimmed" size="xs" onClick={() => navigate('/reset-password-email')}>
-            Forgot password?
-          </Anchor>
-          <Anchor component="button" type="button" color="dimmed" size="xs" onClick={() => navigate('/register')}>
-            Create an account
-          </Anchor>
-        </Group>
-      </Paper>
-    </Container>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <Container size={420} my={40}>
+        <Title align="center" style={{ color: '#003F2D', fontWeight: 700 }}>
+          Welcome to EcoUtopia
+        </Title>
+        <Paper withBorder shadow="md" p={30} mt={30} radius="md">
+          <form onSubmit={form.onSubmit(handleSubmit)}>
+            <TextInput
+              label="Email"
+              placeholder="you@example.com"
+              required
+              {...form.getInputProps('email')}
+            />
+            <PasswordInput
+              label="Password"
+              placeholder="Your password"
+              required
+              {...form.getInputProps('password')}
+              mt="md"
+            />
+            {error && <Alert title="Error" color="red" mt="md">{error}</Alert>}
+            <Button type="submit" fullWidth mt="xl" size="md">
+              Sign In
+            </Button>
+          </form>
+          <Group position="apart" mt="md">
+            <Anchor component="button" type="button" color="dimmed" size="xs" onClick={() => navigate('/reset-password-email')}>
+              Forgot password?
+            </Anchor>
+            <Anchor component="button" type="button" color="dimmed" size="xs" onClick={() => navigate('/register')}>
+              Create an account
+            </Anchor>
+          </Group>
+          <Group position="center" mt="xl">
+            <GoogleLogin
+              onSuccess={handleGoogleLoginSuccess}
+              onError={handleGoogleLoginError}
+            />
+          </Group>
+        </Paper>
+      </Container>
+    </GoogleOAuthProvider>
   );
 }
 

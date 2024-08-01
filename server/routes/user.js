@@ -8,9 +8,14 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const { Op } = require('sequelize');
+const { OAuth2Client } = require('google-auth-library');
+const axios = require('axios');
 const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 const verifyRecaptcha = require('../middleware/recaptcha');
 const upload = require('../middleware/fileupload');
+
+// Google OAuth2 Client
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Input validation schema
 const userSchema = yup.object().shape({
@@ -28,7 +33,35 @@ const generateToken = (user, additionalInfo) => {
     };
     return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 };
+
+// Google Login Route
+router.post('/google-login', async (req, res) => {
+    const { token } = req.body;
+    try {
+      const ticket = await googleClient.verifyIdToken({
+        idToken: token,
+        audience: process.env.GOOGLE_CLIENT_ID
+      });
+      const payload = ticket.getPayload();
   
+      let user = await User.findOne({ where: { email: payload.email } });
+      if (!user) {
+        // Register new user if not found
+        user = await User.create({
+          email: payload.email,
+          role: 'RESIDENT', // Default role
+          is_activated: true // Automatically activate since it's from a trusted provider
+        });
+      }
+  
+      // If user exists, generate token
+      const token = generateToken(user);
+      res.status(200).json({ user, token });
+    } catch (error) {
+      console.error('Google login error:', error);
+      res.status(500).json({ error: 'Google login failed' });
+    }
+});
 
 // Create a new user and resident with input validation (This is for Registration, require reCaptcha)
 router.post('/register', verifyRecaptcha, async (req, res) => {
