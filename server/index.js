@@ -4,6 +4,7 @@ const cors = require('cors');
 const db = require('./models');
 const seedAdmin = require('./initialize'); // Adjust the path as needed
 require('dotenv').config();
+require('./middleware/cron');
 
 const { TranslateClient, TranslateTextCommand } = require('@aws-sdk/client-translate');
 
@@ -32,6 +33,7 @@ const courseRoute = require('./routes/course');
 const userRoute = require('./routes/user');
 // const rewardsRoute = require('./routes/rewards'); // Remove this line
 const ordersRoute = require('./routes/orders');
+const paymentRoute = require('./routes/payment');
 const postsRoute = require('./routes/post');
 
 // Translation logic
@@ -78,7 +80,8 @@ app.use("/courses", courseRoute);
 app.use('/user', userRoute);
 // app.use('/rewards', rewardsRoute); // Remove this line
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
-app.use("/orders", ordersRoute);    
+app.use("/orders", ordersRoute); 
+app.use("/payment", paymentRoute);
 app.use("/posts", postsRoute);
 
 db.sequelize.sync({ alter: true }).then(async () => {

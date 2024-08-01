@@ -38,7 +38,7 @@ function ViewOrders() {
     }
 
     return (
-        <Container size="md" style={{ marginTop: 20, textAlign: 'center' }}>
+        <Container size="md" style={{ marginTop: 20 }}>
             <Group position="apart" mb={30}>
                 <Button component={Link} to="/orders" variant="link">
                     <TiArrowBack />
@@ -56,28 +56,31 @@ function ViewOrders() {
             </Group>
 
             <Card shadow="sm" padding="lg" radius="md" withBorder>
-                <Text size="lg" weight={500}>
+                <Text size="lg" weight={500} align="left">
                     <strong>Course Title:</strong> {order.Course.course_name}
                 </Text>
-                <Text size="lg" weight={500}>
+                <Text size="lg" weight={500} align="left">
                     <strong>Order Status:</strong> {order.order_status}
                 </Text>
-                <Text size="lg" weight={500}>
+                <Text size="lg" weight={500} align="left">
                     <strong>Order Date:</strong> {dayjs(order.order_date).format(global.datetimeFormat)}
                 </Text>
-                <Text size="lg" weight={500}>
+                <Text size="lg" weight={500} align="left">
+                    <strong>Order Amount:</strong> ${order.Course.course_price}
+                </Text>
+                <Text size="lg" weight={500} align="left">
                     <strong>Instructor:</strong> {order.Course.course_instructor}
                 </Text>
-                <Text size="lg" weight={500}>
+                <Text size="lg" weight={500} align="left">
                     <strong>Course Description:</strong> {order.Course.course_description}
                 </Text>
-                <Text size="lg" weight={500}>
+                <Text size="lg" weight={500} align="left">
                     <strong>Course Date:</strong> {dayjs(order.Course.course_date).format(global.dateFormat)}
                 </Text>
-                <Text size="lg" weight={500}>
+                <Text size="lg" weight={500} align="left">
                     <strong>Start Time:</strong> {order.Course.course_start_time}
                 </Text>
-                <Text size="lg" weight={500}>
+                <Text size="lg" weight={500} align="left">
                     <strong>End Time:</strong> {order.Course.course_end_time}
                 </Text>
             </Card>
