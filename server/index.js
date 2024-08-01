@@ -46,7 +46,6 @@ app.use('/uploads', express.static('uploads'));
 // Routes
 const courseRoute = require('./routes/course');
 const userRoute = require('./routes/user');
-// const rewardsRoute = require('./routes/rewards'); // Remove this line
 const ordersRoute = require('./routes/orders');
 const paymentRoute = require('./routes/payment');
 const postsRoute = require('./routes/post');
