@@ -20,7 +20,7 @@ function Navbar() {
 
   return (
     <AppShell header={{ height: 50 }} navbar={{ width: 200, breakpoint: "xl" }}>
-      <AppShell.Header style={{ height: 50, backgroundColor: "#0F9D58" }}>
+      <AppShell.Header style={{ height: 50, backgroundColor: isStaff ? "#00A0D2" : "#0F9D58" }}>
         <Flex align="center" justify="space-between" style={{ height: "100%" }}>
           <Flex align="center">
             <Anchor href="/" style={{ textDecoration: "none" }}>
