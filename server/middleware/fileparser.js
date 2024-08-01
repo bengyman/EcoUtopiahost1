@@ -8,7 +8,7 @@ const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
 const region = process.env.S3_REGION;
 const Bucket = process.env.S3_BUCKET;
 
-const parsefile = async (req) => {
+const parsefile = async (req, res, next) => {
     return new Promise((resolve, reject) => {
         let options = {
             maxFileSize: 2 * 1024 * 1024 * 1024, // 2GB converted to bytes
@@ -21,6 +21,9 @@ const parsefile = async (req) => {
             if (err) {
                 reject(err.message);
             }
+            req.body = fields;
+            req.file = files.image;
+            next();
         });
 
         form.on('error', error => {
