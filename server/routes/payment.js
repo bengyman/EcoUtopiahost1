@@ -46,6 +46,8 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
 router.post('/process-order', async (req, res) => {
     const { sessionId } = req.body;
 
+    console.log('Received request to process order with sessionId:', sessionId);
+
     try {
         const session = await stripe.checkout.sessions.retrieve(sessionId);
 
@@ -68,5 +70,6 @@ router.post('/process-order', async (req, res) => {
         res.status(500).json({ error: 'Failed to process order' });
     }
 });
+
 
 module.exports = router;

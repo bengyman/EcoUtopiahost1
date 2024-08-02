@@ -7,6 +7,7 @@ import {
   TextInput,
   FileInput,
   Group,
+  Select,
 } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -20,14 +21,25 @@ function CreatePost() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [image, setImage] = useState(null);
+  const [tags, setTags] = useState(""); // State for tags
   const [loading, setLoading] = useState(false);
+  const [titleError, setTitleError] = useState(false);
+  const [contentError, setContentError] = useState(false);
+  const [tagsError, setTagsError] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
 
-    if (!title || !content) {
-      alert("Title and content are required");
+    const isTitleEmpty = !title;
+    const isContentEmpty = !content;
+    const isTagsEmpty = !tags;
+
+    setTitleError(isTitleEmpty);
+    setContentError(isContentEmpty);
+    setTagsError(isTagsEmpty);
+
+    if (isTitleEmpty || isContentEmpty || isTagsEmpty) {
       setLoading(false);
       return;
     }
@@ -37,6 +49,7 @@ function CreatePost() {
     formData.append("title", title);
     formData.append("content", content);
     if (image) formData.append("image", image);
+    formData.append("tags", tags);
 
     try {
       if (!token) throw new Error("No token found");
@@ -88,15 +101,45 @@ function CreatePost() {
             label="Title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            required
             mb="md"
+            error={titleError ? "Required" : null}
+            styles={(theme) => ({
+              input: {
+                borderColor: titleError ? theme.colors.red[7] : undefined,
+                color: titleError ? theme.colors.dark[9] : undefined,
+              },
+            })}
           />
           <TextInput
             label="Content"
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            required
             mb="md"
+            error={contentError ? "Required" : null}
+            styles={(theme) => ({
+              input: {
+                borderColor: contentError ? theme.colors.red[7] : undefined,
+                color: contentError ? theme.colors.dark[9] : undefined,
+              },
+            })}
+          />
+          <Select
+            label="Tag"
+            value={tags}
+            onChange={setTags}
+            data={[
+              { value: "Advice", label: "Advice" },
+              { value: "Discussion", label: "Discussion" },
+              { value: "Tips", label: "Tips" },
+            ]}
+            mb="md"
+            error={tagsError ? "Required" : null}
+            styles={(theme) => ({
+              input: {
+                borderColor: tagsError ? theme.colors.red[7] : undefined,
+                color: tagsError ? theme.colors.dark[9] : undefined,
+              },
+            })}
           />
           <FileInput
             label="Image"

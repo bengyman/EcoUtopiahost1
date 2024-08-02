@@ -3,8 +3,10 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import { Table, Container, Button, Group, Title, Text, TextInput, SegmentedControl, Modal, Pagination } from '@mantine/core';
 import { Search } from 'tabler-icons-react';
+import { useAuth } from '../context/AuthContext'; // Adjust the import path as necessary
 
 function AdminOrders() {
+  const { user } = useAuth();
   const [ordersList, setOrdersList] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,6 +26,10 @@ function AdminOrders() {
   }, []);
 
   useEffect(() => {
+    if (!user?.staff) {
+      return;
+    }
+
     const fetchOrders = async () => {
       try {
         const token = sessionStorage.getItem('token');
@@ -40,7 +46,7 @@ function AdminOrders() {
     };
 
     fetchOrders();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     let result = ordersList;
@@ -93,6 +99,10 @@ function AdminOrders() {
       console.error('Error processing refund approval:', error);
     }
   };
+
+  if (!user?.staff) {
+    return null; // Render nothing if the user is not STAFF
+  }
 
   if (isLoading) {
     return <Text align="center" style={{ marginTop: 50 }}>Loading...</Text>;
