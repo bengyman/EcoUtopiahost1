@@ -5,9 +5,11 @@ import { TextInput, PasswordInput, Button, Title, Alert, Container, Group, Ancho
 import { useAuth } from '../context/AuthContext';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import withRecaptcha from '../components/withRecaptcha';
+import { googleProvider, githubProvider } from '../components/Firebase';
+import { FaGoogle, FaGithub } from 'react-icons/fa';
 
 function Login() {
-  const { login } = useAuth();
+  const { login, loginWithOAuth } = useAuth();
   const navigate = useNavigate();
   const { executeRecaptcha } = useGoogleReCaptcha();
   const [error, setError] = useState('');
@@ -32,30 +34,37 @@ function Login() {
         return;
       }
 
-      // Attempt to log in
       const user = await login(values.email, values.password, recaptchaToken);
 
-      // Check if the account is soft-deleted
       if (user.is_deleted) {
         setError('Account is Invalid');
         return;
       }
 
-      setError(''); // Clear any previous errors
+      setError('');
       console.log('Login successful, redirecting to profile:', user.user_id);
 
-      // Redirect based on user activation status and role
       if (!user.is_activated) {
-        navigate('/account-activation'); // Navigate to Account Activation page if user is not activated
+        navigate('/account-activation');
       } else if (user.role === 'STAFF') {
-        navigate('/account-management'); // Navigate to Account Management page for staff
+        navigate('/account-management');
       } else {
-        navigate(`/profile/${user.user_id}`); // Navigate to profile with user ID for other users
+        navigate(`/profile/${user.user_id}`);
       }
 
     } catch (err) {
       setError('Failed to login');
       console.error('Login failed:', err);
+    }
+  };
+
+  const handleOAuthLogin = async (provider) => {
+    try {
+      const newUser = await loginWithOAuth(provider);
+      navigate(`/profile/${newUser.user_id}`);
+    } catch (err) {
+      setError(`${provider.providerId} login failed`);
+      console.error(`${provider.providerId} login failed:`, err);
     }
   };
 
@@ -84,6 +93,16 @@ function Login() {
             Sign In
           </Button>
         </form>
+        <Group position="center" mt="md" spacing="md" grow>
+          <Button onClick={() => handleOAuthLogin(googleProvider)} color="green" fullWidth>
+            <FaGoogle style={{ marginRight: 8 }} />
+            Sign In
+          </Button>
+          <Button onClick={() => handleOAuthLogin(githubProvider)} color="dark" fullWidth>
+            <FaGithub style={{ marginRight: 8 }} />
+            Sign In
+          </Button>
+        </Group>
         <Group position="apart" mt="md">
           <Anchor component="button" type="button" color="dimmed" size="xs" onClick={() => navigate('/reset-password-email')}>
             Forgot password?

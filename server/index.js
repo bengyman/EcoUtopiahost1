@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
+const cron = require('node-cron');
 const db = require('./models');
 const seedAdmin = require('./initialize'); // Adjust the path as needed
 const fileparser = require('./middleware/fileparser');
@@ -101,6 +102,12 @@ app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 app.use("/orders", ordersRoute); 
 app.use("/payment", paymentRoute);
 app.use("/posts", postsRoute);
+
+// Schedule the job to run every 15 minutes
+cron.schedule('*/15 * * * *', async () => {
+    console.log('Running the point record status update job...');
+    await updatePointRecordStatus();
+});
 
 db.sequelize.sync({ alter: true }).then(async () => {
     await seedAdmin(); // Seed the admin user

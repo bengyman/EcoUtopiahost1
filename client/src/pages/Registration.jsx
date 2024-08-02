@@ -6,10 +6,12 @@ import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import withRecaptcha from '../components/withRecaptcha';
+import { googleProvider, githubProvider } from '../components/Firebase';
+import { FaGoogle, FaGithub } from 'react-icons/fa';
 
 function Registration() {
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { register, loginWithOAuth } = useAuth();
   const { executeRecaptcha } = useGoogleReCaptcha();
   const [error, setError] = useState('');
 
@@ -50,6 +52,16 @@ function Registration() {
       }
     }
   });
+
+  const handleOAuthLogin = async (provider) => {
+    try {
+      const newUser = await loginWithOAuth(provider);
+      navigate(`/profile/${newUser.user_id}`);
+    } catch (err) {
+      setError(`${provider.providerId} login failed`);
+      console.error(`${provider.providerId} login failed:`, err);
+    }
+  };
 
   return (
     <Container size="xs" my={40}>
@@ -128,6 +140,16 @@ function Registration() {
             </Button>
           </Group>
         </form>
+        <Group position="center" mt="md" spacing="md" grow>
+          <Button onClick={() => handleOAuthLogin(googleProvider)} color="green" fullWidth>
+            <FaGoogle style={{ marginRight: 8 }} />
+            Sign In
+          </Button>
+          <Button onClick={() => handleOAuthLogin(githubProvider)} color="dark" fullWidth>
+            <FaGithub style={{ marginRight: 8 }} />
+            Sign In
+          </Button>
+        </Group>
         <Group position="center" mt="md">
           <Button variant="subtle" onClick={() => navigate('/login')}>
             Already have an account? Sign In

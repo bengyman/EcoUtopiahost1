@@ -8,8 +8,8 @@ function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const location = useLocation(); 
-  const { email, code } = location.state || {}; 
+  const location = useLocation();
+  const { email, code, token } = location.state || {};
 
   const handleSubmit = async () => {
     if (password !== confirmPassword) {
@@ -18,7 +18,7 @@ function ResetPassword() {
     }
 
     try {
-      await axios.put(`/user/password-reset/${code}`, { email, password }); 
+      await axios.put(`/user/password-reset/${code}`, { email, password, token });
       setError('');
       navigate('/password-reset-success');
     } catch (error) {

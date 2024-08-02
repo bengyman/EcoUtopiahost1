@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Container, Paper, Text, Title, Group, Avatar, Box, Grid, TextInput } from '@mantine/core';
+import { Button, Container, Paper, Text, Title, Avatar, Box, Grid, TextInput } from '@mantine/core';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
@@ -24,7 +24,7 @@ function EditProfile() {
           const response = await axios.get(`/user/${id}`, {
             headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }
           });
-          const { user: userData, resident, staff } = response.data;
+          const { user: userData, resident, staff, instructor } = response.data;
           
           if (userData.role === 'RESIDENT' && resident) {
             setProfileData({
@@ -33,6 +33,14 @@ function EditProfile() {
               lastName: resident.name.split(' ')[1],
               mobileNumber: resident.mobile_num,
               profilePic: resident.profile_pic || ''
+            });
+          } else if (userData.role === 'INSTRUCTOR' && instructor) {
+            setProfileData({
+              email: userData.email,
+              firstName: instructor.name.split(' ')[0],
+              lastName: instructor.name.split(' ')[1],
+              mobileNumber: instructor.mobilenum,
+              profilePic: instructor.profile_pic || ''
             });
           } else if (userData.role === 'STAFF' && staff) {
             setProfileData({
