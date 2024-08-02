@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Center, Container, Loader, Text } from '@mantine/core';
@@ -6,14 +6,20 @@ import { Center, Container, Loader, Text } from '@mantine/core';
 const Success = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const [hasProcessed, setHasProcessed] = useState(false);
     const sessionId = new URLSearchParams(location.search).get('session_id');
 
     useEffect(() => {
         const processOrder = async () => {
+            if (hasProcessed || !sessionId) return; // Prevent multiple calls or missing sessionId
+
+            setHasProcessed(true); // Mark as processed to prevent duplicate calls
+
             try {
+                console.log('Processing order with sessionId:', sessionId);
                 const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/payment/process-order`, { sessionId });
                 if (response.status === 200) {
-                    // Redirect to orders page after successful processing
+                    console.log('Order processed successfully');
                     setTimeout(() => {
                         navigate('/orders');
                     }, 3000); // 3 seconds delay
@@ -25,10 +31,8 @@ const Success = () => {
             }
         };
 
-        if (sessionId) {
-            processOrder();
-        }
-    }, [sessionId, navigate]);
+        processOrder();
+    }, [sessionId, navigate, hasProcessed]);
 
     return (
         <Center style={{ height: '100vh' }}>

@@ -37,39 +37,37 @@ const deleteFile = (filePath) => {
 };
 
 // Create a new post
-router.post('/create-post', authenticateToken, parsefile, async (req, res) => {
-    const transaction = await Post.sequelize.transaction();
-    try {
-      const { title, content, resident_id, residentName, tags } = req.body;
-      let image = req.file ? req.file.path : null; // Path to the uploaded image
+router.post('/create-post', authenticateToken, upload.single('image'), async (req, res) => {
+  const transaction = await Post.sequelize.transaction();
+  try {
+    const { title, content, resident_id, residentName, tags } = req.body;
+    let image = req.file ? req.file.path : null; // Path to the uploaded image
 
-      if (image) {
-        image = image.replace(/\\/g, '/').replace('ecoutopia-bucket/', '');
-      }
-  
-      // Validate the other fields
-      await postSchema.validate({ title, content, resident_id, residentName, tags });
-  
-      const newPost = await Post.create({
-        title,
-        content,
-        imageUrl: image,
-        resident_id,
-        residentName,
-        tags,
-      }, { transaction });
-
-      console.log('New post:', newPost);
-  
-      await transaction.commit();
-  
-      res.status(201).json({ post: newPost });
-    } catch (error) {
-      await transaction.rollback();
-      console.error('Post creation error:', error);
-      res.status(500).json({ error: error.message });
+    if (image) {
+      image = image.replace(/\\/g, '/').replace('public/', '');
     }
-  });
+
+    // Validate the other fields
+    await postSchema.validate({ title, content, resident_id, residentName, tags });
+
+    const newPost = await Post.create({
+      title,
+      content,
+      imageUrl: image,
+      resident_id,
+      residentName,
+      tags,
+    }, { transaction });
+
+    await transaction.commit();
+
+    res.status(201).json({ post: newPost });
+  } catch (error) {
+    await transaction.rollback();
+    console.error('Post creation error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // Fetch all posts
 router.get('/posts', authenticateToken, async (req, res) => {
