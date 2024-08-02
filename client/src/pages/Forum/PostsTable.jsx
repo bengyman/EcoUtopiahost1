@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Container, Button, Group, Title, Alert, TextInput, Paper, Pagination, ActionIcon, Select } from '@mantine/core';
 import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ClipboardCopy } from 'tabler-icons-react';
 import copy from 'copy-to-clipboard';

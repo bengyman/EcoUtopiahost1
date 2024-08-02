@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Container, Button, Group, Title, Alert, TextInput, Paper, Pagination, Switch, Modal, Select } from '@mantine/core';
 import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { Check, X } from 'tabler-icons-react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import http from '../http';
+import http from '../../http.js';
 import dayjs from 'dayjs';
-import global from '../global';
+import global from '../../global.js';
 import { Text, Container, Card, Button, Group } from '@mantine/core';
 import { TiArrowBack } from "react-icons/ti";
-import LoaderComponent from '../components/Loader.jsx';
+import LoaderComponent from '../../components/Loader.jsx';
 
 function ViewOrders() {
     const { orderId } = useParams();

@@ -12,9 +12,9 @@ import {
 } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext.jsx";
 import { IconPhoto } from "@tabler/icons-react";
-import LoaderComponent from "../components/Loader.jsx";
+import LoaderComponent from "../../components/Loader.jsx";
 
 function Profile() {
   const { logout, user } = useAuth();

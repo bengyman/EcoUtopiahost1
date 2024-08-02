@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from '@mantine/form';
 import { TextInput, PasswordInput, Button, Title, Alert, Container, Group, Anchor, Paper } from '@mantine/core';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
-import withRecaptcha from '../components/withRecaptcha';
-import { googleProvider, githubProvider } from '../components/Firebase';
+import withRecaptcha from '../../components/withRecaptcha';
+import { googleProvider, githubProvider } from '../../components/Firebase';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
 
 function Login() {

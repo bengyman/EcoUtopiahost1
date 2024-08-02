@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { TextInput, PasswordInput, Button, Container, Paper, Group, Title, Box, Alert } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import withRecaptcha from '../components/withRecaptcha';
-import { googleProvider, githubProvider } from '../components/Firebase';
+import withRecaptcha from '../../components/withRecaptcha';
+import { googleProvider, githubProvider } from '../../components/Firebase';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
 
 function Registration() {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Container, Paper, Text, Title, Group, Avatar, Box, Grid, TextInput } from '@mantine/core';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { IconPhoto } from '@tabler/icons-react';
 
 function ViewProfileAdmin() {

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext.jsx";
 import {
   Button,
   Container,
@@ -12,7 +12,7 @@ import {
   Group,
   Select,
 } from "@mantine/core";
-import LoaderComponent from "../components/Loader.jsx";
+import LoaderComponent from "../../components/Loader.jsx";
 
 function TestCreate() {
 
