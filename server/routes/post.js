@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path'); // Import the path module
 const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 const upload = require('../middleware/fileupload');
-const parsefile = require('../middleware/fileparser');
+const uploadFile = require('../middleware/uploadfile');
 
 
 const reportedPosts = {};
@@ -37,15 +37,20 @@ const deleteFile = (filePath) => {
 };
 
 // Create a new post
-router.post('/create-post', authenticateToken, upload.single('image'), async (req, res) => {
+router.post('/create-post', authenticateToken, uploadFile.single('image'), async (req, res) => {
   const transaction = await Post.sequelize.transaction();
   try {
     const { title, content, resident_id, residentName, tags } = req.body;
-    let image = req.file ? req.file.path : null; // Path to the uploaded image
-
-    if (image) {
-      image = image.replace(/\\/g, '/').replace('public/', '');
+    
+    let data = {};
+    
+    if (req.file) {
+      data.image = req.file.location;
     }
+
+    /*if (image) {
+      image = image.replace(/\\/g, '/').replace('public/', '');
+    }*/
 
     // Validate the other fields
     await postSchema.validate({ title, content, resident_id, residentName, tags });
@@ -53,7 +58,7 @@ router.post('/create-post', authenticateToken, upload.single('image'), async (re
     const newPost = await Post.create({
       title,
       content,
-      imageUrl: image,
+      imageUrl: data.image,
       resident_id,
       residentName,
       tags,
