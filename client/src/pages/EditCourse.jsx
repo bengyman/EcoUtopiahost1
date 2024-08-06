@@ -1,4 +1,5 @@
 import axios from 'axios'
+import daysjs from 'dayjs'
 import { 
     Container,
     Text,
@@ -42,7 +43,7 @@ function EditCourse() {
         course_start_time: '',
         course_end_time: '',
         course_capacity: '',
-        course_img: ''  
+        course_image_url: '', 
       });
 
     const ref = useRef(null);
@@ -64,142 +65,51 @@ function EditCourse() {
         if (!formData.course_start_time) errors.course_start_time = "Course start time is required";
         if (!formData.course_end_time) errors.course_end_time = "Course end time is required";
         if (!formData.course_capacity) errors.course_capacity = "Course capacity is required";
-        if (!formData.course_img) errors.course_img = "Course image is required";
+        if (!formData.course_image_url) errors.course_image_url = "Course image is required";
         return errors;
     };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prevState => ({
-            ...prevState,
-            [name]: value
-        }));
-    };
-
-    const handleFileChange = (file) => {
-        setFormData(prevState => ({
-            ...prevState,
-            course_img: file
-        }));
-    };
-
-   /*const handleSubmit = async () => {
-        const errors = validateForm();
+    const handleSubmit = async (event) => {
+        event.preventDefault();
         const formDataToSend = new FormData();
-        Object.keys(formData).forEach(key => {
-            if (key === 'course_img' && formData[key] instanceof File) {
-                formDataToSend.append(key, formData[key], formData[key].name);
-            } else {
-                //formData.append(key, formData[key]);
-            }
-        });
+        formDataToSend.append('course_name', formData.course_name);
+        formDataToSend.append('course_description', formData.course_description);
+        formDataToSend.append('course_price', formData.course_price);
+        formDataToSend.append('course_instructor', formData.course_instructor);
+        formDataToSend.append('course_type', formData.course_type);
+        formDataToSend.append('course_date', daysjs(formData.course_date).format('YYYY-MM-DD HH:mm:ss'));
+        formDataToSend.append('course_start_time', formData.course_start_time);
+        formDataToSend.append('course_end_time', formData.course_end_time);
+        formDataToSend.append('course_capacity', formData.course_capacity);
+        formDataToSend.append('course_image_url', formData.course_image_url);
+
+        const errors = validateForm();
         if (Object.keys(errors).length > 0) {
             setFormErrors(errors);
             return;
         }
         try {
-            //console.log(values);
-            const formattedData = {
-                ...formData,
-                course_date: new Date(formData.course_date).toISOString(),
-                course_start_time: formData.course_start_time,
-                course_end_time: formData.course_end_time,
-                course_capacity: parseInt(formData.course_capacity),
-                course_price: parseFloat(formData.course_price),
-                course_img: formDataToSend.course_img
-            };
-            console.log(`Formatted data: ${JSON.stringify(formattedData)}`);
-            const response = await axios.put(`http://localhost:3001/courses/updateCourse/${courseId}`, formattedData);
-            console.log(`AAAAAAA: ${response.data}`);
+            console.log("FormData entries");
+            console.log(`Course ID: ${courseId}`);
+            formDataToSend.forEach((value, key) => {
+                console.log(key, value);
+            });
+
+            const response = await axios.put(`/courses/update-course/${courseId}`, formDataToSend, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            console.log('Response:', response.data);
+            console.log('Course updated successfully');
             setSuccess(true);
-            setError(false)
+            navigate('/admin/view-courses');
             setFormErrors({});
-            setTimeout(() => {
-                navigate('/admin/view-courses')
-            }, 2000);
         } catch (error) {
-            console.error('Error:', JSON.stringify(error));
-            console.log(`FormData: ${JSON.stringify(formData)}`);
-            setError(true)
-            if (error.response) {
-                const responseErrors = error.response.data.errors || {};
-                setFormErrors(responseErrors);
-                setErrorMessage(JSON.stringify(error.response.data));
-            } else if (error.request) {
-                setErrorMessage('Error: No response received from the server.');
-                setError(true)
-            } else {
-                setErrorMessage(`Error: ${error.message}`);
-                setError(true)
-            }
+            setError(error)
+            setErrorMessage(`Error: ${error.message}, ${error.response.data.error}`);
         }
-    }*/
-
-        const handleSubmit = async () => {
-            const errors = validateForm();
-
-            if (Object.keys(errors).length > 0) {
-                setFormErrors(errors);
-                return;
-            }
-
-            try {
-                const token = sessionStorage.getItem('token');
-                // Create a FormData object to handle the file upload
-                const formDataToSend = new FormData();
-
-                // Append the image file to the FormData
-                if (formData.course_img instanceof File) {
-                    formDataToSend.append('course_img', formData.course_img, formData.course_img.name);
-                } else {
-                    formDataToSend.append('course_img', formData.course_img);
-                }
-
-                // Append the rest of the form data to FormData as a JSON string
-                formDataToSend.append('courseData', JSON.stringify({
-                    course_name: formData.course_name,
-                    course_description: formData.course_description,
-                    course_price: parseFloat(formData.course_price),
-                    course_instructor: formData.course_instructor,
-                    course_type: formData.course_type,
-                    course_date: new Date(formData.course_date).toISOString(),
-                    course_start_time: formData.course_start_time,
-                    course_end_time: formData.course_end_time,
-                    course_capacity: parseInt(formData.course_capacity),
-                    //course_img: formData.course_img,
-                }));
-
-                // Send the request
-                const response = await axios.put(`/courses/updateCourse/${courseId}`, formDataToSend, {
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                        "Content-Type": "multipart/form-data",
-                    },
-                });
-                //const response = await axios.put(`http://localhost:3000/api/courses/updateCourse/${courseId}`, formDataToSend);
-                console.log(formDataToSend);
-                console.log(`Response Data: ${JSON.stringify(response.data)}`);
-                setSuccess(true);
-                setError(false);
-                setFormErrors({});
-                setTimeout(() => {
-                    navigate('/admin/view-courses');
-                }, 2000);
-            } catch (error) {
-                console.error('Error:', JSON.stringify(error));
-                console.log(`FormData: ${JSON.stringify(formData)}`);
-                setError(true);
-                if (error.response) {
-                    const responseErrors = error.response.data.errors || {};
-                    setFormErrors(responseErrors);
-                    setErrorMessage(JSON.stringify(error.response.data));
-                } else if (error.request) {
-                    setErrorMessage('Error: No response received from the server.');
-                } else {
-                    setErrorMessage(`Error: ${error.message}`);
-                }
-            }
-        };
+    };
 
     useEffect(() => {
         document.title = 'Course Details - EcoUtopia'
@@ -218,7 +128,7 @@ function EditCourse() {
                     course_start_time: fetchedCourse.course_start_time,
                     course_end_time: fetchedCourse.course_end_time,
                     course_capacity: fetchedCourse.course_capacity,
-                    course_img: fetchedCourse.course_img
+                    course_image_url: fetchedCourse.course_image_url,
                 })
                 setLoading(false)
             } catch (error) {
@@ -253,16 +163,22 @@ function EditCourse() {
         <Container size="xl">
             <Box style={{ marginTop: 40 }} />
             <Title order={1} style={{ marginBottom: 20 }}>Edit Course</Title>
-            <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} encType="multipart/form-data">
+            <form onSubmit={handleSubmit}>
                 <Box>
                     <TextInput
                         label="Course Name"
                         placeholder="Enter course name"
                         value={formData.course_name}
-                        style={{ marginBottom: rem(1) }}
                         onChange={(event) => setFormData({ ...formData, course_name: event.target.value })}
-                        required
+                        style={{ marginBottom: rem(1) }}
                         error={formErrors.course_name}
+                        styles={(theme) => ({
+                            input: {
+                                borderColor: formErrors.course_name ? theme.colors.red[6] : theme.colors.gray[4],
+                                color: formErrors.course_name ? theme.colors.red[6] : theme.colors.gray[9],
+                            },
+                        })
+                        }
                     />
                     <Textarea
                         label="Course Description"
@@ -347,20 +263,12 @@ function EditCourse() {
                     />
                     <FileInput
                         label="Course Image"
-                        name="course_img"
+                        name="course_image_url"
                         placeholder="Choose course image"
                         accept="image/*"
                         required
-                        error={formErrors.course_img}
-                        onChange={handleFileChange}
-                        /*onChange={(files) => {
-                            const file = files[0];
-                            const reader = new FileReader();
-                            reader.onload = (e) => {
-                                setFormData({ ...formData, course_img: e.target.result });
-                            };
-                            reader.readAsDataURL(file);
-                        }}*/
+                        error={formErrors.course_image_url}
+                        onChange={(file => setFormData({ ...formData, course_image_url: file }))}
                      />
                     <Box style={{ marginTop: 20 }} />
                     <Group position="right" style={{ marginTop: 20 }}>
