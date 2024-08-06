@@ -1,10 +1,9 @@
-import React from 'react';
 import { useParams } from 'react-router-dom';
 import { Container, Image, Text } from '@mantine/core';
 
 const ImagePage = () => {
     const { imageUrl } = useParams();
-    const mediaSrc = `http://localhost:3001/${decodeURIComponent(imageUrl)}`;
+    const mediaSrc = `${decodeURIComponent(imageUrl)}`;
 
     const isImage = (url) => /\.(jpg|jpeg|png|gif)$/i.test(url);
     const isVideo = (url) => /\.(mp4|webm|ogg)$/i.test(url);
