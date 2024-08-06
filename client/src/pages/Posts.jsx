@@ -174,13 +174,13 @@ const Posts = () => {
                       <Image
                         w={400}
                         h={400}
-                        src={`http://localhost:3001/${post.imageUrl}`}
+                        src={`${post.imageUrl}`}
                       />
                     )}
                     {isVideo(post.imageUrl) && (
                       <video width="400" controls>
                         <source
-                          src={`http://localhost:3001/${post.imageUrl}`}
+                          src={`${post.imageUrl}`}
                           type="video/mp4"
                         />
                         Your browser does not support the video tag.

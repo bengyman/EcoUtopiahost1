@@ -176,14 +176,14 @@ const PostDetails = () => {
       {post.tags && <p style={{ fontStyle: 'italic', marginBottom: '10px' }}>Tags: {post.tags}</p>}
       {post.imageUrl && (
         isImageUrl(post.imageUrl) ? (
-          <img src={`http://localhost:3001/${post.imageUrl}`} alt={post.title} style={{ width: '400px', height: '400px', objectFit: 'cover', marginBottom: '10px' }} />
+          <img src={`${post.imageUrl}`} alt={post.title} style={{ width: '400px', height: '400px', objectFit: 'cover', marginBottom: '10px' }} />
         ) : (
           <video
             controls
             style={{ width: '400px', height: '400px', objectFit: 'cover', marginBottom: '10px' }}
             onEnded={(e) => { e.target.currentTime = 0; e.target.play(); }}
           >
-            <source src={`http://localhost:3001/${post.imageUrl}`} type="video/mp4" />
+            <source src={`${post.imageUrl}`} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         )
