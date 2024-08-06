@@ -1,61 +1,63 @@
 const express = require("express");
 const yup = require("yup");
 const { Course, Sequelize } = require("../models");
-const fileparser = require("../middleware/fileparser");
-const parsefile = require("../middleware/fileparser");
+const uploadFile = require('../middleware/uploadfile');
 const router = express.Router();
 
-router.post("/createCourse", async (req, res) => {
-  const schema = yup.object().shape({
-    course_name: yup.string().required("Course name is required"),
-    course_description: yup.string().required("Course description is required"),
-    course_instructor: yup.string().required("Instructor name is required"),
-    course_price: yup.number().required("Price is required"),
-    course_type: yup
-      .string()
-      .required("Course type is required")
-      .oneOf(
-        ["Online", "Physical"],
-        'Course type must be either "Online" or "Physical"'
-      ), // "Online" or "Physical"
-    course_date: yup
-      .date()
-      .required("Course date is required")
-      .min(new Date(), "Course date cannot be in the past") // Ensure the date is not in the past
-      .typeError("Invalid date format. Please use YYYY-MM-DD."),
-    course_start_time: yup
-      .string() // "HH:MM:SS"
-      .required("Course start time is required")
-      .matches(
-        /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/,
-        "Invalid time format. Please use HH:MM (24-hour format)."
-      ),
-    course_end_time: yup
-      .string()
-      .required("Course end time is required")
-      .test(
-        "end-time-after-start-time",
-        "End time must be after start time",
-        function (value) {
-          const startTime = this.parent.course_start_time;
-          if (!startTime || !value) return true; // Allow if either time is missing
-          return (
-            new Date(`2000-01-01 ${value}`) >
-            new Date(`2000-01-01 ${startTime}`)
-          );
-        }
-      )
-      .matches(
-        /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/,
-        "Invalid time format. Please use HH:MM (24-hour format)."
-      ), // "HH:MM:SS"
-    course_capacity: yup
-      .number()
-      .required("Course capacity is required")
-      .integer("Capacity must be a whole number")
-      .min(1, "Capacity must be at least 1"),
-  });
+const courseSchema = yup.object().shape({
+  course_name: yup.string().required("Course name is required"),
+  course_description: yup.string().required("Course description is required"),
+  course_instructor: yup.string().required("Instructor name is required"),
+  course_price: yup.number().required("Price is required"),
+  course_type: yup
+    .string()
+    .required("Course type is required")
+    .oneOf(
+      ["Online", "Physical"],
+      'Course type must be either "Online" or "Physical"'
+    ), // "Online" or "Physical"
+  course_date: yup
+    .date()
+    .required("Course date is required")
+    .min(new Date(), "Course date cannot be in the past") // Ensure the date is not in the past
+    .typeError("Invalid date format. Please use YYYY-MM-DD."),
+  course_start_time: yup
+    .string() // "HH:MM:SS"
+    .required("Course start time is required")
+    .matches(
+      /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/,
+      "Invalid time format. Please use HH:MM (24-hour format)."
+    ),
+  course_end_time: yup
+    .string()
+    .required("Course end time is required")
+    .test(
+      "end-time-after-start-time",
+      "End time must be after start time",
+      function (value) {
+        const startTime = this.parent.course_start_time;
+        if (!startTime || !value) return true; // Allow if either time is missing
+        return (
+          new Date(`2000-01-01 ${value}`) >
+          new Date(`2000-01-01 ${startTime}`)
+        );
+      }
+    )
+    .matches(
+      /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/,
+      "Invalid time format. Please use HH:MM (24-hour format)."
+    ), // "HH:MM:SS"
+  course_capacity: yup
+    .number()
+    .required("Course capacity is required")
+    .integer("Capacity must be a whole number")
+    .min(1, "Capacity must be at least 1"),
+  course_image_url: yup
+    .string()
+    .required("Image URL is required"),
+});
 
+router.post("/create-course", uploadFile.single('course_image_url'), async (req, res) => {
   try {
     const {
       course_name,
@@ -67,7 +69,30 @@ router.post("/createCourse", async (req, res) => {
       course_start_time,
       course_end_time,
       course_capacity,
-    } = await schema.validate(req.body, { abortEarly: false });
+      course_image_url,
+    } = req.body;
+
+    let data = {};
+    
+    if (req.file) {
+      data.image = req.file.location;
+    }
+    
+    await courseSchema.validate({
+      course_name,
+      course_description,
+      course_instructor,
+      course_price,
+      course_type,
+      course_date,
+      course_start_time,
+      course_end_time,
+      course_capacity,
+      course_image_url: data.image,
+    });
+
+    console.log(`image url: ${data.image}`);
+
     const course = await Course.create({
       course_name,
       course_description,
@@ -78,6 +103,7 @@ router.post("/createCourse", async (req, res) => {
       course_start_time,
       course_end_time,
       course_capacity,
+      course_image_url: data.image,
     });
     res.status(201).json(course);
   } catch (error) {
@@ -109,60 +135,11 @@ router.get("/getCourse/:id", async (req, res) => {
   }
 })
 
-router.put("/updateCourse/:id", parsefile, async (req, res) => {
-  const schema = yup.object().shape({
-    course_name: yup.string().required("Course name is required"),
-    course_description: yup.string().required("Course description is required"),
-    course_instructor: yup.string().required("Instructor name is required"),
-    course_price: yup.number().required("Price is required"),
-    course_type: yup
-      .string()
-      .required("Course type is required")
-      .oneOf(
-        ["Online", "Physical"],
-        'Course type must be either "Online" or "Physical"'
-      ), // "Online" or "Physical"
-    course_date: yup
-      .date()
-      .required("Course date is required")
-      .min(new Date(), "Course date cannot be in the past") // Ensure the date is not in the past
-      .typeError("Invalid date format. Please use YYYY-MM-DD."),
-    course_start_time: yup
-      .string() // "HH:MM:SS"
-      .required("Course start time is required")
-      .matches(
-        /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/,
-        "Invalid time format. Please use HH:MM (24-hour format)."
-      ),
-    course_end_time: yup
-      .string()
-      .required("Course end time is required")
-      .test(
-        "end-time-after-start-time",
-        "End time must be after start time",
-        function (value) {
-          const startTime = this.parent.course_start_time;
-          if (!startTime || !value) return true; // Allow if either time is missing
-          return (
-            new Date(`2000-01-01 ${value}`) >
-            new Date(`2000-01-01 ${startTime}`)
-          );
-        }
-      )
-      .matches(
-        /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/,
-        "Invalid time format. Please use HH:MM (24-hour format)."
-      ), // "HH:MM:SS"
-    course_capacity: yup
-      .number()
-      .required("Course capacity is required")
-      .integer("Capacity must be a whole number")
-      .min(1, "Capacity must be at least 1"),
-    course_image_url: yup
-      .string()
-      .required("Image URL is required"),
-  });
+router.put("/update-course/:id", uploadFile.single('course_image_url'), async (req, res) => {
   try {
+    console.log(`Request file: ${req.file}`);
+    console.log(`Request body: ${req.body}`);
+    console.log(`Request params: ${req.params}`);
     const course = await Course.findByPk(req.params.id);
     if (!course) {
       return res.status(404).json({ error: "Course not found" });
@@ -178,15 +155,15 @@ router.put("/updateCourse/:id", parsefile, async (req, res) => {
       course_end_time,
       course_capacity,
       course_image_url,
-    } = await schema.validate(req.body, { abortEarly: false });
+    } = req.body;
 
-    /*let course_img_url = course.course_image_url;
-    if (req.files && req.files.course_img) {
-      course_img_url = await parsefile(req.files);
-      console.log(`New image uploaded: ${course_img_url}`);
-    }*/
-
-    /*await course.update({
+    let data = {};
+    
+    if (req.file) {
+      data.image = req.file.location;
+    }
+    
+    await courseSchema.validate({
       course_name,
       course_description,
       course_instructor,
@@ -196,33 +173,25 @@ router.put("/updateCourse/:id", parsefile, async (req, res) => {
       course_start_time,
       course_end_time,
       course_capacity,
-      //course_image_url: course_img_url,
-      course_image_url,  
-
+      course_image_url: data.image,
     });
 
-    console.log(`Course ${course.course_name} updated successfully`);
-    res.status(200).json(course);*/
-    fileparser(req)
-      .then((result) => {
-        course.update({
-          course_name,
-          course_description,
-          course_instructor,
-          course_price,
-          course_type,
-          course_date,
-          course_start_time,
-          course_end_time,
-          course_capacity,
-          course_image_url
-        });
-        console.log(`Course ${course.course_name} updated successfully`);
-        res.status(200).json(course);
-      })
-      .catch((error) => {
-        res.status(400).json({ message: "Error uploading file: " + error });
-      });
+    console.log(`image url: ${data.image}`);
+  
+    await course.update({
+      course_name,
+      course_description,
+      course_instructor,
+      course_price,
+      course_type,
+      course_date,
+      course_start_time,
+      course_end_time,
+      course_capacity,
+      course_image_url: data.image,
+    });
+
+    res.status(200).json(course);
   }
   catch (error) {
     if (error instanceof Sequelize.ValidationError) {
