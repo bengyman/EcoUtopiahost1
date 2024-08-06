@@ -114,7 +114,6 @@ function Main() {
         <Route path="/posts/:id" element={<PostDetails />} />
         <Route path ="/admin/posts" element={<AdminPostsTable />} />
         <Route path="/image/:imageUrl" element={<ImagePage />} />
-
       </Routes>
     </>
   )
