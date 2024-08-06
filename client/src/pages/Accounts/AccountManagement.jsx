@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Container, Button, Group, Title, Alert, TextInput, Paper, Pagination, Switch, Modal, Select } from '@mantine/core';
 import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { Check, X } from 'tabler-icons-react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
@@ -29,7 +29,7 @@ function AccountManagement() {
     password: yup.string().min(8, 'Password must be at least 8 characters').required('Password is required'),
     confirmPassword: yup.string().oneOf([yup.ref('password'), null], 'Passwords must match').required('Confirm Password is required'),
     contactNumber: yup.string().required('Contact Number is required'),
-    role: yup.string().oneOf(['RESIDENT', 'STAFF']).required('Role is required')
+    role: yup.string().oneOf(['RESIDENT', 'STAFF', 'INSTRUCTOR']).required('Role is required')
   });
 
   const { handleSubmit, control, reset } = useForm({
@@ -77,7 +77,8 @@ function AccountManagement() {
         user.email.toLowerCase().includes(search.toLowerCase()) ||
         user.role.toLowerCase().includes(search.toLowerCase()) ||
         (user.Residents.length > 0 && user.Residents[0].name.toLowerCase().includes(search.toLowerCase())) ||
-        (user.Staffs.length > 0 && user.Staffs[0].name.toLowerCase().includes(search.toLowerCase()))
+        (user.Staffs.length > 0 && user.Staffs[0].name.toLowerCase().includes(search.toLowerCase())) ||
+        (user.Instructors.length > 0 && user.Instructors[0].name.toLowerCase().includes(search.toLowerCase()))
       );
     }
 
@@ -187,6 +188,7 @@ function AccountManagement() {
               data={[
                 { value: 'RESIDENT', label: 'Resident' },
                 { value: 'STAFF', label: 'Staff' },
+                { value: 'INSTRUCTOR', label: 'Instructor' },
               ]}
               value={filterRole}
               onChange={setFilterRole}
@@ -209,6 +211,7 @@ function AccountManagement() {
             {displayedUsers.length > 0 ? displayedUsers.map((user, index) => {
               const residentInfo = user.Residents.length > 0 ? user.Residents[0] : null;
               const staffInfo = user.Staffs.length > 0 ? user.Staffs[0] : null;
+              const instructorInfo = user.Instructors.length > 0 ? user.Instructors[0] : null;
               const greyedOut = isGreyedOut(user.email);
 
               return (
@@ -216,8 +219,8 @@ function AccountManagement() {
                   <td style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>{user.user_id}</td>
                   <td style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>{user.email}</td>
                   <td style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>{user.role}</td>
-                  <td style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>{residentInfo ? residentInfo.name : (staffInfo ? staffInfo.name : 'N/A')}</td>
-                  <td style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>{residentInfo ? residentInfo.mobile_num : (staffInfo ? staffInfo.mobilenum : 'N/A')}</td>
+                  <td style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>{residentInfo ? residentInfo.name : (staffInfo ? staffInfo.name : (instructorInfo ? instructorInfo.name : 'N/A'))}</td>
+                  <td style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>{residentInfo ? residentInfo.mobile_num : (staffInfo ? staffInfo.mobilenum : (instructorInfo ? instructorInfo.mobilenum : 'N/A'))}</td>
                   <td style={{ border: '1px solid #e0e0e0', padding: '8px', color: greyedOut ? '#9e9e9e' : 'inherit' }}>
                     <Group align="center">
                       <Switch
@@ -338,6 +341,7 @@ function AccountManagement() {
                 data={[
                   { value: 'RESIDENT', label: 'Resident' },
                   { value: 'STAFF', label: 'Staff' },
+                  { value: 'INSTRUCTOR', label: 'Instructor' },
                 ]}
                 required
                 {...field}

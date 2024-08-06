@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Button, Container, Paper, Text, Title, Group, Avatar, Box, Grid, TextInput } from '@mantine/core';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { IconPhoto } from '@tabler/icons-react';
 
-function EditProfile() {
-  const { user } = useAuth();
+function ViewProfileAdmin() {
   const navigate = useNavigate();
-  const { id } = useParams(); // Get user id from URL parameters
+  const { userId } = useParams(); // Get user_id from route parameters
+  const { logout } = useAuth(); // Assuming useAuth provides a logout function
   const [profileData, setProfileData] = useState({
     firstName: '',
     lastName: '',
@@ -18,39 +18,45 @@ function EditProfile() {
   });
 
   useEffect(() => {
-    if (id) {
-      const fetchProfile = async () => {
-        try {
-          const response = await axios.get(`/user/${id}`, {
-            headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }
-          });
-          const { user: userData, resident, staff } = response.data;
-          
-          if (userData.role === 'RESIDENT' && resident) {
-            setProfileData({
-              email: userData.email,
-              firstName: resident.name.split(' ')[0],
-              lastName: resident.name.split(' ')[1],
-              mobileNumber: resident.mobile_num,
-              profilePic: resident.profile_pic || ''
-            });
-          } else if (userData.role === 'STAFF' && staff) {
-            setProfileData({
-              email: userData.email,
-              firstName: staff.name.split(' ')[0],
-              lastName: staff.name.split(' ')[1],
-              mobileNumber: staff.mobilenum,
-              profilePic: staff.profile_pic || ''
-            });
-          }
-        } catch (error) {
-          console.error('Error fetching profile data:', error);
-        }
-      };
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get(`/user/${userId}`, {
+          headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }
+        });
+        const { user: userData, resident, staff } = response.data;
 
-      fetchProfile();
-    }
-  }, [id]);
+        if (userData.role === 'RESIDENT' && resident) {
+          setProfileData({
+            email: userData.email,
+            firstName: resident.name.split(' ')[0] || '',
+            lastName: resident.name.split(' ')[1] || '',
+            mobileNumber: resident.mobile_num || '',
+            profilePic: resident.profile_pic || ''
+          });
+        } else if (userData.role === 'STAFF' && staff) {
+          setProfileData({
+            email: userData.email,
+            firstName: staff.name.split(' ')[0] || '',
+            lastName: staff.name.split(' ')[1] || '',
+            mobileNumber: staff.mobilenum || '',
+            profilePic: staff.profile_pic || ''
+          });
+        } else {
+          setProfileData({
+            email: userData.email,
+            firstName: '',
+            lastName: '',
+            mobileNumber: '',
+            profilePic: ''
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
+      }
+    };
+
+    fetchProfile();
+  }, [userId]);
 
   const handleProfilePicChange = async (event) => {
     const file = event.target.files[0];
@@ -58,7 +64,7 @@ function EditProfile() {
 
     const formData = new FormData();
     formData.append('profilePic', file);
-    formData.append('userId', id);
+    formData.append('userId', userId);
 
     try {
       const response = await axios.post('/user/profile-picture', formData, {
@@ -72,34 +78,6 @@ function EditProfile() {
       console.error('Error uploading profile picture:', error);
     }
   };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setProfileData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-  const handleSave = async () => {
-    try {
-      await axios.put(`/user/${id}`, {
-        firstName: profileData.firstName,
-        lastName: profileData.lastName,
-        email: profileData.email,
-        mobileNumber: profileData.mobileNumber,
-      }, {
-        headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }
-      });
-      navigate(`/profile/${id}`);
-    } catch (error) {
-      console.error('Error saving profile data:', error);
-    }
-  };
-
-  if (!user) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <Container size="md" my={40}>
@@ -127,48 +105,55 @@ function EditProfile() {
                 <input hidden accept="image/*" type="file" onChange={handleProfilePicChange} />
               </Button>
             </label>
+            <Button variant="outline" fullWidth mt="md" onClick={() => navigate('/order-history')}>Order History</Button>
+            <Button variant="outline" fullWidth mt="md" onClick={() => navigate('/payment-methods')}>Payment Methods</Button>
           </Grid.Col>
           <Grid.Col span={8}>
             <Box>
-              <Title order={3}>Edit Profile</Title>
+              <Title order={3} mb="md">User Profile</Title>
               <TextInput
                 label="Email"
-                name="email"
-                value={profileData.email}
-                onChange={handleInputChange}
+                value={profileData.email || ''}
+                readOnly
                 style={{ marginBottom: '1rem' }}
                 variant="filled"
               />
               <TextInput
                 label="First Name"
-                name="firstName"
-                value={profileData.firstName}
-                onChange={handleInputChange}
+                value={profileData.firstName || ''}
+                readOnly
                 style={{ marginBottom: '1rem' }}
                 variant="filled"
               />
               <TextInput
                 label="Last Name"
-                name="lastName"
-                value={profileData.lastName}
-                onChange={handleInputChange}
+                value={profileData.lastName || ''}
+                readOnly
                 style={{ marginBottom: '1rem' }}
                 variant="filled"
               />
               <TextInput
                 label="Mobile Number"
-                name="mobileNumber"
-                value={profileData.mobileNumber}
-                onChange={handleInputChange}
+                value={profileData.mobileNumber || ''}
+                readOnly
                 variant="filled"
               />
-              <Button fullWidth mt="md" onClick={handleSave}>Save Changes</Button>
+              <Button fullWidth mt="md" onClick={() => navigate(`/edit-profile/${userId}`)}>Edit Profile</Button>
+              <Button fullWidth mt="md" color="red" onClick={() => navigate(`/change-password/${userId}`)}>Change Password</Button>
             </Box>
           </Grid.Col>
         </Grid>
+        <Box mt="xl" style={{ textAlign: 'center' }}>
+          <Text size="xl" weight={500}>Membership Information</Text>
+          <Text>Role: {profileData.role}</Text>
+          <Text>Thank you for your active participation in Sustainability Efforts!</Text>
+        </Box>
+        <Button color="red" fullWidth mt="md" onClick={() => { logout(); navigate('/login'); }}>
+          Logout
+        </Button>
       </Paper>
     </Container>
   );
 }
 
-export default EditProfile;
+export default ViewProfileAdmin;

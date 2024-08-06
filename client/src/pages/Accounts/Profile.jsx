@@ -12,9 +12,9 @@ import {
 } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext.jsx";
 import { IconPhoto } from "@tabler/icons-react";
-import LoaderComponent from "../components/Loader.jsx";
+import LoaderComponent from "../../components/Loader.jsx";
 
 function Profile() {
   const { logout, user } = useAuth();
@@ -66,7 +66,7 @@ function Profile() {
           throw new Error("Access denied.");
         }
 
-        const { user: userData, resident, staff } = response.data;
+        const { user: userData, resident, staff, instructor } = response.data;
         console.log(userData);
         console.log(userData.role);
 
@@ -87,6 +87,15 @@ function Profile() {
             mobileNumber: staff.mobilenum || "",
             profilePic: staff.profile_pic || "",
             role: "STAFF",
+          });
+        } else if (userData.role === "INSTRUCTOR" && instructor) {
+          setProfileData({
+            email: userData.email,
+            firstName: instructor.name.split(" ")[0] || "",
+            lastName: instructor.name.split(" ")[1] || "",
+            mobileNumber: instructor.mobilenum || "",
+            profilePic: instructor.profile_pic || "",
+            role: "INSTRUCTOR",
           });
         } else {
           setProfileData({

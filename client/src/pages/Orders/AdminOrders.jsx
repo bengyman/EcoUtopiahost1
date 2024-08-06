@@ -3,7 +3,7 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import { Table, Container, Button, Group, Title, Text, TextInput, SegmentedControl, Modal, Pagination } from '@mantine/core';
 import { Search } from 'tabler-icons-react';
-import { useAuth } from '../context/AuthContext'; // Adjust the import path as necessary
+import { useAuth } from '../../context/AuthContext'; // Adjust the import path as necessary
 
 function AdminOrders() {
   const { user } = useAuth();

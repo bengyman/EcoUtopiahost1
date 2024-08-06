@@ -11,8 +11,8 @@ import {
 } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useAuth } from "../context/AuthContext";
-import LoaderComponent from "../components/Loader.jsx";
+import { useAuth } from "../../context/AuthContext.jsx";
+import LoaderComponent from "../../components/Loader.jsx";
 
 function CreatePost() {
   const { user } = useAuth(); // Get user from AuthContext

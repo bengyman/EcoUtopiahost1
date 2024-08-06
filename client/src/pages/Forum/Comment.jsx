@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Button, TextInput, Group, Text } from '@mantine/core';
 import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 const Comment = ({ comment, onUpdate, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);

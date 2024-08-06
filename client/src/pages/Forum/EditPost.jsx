@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { TextInput, Container, Paper, Title, Button, Group } from '@mantine/core';
-import LoaderComponent from '../components/Loader.jsx';
+import LoaderComponent from '../../components/Loader.jsx';
 
 const EditPost = () => {
     const { id } = useParams();

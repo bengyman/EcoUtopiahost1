@@ -5,37 +5,44 @@ import { AuthProvider } from './context/AuthContext.jsx';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 
-// Pages and components
-import App from './pages/App.jsx';
-import TestPage from './pages/TestPage.jsx';
-import TestCreate from './pages/TestCreate.jsx';
-import Courses from './pages/Courses.jsx';
-import ViewCourse from './pages/ViewCourse.jsx';
+//components
 import Navbar from './components/Navbar.jsx';
-import Registration from './pages/Registration.jsx';
-import Login from './pages/Login.jsx';
-import Profile from './pages/Profile.jsx';
-import EditProfile from './pages/EditProfile.jsx';
-import ChangePassword from './pages/ChangePassword.jsx';
-import ResetPasswordEnterEmail from './pages/ResetPasswordEnterEmail.jsx';
-import ResetPasswordEnterCode from './pages/ResetPasswordEnterCode.jsx';
-import ResetPassword from './pages/ResetPassword.jsx';
-import PasswordResetSuccess from './pages/ResetPasswordSuccess.jsx';
-import AccountManagement from './pages/AccountManagement.jsx';
-import AccountActivation from './pages/AccountActivation.jsx'
-import Orders from './pages/Orders';
-import OrderDetails from './pages/OrderDetails';
-import AdminCourses from './pages/AdminCourses';
-import CreateCourse from './pages/CreateCourse';
-import EditCourse from './pages/EditCourse.jsx';
-import AdminOrders from './pages/AdminOrders';
-import Success from './pages/Success.jsx';
-import Posts from './pages/Posts';
-import CreatePost from './pages/CreatePost.jsx';
-import EditPost from './pages/EditPost.jsx';
-import PostDetails from './pages/PostDetails';
-import AdminPostsTable from './pages/PostsTable';
-import ImagePage from './pages/ImagePage.jsx';
+
+// Pages
+import App from './pages/App.jsx';
+import TestPage from './pages/Test/TestPage.jsx';
+import TestCreate from './pages/Test/TestCreate.jsx';
+//accounts
+import Registration from './pages/Accounts/Registration.jsx';
+import Login from './pages/Accounts/Login.jsx';
+import Profile from './pages/Accounts/Profile.jsx';
+import EditProfile from './pages/Accounts/EditProfile.jsx';
+import ChangePassword from './pages/Accounts/ChangePassword.jsx';
+import ResetPasswordEnterEmail from './pages/Accounts/ResetPasswordEnterEmail.jsx';
+import ResetPasswordEnterCode from './pages/Accounts/ResetPasswordEnterCode.jsx';
+import ResetPassword from './pages/Accounts/ResetPassword.jsx';
+import PasswordResetSuccess from './pages/Accounts/ResetPasswordSuccess.jsx';
+import AccountManagement from './pages/Accounts/AccountManagement.jsx';
+import AccountActivation from './pages/Accounts/AccountActivation.jsx';
+//courses
+import Courses from './pages/Courses/Courses.jsx';
+import ViewCourse from './pages/Courses/ViewCourse.jsx';
+import AdminCourses from './pages/Courses/AdminCourses.jsx';
+import CreateCourse from './pages/Courses/CreateCourse.jsx';
+import EditCourse from './pages/Courses/EditCourse.jsx';
+//forum
+import Posts from './pages/Forum/Posts.jsx';
+import CreatePost from './pages/Forum/CreatePost.jsx';
+import EditPost from './pages/Forum/EditPost.jsx';
+import PostDetails from './pages/Forum/PostDetails.jsx';
+import AdminPostsTable from './pages/Forum/PostsTable.jsx';
+import ImagePage from './pages/Forum/ImagePage.jsx';
+//orders
+import Orders from './pages/Orders/Orders.jsx';
+import OrderDetails from './pages/Orders/OrderDetails.jsx';
+import AdminOrders from './pages/Orders/AdminOrders.jsx';
+import Success from './pages/Orders/Success.jsx';
+
 
 import {
   BrowserRouter,
@@ -85,11 +92,11 @@ function Main() {
       <Box padding="xl" style={{ marginTop: '70px' }} />
       <Routes>
         <Route path="/" element={<App />} />
-        <Route path="/courses" element={<Courses />} />
-        <Route path="/course/:courseId" element={<ViewCourse />} />
-        <Route path="/login" element={<Login />} />
+        
         <Route path="/test" element={<TestPage />} />
         <Route path="/testcreate" element={<TestCreate />} />
+
+        <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Registration />} />
         <Route path="/login" element={<Login />} />
         <Route path="/profile/:paramId" element={<Profile />} />
@@ -101,19 +108,23 @@ function Main() {
         <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
         <Route path="/account-management" element={<AccountManagement />} />
         <Route path="/account-activation" element={<AccountActivation />} />
-        <Route path="/orders" element={<Orders />} />
-        <Route path="/orderdetails/:orderId" element={<OrderDetails />} />
-        <Route path="/admin/orders" element={<AdminOrders />} />
+
+        <Route path="/courses" element={<Courses />} />
+        <Route path="/course/:courseId" element={<ViewCourse />} />
         <Route path="/admin/view-courses" element={<AdminCourses />} />
         <Route path="/admin/create-course" element={<CreateCourse />} />
         <Route path="/admin/edit-course/:courseId" element={<EditCourse />} />
-        <Route path="/success" element={<Success />} />
+
         <Route path="/posts" element={<Posts />} />
         <Route path="/createPost" element = {<CreatePost />} />
         <Route path="/edit/:id" element={<EditPost />} />
         <Route path="/posts/:id" element={<PostDetails />} />
         <Route path ="/admin/posts" element={<AdminPostsTable />} />
         <Route path="/image/:imageUrl" element={<ImagePage />} />
+        <Route path="/orders" element={<Orders />} />
+        <Route path="/orderdetails/:orderId" element={<OrderDetails />} />
+        <Route path="/admin/orders" element={<AdminOrders />} />
+        <Route path="/success" element={<Success />} />
       </Routes>
     </>
   )
