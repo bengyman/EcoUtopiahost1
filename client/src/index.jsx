@@ -11,7 +11,7 @@ import Navbar from './components/Navbar.jsx';
 // Pages
 import App from './pages/App.jsx';
 import TestPage from './pages/Test/TestPage.jsx';
-import TestCreate from './pages/Test/TestCreate.jsx';
+
 //accounts
 import Registration from './pages/Accounts/Registration.jsx';
 import Login from './pages/Accounts/Login.jsx';
@@ -94,7 +94,6 @@ function Main() {
         <Route path="/" element={<App />} />
         
         <Route path="/test" element={<TestPage />} />
-        <Route path="/testcreate" element={<TestCreate />} />
 
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Registration />} />
