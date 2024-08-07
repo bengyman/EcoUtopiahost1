@@ -119,7 +119,7 @@ router.put("/refund/:id", authenticateToken, authorizeRoles('RESIDENT'), async (
   }
 });
 
-router.put("/approveRefund/:id", authenticateToken, authorizeRoles('ADMIN'), async (req, res) => {
+router.put("/approveRefund/:id", authenticateToken, authorizeRoles('STAFF'), async (req, res) => {
   let id = req.params.id;
   let order = await Orders.findByPk(id);
   if (order && order.order_status === 'Pending') {
