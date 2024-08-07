@@ -22,6 +22,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DATE,
             allowNull: false
         },
+        reward_image: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
 
     }, {
         tableName: 'rewards'
