@@ -59,6 +59,8 @@ const uploadFile = multer({
     storage: s3Storage,
     fileFilter: (req, file, callback) => {
         console.log("File received:", file);
+        console.log("File name:", file.originalname);
+        console.log("S3 Image URL:", file.location);
         sanitizeFile(file, callback)
     },
     limits: {
