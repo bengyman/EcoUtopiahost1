@@ -1,10 +1,8 @@
-import { useDisclosure } from '@mantine/hooks';
 import {
   Button,
   Container,
   Group,
   Anchor,
-  Modal,
   Text,
   Box,
   Card,
@@ -127,11 +125,6 @@ function App() {
           <Anchor href="/test" style={{ textDecoration: "none" }}>
             <Button color="deepBlue" radius="xl">
               Test
-            </Button>
-          </Anchor>
-          <Anchor href="/testcreate" style={{ textDecoration: "none" }}>
-            <Button color="blue" radius="xl">
-              Test Create
             </Button>
           </Anchor>
         </Group>
