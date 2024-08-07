@@ -29,7 +29,7 @@ module.exports = (sequelize) => {
             allowNull: false,
             defaultValue: 0,
         },
-        likes: {
+        likesCount: {
             type: DataTypes.INTEGER,
             allowNull: false,
             defaultValue: 0,
