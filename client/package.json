@@ -15,7 +15,7 @@
 		"@fortawesome/react-fontawesome": "^0.2.2",
 		"@hookform/resolvers": "^3.6.0",
 		"@mantine/core": "^7.11.0",
-		"@mantine/dates": "^7.11.2",
+		"@mantine/dates": "^7.12.0",
 		"@mantine/form": "^7.10.2",
 		"@mantine/hooks": "^7.10.2",
 		"@react-oauth/google": "^0.12.1",
@@ -38,8 +38,8 @@
 		"react-hook-form": "^7.52.0",
 		"react-icons": "^5.2.1",
 		"react-router-dom": "^6.23.1",
-		"react-social-login-buttons": "^4.1.0",
 		"react-share": "^5.1.0",
+		"react-social-login-buttons": "^4.1.0",
 		"tabler": "^1.0.0-alpha.8",
 		"tabler-icons-react": "^1.56.0",
 		"yup": "^1.4.0"
