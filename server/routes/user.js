@@ -13,6 +13,7 @@ const axios = require('axios');
 const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 const verifyRecaptcha = require('../middleware/recaptcha');
 const upload = require('../middleware/fileupload');
+const uploadfile = require('../middleware/uploadfile');
 
 // Google OAuth2 Client
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -572,7 +573,7 @@ router.put('/password-reset/:code', async (req, res) => {
 });
 
 // Route to upload or update a profile picture
-router.post('/profile-picture', upload.single('profilePic'), async (req, res) => {
+router.post('/profile-picture', uploadfile.single('profilePic'), async (req, res) => {
     const userId = req.body.userId; // Ensure the user is authenticated
     try {
         const resident = await Resident.findOne({ where: { user_id: userId } });
