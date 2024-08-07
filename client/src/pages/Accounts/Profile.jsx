@@ -9,6 +9,7 @@ import {
   Box,
   Grid,
   TextInput,
+  FileInput,
 } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
@@ -26,7 +27,7 @@ function Profile() {
     lastName: "",
     email: "",
     mobileNumber: "",
-    profilePic: "",
+    profile_pic_url: "",
     role: "",
   });
   const [loading, setLoading] = useState(true);
@@ -171,13 +172,19 @@ function Profile() {
                 style={{ display: "none" }}
                 onChange={handleProfilePicChange}
               />
-              <Button variant="contained" component="label">
+              <Button color="blue" variant="filled" type="submit">
                 Upload Image
-                <input
+                {/*<input
                   hidden
                   accept="image/*"
                   type="file"
                   onChange={handleProfilePicChange}
+                />*/}
+                <FileInput
+                  accept="image/*"
+                  onChange={handleProfilePicChange}
+                  type="file"
+                  style={{ display: "none" }}
                 />
               </Button>
             </label>
