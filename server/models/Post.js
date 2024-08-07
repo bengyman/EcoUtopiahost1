@@ -1,4 +1,6 @@
-module.exports = (sequelize, DataTypes) => {
+const { Sequelize, DataTypes } = require('sequelize');
+
+module.exports = (sequelize) => {
     const Post = sequelize.define('Post', {
         post_id: {
             type: DataTypes.INTEGER,
@@ -27,20 +29,50 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             defaultValue: 0,
         },
+        likes: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
+        },
         resident_id: {
             type: DataTypes.INTEGER,
             allowNull: true,
         },
-        residentName: { // Add this field to store the resident's name
+        residentName: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: false,
         },
+        commentsCount: {
+            type: DataTypes.VIRTUAL,
+            get() {
+                return this.getComments().then(comments => comments.length);
+            }
+        }
     }, {
         tableName: 'posts',
+        defaultScope: {
+            attributes: { include: ['commentsCount'] },
+        },
+        scopes: {
+            withCommentsCount: {
+                attributes: {
+                    include: [
+                        [sequelize.fn('COUNT', sequelize.col('Comments.post_id')), 'commentsCount']
+                    ]
+                },
+                include: [
+                    {
+                        model: sequelize.models.Comment,
+                        attributes: []
+                    }
+                ],
+                group: ['Post.post_id']
+            }
+        }
     });
 
     Post.associate = function (models) {
-        Post.belongsTo(models.Resident, { foreignKey: 'resident_id'});
+        Post.belongsTo(models.Resident, { foreignKey: 'resident_id' });
         Post.hasMany(models.Comment, { foreignKey: 'post_id', onDelete: 'CASCADE' });
     };
 
