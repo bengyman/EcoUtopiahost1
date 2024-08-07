@@ -56,6 +56,10 @@ module.exports = (sequelize, DataTypes) => {
         Course.hasMany(models.Orders, { foreignKey: 'course_id' });
     };
 
+    Course.associate = (models) => {
+        Course.belongsTo(models.Instructor, { foreignKey: 'instructorid' });
+    };
+
 
     return Course;
 }
