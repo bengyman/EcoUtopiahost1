@@ -53,11 +53,11 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Course.associate = (models) => {
-        Course.hasMany(models.Orders, { foreignKey: 'course_id' });
+        Course.hasMany(models.Orders, { foreignKey: 'course_id', onDelete: 'CASCADE' });
     };
 
     Course.associate = (models) => {
-        Course.belongsTo(models.Instructor, { foreignKey: 'instructorid' });
+        Course.belongsTo(models.Instructor, { foreignKey: 'instructorid', onDelete: 'CASCADE' });
     };
 
 
