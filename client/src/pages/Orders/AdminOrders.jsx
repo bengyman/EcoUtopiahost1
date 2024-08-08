@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import dayjs from 'dayjs';
-import { Table, Container, Button, Group, Title, Text, TextInput, SegmentedControl, Modal, Pagination } from '@mantine/core';
+import { Table, Container, Button, Group, Title, Text, TextInput, SegmentedControl, Modal, Pagination, Select } from '@mantine/core';
 import { Search } from 'tabler-icons-react';
-import { useAuth } from '../../context/AuthContext'; // Adjust the import path as necessary
+import { useAuth } from '../../context/AuthContext';
 
 function AdminOrders() {
   const { user } = useAuth();
@@ -15,12 +15,13 @@ function AdminOrders() {
   const [filter, setFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortField, setSortField] = useState('order_id'); // Sort field state
   const itemsPerPage = 10;
 
   useEffect(() => {
     let timer = setTimeout(() => {
       setIsLoading(false);
-    }, 300); // Display loader for at least 0.3 seconds
+    }, 300);
 
     return () => clearTimeout(timer);
   }, []);
@@ -65,8 +66,19 @@ function AdminOrders() {
       );
     }
 
+    // Sort orders based on the selected sort field
+    result = result.sort((a, b) => {
+      if (sortField === 'order_date') {
+        return new Date(b.order_date) - new Date(a.order_date);
+      } else if (sortField === 'course_price') {
+        return b.Course.course_price - a.Course.course_price;
+      } else {
+        return a.order_id - b.order_id;
+      }
+    });
+
     setFilteredOrders(result);
-  }, [filter, searchQuery, ordersList]);
+  }, [filter, searchQuery, sortField, ordersList]);
 
   const handleApproveClick = (orderId) => {
     setCurrentOrderId(orderId);
@@ -76,7 +88,7 @@ function AdminOrders() {
   const handleApprove = async () => {
     try {
       const token = sessionStorage.getItem('token');
-      console.log('Approving order ID:', currentOrderId); // Debugging log
+      console.log('Approving order ID:', currentOrderId);
       await axios.put(`http://localhost:3001/orders/approveRefund/${currentOrderId}`, {}, {
         headers: {
           Authorization: `Bearer ${token}`
@@ -103,7 +115,7 @@ function AdminOrders() {
   };
 
   if (!user?.staff) {
-    return null; // Render nothing if the user is not STAFF
+    return null;
   }
 
   if (isLoading) {
@@ -143,14 +155,26 @@ function AdminOrders() {
           onChange={(e) => setSearchQuery(e.target.value)}
           icon={<Search size={16} />}
         />
-        <SegmentedControl
-          value={filter}
-          onChange={setFilter}
-          data={[
-            { label: 'All Orders', value: 'All' },
-            { label: 'Pending Refunds', value: 'Pending' }
-          ]}
-        />
+        <Group>
+          <SegmentedControl
+            value={filter}
+            onChange={setFilter}
+            data={[
+              { label: 'All Orders', value: 'All' },
+              { label: 'Pending Refunds', value: 'Pending' }
+            ]}
+          />
+          <Select
+            value={sortField}
+            onChange={setSortField}
+            data={[
+              { value: 'order_id', label: 'Order ID' },
+              { value: 'order_date', label: 'Order Date' },
+              { value: 'course_price', label: 'Course Price' }
+            ]}
+            placeholder="Sort by"
+          />
+        </Group>
       </Group>
       <Table striped highlightOnHover style={{ border: '1px solid #e0e0e0' }}>
         <thead>
