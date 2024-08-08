@@ -8,7 +8,7 @@ const { authenticateToken } = require('../middleware/auth');
 require('dotenv').config();
 
 router.post('/create-checkout-session', authenticateToken, async (req, res) => {
-    const { items, course_id, cancel_url } = req.body; // Added cancel_url to req.body
+    const { items, course_id, cancel_url } = req.body;
     const resident = await Resident.findOne({ where: { user_id: req.user.id } });
 
     if (!resident) {
@@ -24,20 +24,20 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
                     product_data: {
                         name: item.name,
                     },
-                    unit_amount: item.price, // Corrected to multiply by 100 for cents
+                    unit_amount: item.price,
                 },
                 quantity: item.quantity,
             })),
             mode: 'payment',
             success_url: `${process.env.CLIENT_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: cancel_url, // Set cancel URL from request
+            cancel_url: cancel_url,
             metadata: {
                 resident_id: resident.resident_id,
                 course_id: course_id,
             },
         });
 
-        res.json({ id: session.id });
+        res.json({ id: session.id, payment_intent: session.payment_intent });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -59,6 +59,7 @@ router.post('/process-order', async (req, res) => {
                 resident_id,
                 order_date: new Date(),
                 order_status: 'Upcoming',
+                payment_intent: session.payment_intent, // Store the payment_intent
             });
 
             res.sendStatus(200);

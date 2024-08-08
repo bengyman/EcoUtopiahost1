@@ -76,11 +76,13 @@ function AdminOrders() {
   const handleApprove = async () => {
     try {
       const token = sessionStorage.getItem('token');
-      await axios.put(`http://localhost:3001/orders/${currentOrderId}`, {}, {
+      console.log('Approving order ID:', currentOrderId); // Debugging log
+      await axios.put(`http://localhost:3001/orders/approveRefund/${currentOrderId}`, {}, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
+
       const updatedOrders = ordersList.map(order =>
         order.order_id === currentOrderId
           ? { ...order, order_status: 'Refunded' }

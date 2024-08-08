@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { Orders, Course, Resident } = require('../models');
 const { authenticateToken, authorizeRoles } = require('../middleware/auth');
-
+const Stripe = require('stripe');
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY); // Make sure to set your Stripe secret key in your environment variables
 
 router.post("/", authenticateToken, async (req, res) => {
   try {
@@ -48,7 +49,6 @@ router.get("/", authenticateToken, authorizeRoles('STAFF', 'RESIDENT'), async (r
     res.status(500).json({ error: 'Failed to fetch orders' });
   }
 });
-
 
 router.get("/:id", async (req, res) => {
   try {
@@ -122,15 +122,33 @@ router.put("/refund/:id", authenticateToken, authorizeRoles('RESIDENT'), async (
 router.put("/approveRefund/:id", authenticateToken, authorizeRoles('STAFF'), async (req, res) => {
   let id = req.params.id;
   let order = await Orders.findByPk(id);
+  
   if (order && order.order_status === 'Pending') {
-    order.order_status = 'Refunded';
-    await order.save();
-    let updatedOrder = await Orders.findByPk(id, {
-      include: {
-        model: Course,
-      }
-    });
-    res.json(updatedOrder);
+    try {
+      // Fetch the Stripe PaymentIntent ID from your database
+      const paymentIntentId = order.payment_intent;
+
+      // Process the refund with Stripe
+      await stripe.refunds.create({
+        payment_intent: paymentIntentId,
+        reason: 'requested_by_customer',
+      });
+
+      // Update the order status
+      order.order_status = 'Refunded';
+      await order.save();
+
+      let updatedOrder = await Orders.findByPk(id, {
+        include: {
+          model: Course,
+        }
+      });
+
+      res.json(updatedOrder);
+    } catch (error) {
+      console.error('Error processing refund with Stripe:', error);
+      res.status(500).json({ error: 'Failed to process refund with Stripe' });
+    }
   } else {
     res.status(404).json({ error: 'Order not found or not in pending status' });
   }
