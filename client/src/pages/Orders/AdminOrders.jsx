@@ -132,7 +132,9 @@ function AdminOrders() {
   const rows = paginatedOrders.map((order, i) => (
     <tr key={order.order_id} style={{ backgroundColor: i % 2 === 0 ? '#f9f9f9' : '#ffffff' }}>
       <td style={{ border: '1px solid #e0e0e0', padding: '8px', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{order.order_id}</td>
-      <td style={{ border: '1px solid #e0e0e0', padding: '8px', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{order.resident_id}</td>
+      <td style={{ border: '1px solid #e0e0e0', padding: '8px', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        {order.resident_id} ({order.Resident ? order.Resident.name : 'Unknown'})
+      </td>
       <td style={{ border: '1px solid #e0e0e0', padding: '8px', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{order.Course.course_name}</td>
       <td style={{ border: '1px solid #e0e0e0', padding: '8px', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{order.order_status}</td>
       <td style={{ border: '1px solid #e0e0e0', padding: '8px', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{dayjs(order.order_date).format('YYYY-MM-DD HH:mm:ss')}</td>
@@ -144,6 +146,7 @@ function AdminOrders() {
       )}
     </tr>
   ));
+
 
   return (
     <Container size="md" style={{ marginTop: 20 }}>
