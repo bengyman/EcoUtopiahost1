@@ -10,11 +10,11 @@ const rewardSchema = yup.object().shape({
     reward_description: yup.string(),
     reward_points: yup.number().required("Reward points are required").min(0, "Reward points must be at least 0"),
     reward_expiry_date: yup.date().required("Reward expiry date is required").typeError("Invalid date format. Please use YYYY-MM-DD."),
-    reward_image: yup.string().url("Invalid URL format"),
+    reward_image: yup.string().url("Invalid URL format").nullable(),
 });
 
 // Create a reward
-router.post("/create-reward", uploadFile.single('reward_image'), async (req, res) => {
+router.post("/", uploadFile.single('reward_image'), async (req, res) => {
     try {
         const {
             reward_name,
@@ -74,7 +74,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // Update a reward
-router.put("/update-reward/:id", uploadFile.single('reward_image'), async (req, res) => {
+router.put("/:id", uploadFile.single('reward_image'), async (req, res) => {
     try {
         const reward = await Rewards.findByPk(req.params.id);
         if (!reward) {
@@ -118,13 +118,13 @@ router.put("/update-reward/:id", uploadFile.single('reward_image'), async (req, 
 // Soft delete a reward
 router.put('/softdelete/:id', async (req, res) => {
     try {
-        const reward = await Rewards.findByPk(req.params.id);
-        if (!reward) {
+        const rewards = await Rewards.findByPk(req.params.id);
+        if (!rewards) {
             return res.status(404).json({ error: 'Reward not found' });
         }
         
-        await reward.update({ is_deleted: true });
-        res.json({ message: 'Reward marked as deleted successfully' });
+        const updatedRewards = await rewards.update({ is_deleted: true });
+        res.status(200).json(updatedRewards);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -133,13 +133,13 @@ router.put('/softdelete/:id', async (req, res) => {
 // Soft restore a reward
 router.put('/softrestore/:id', async (req, res) => {
     try {
-        const reward = await Rewards.findByPk(req.params.id);
-        if (!reward) {
+        const rewards = await Rewards.findByPk(req.params.id);
+        if (!rewards) {
             return res.status(404).json({ error: 'Reward not found' });
         }
         
-        await reward.update({ is_deleted: false });
-        res.json({ message: 'Reward restored successfully' });
+        const updatedRewards = await rewards.update({ is_deleted: false });
+        res.status(200).json(updatedRewards);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
