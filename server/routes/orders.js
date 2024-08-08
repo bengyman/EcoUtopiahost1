@@ -16,14 +16,21 @@ router.post("/", authenticateToken, async (req, res) => {
   }
 });
 
+// Fetch all orders with associated Resident and Course details
 router.get("/", authenticateToken, authorizeRoles('STAFF', 'RESIDENT'), async (req, res) => {
   try {
     let list;
     if (req.user.role === 'STAFF') {
       list = await Orders.findAll({
-        include: {
-          model: Course,
-        },
+        include: [
+          {
+            model: Course,
+          },
+          {
+            model: Resident,
+            attributes: ['name']  // Fetch only the name of the resident
+          }
+        ],
         order: [['order_id', 'ASC']]
       });
     } else if (req.user.role === 'RESIDENT') {
@@ -35,9 +42,15 @@ router.get("/", authenticateToken, authorizeRoles('STAFF', 'RESIDENT'), async (r
         where: {
           resident_id: resident.resident_id
         },
-        include: {
-          model: Course,
-        },
+        include: [
+          {
+            model: Course,
+          },
+          {
+            model: Resident,
+            attributes: ['name']  // Fetch only the name of the resident
+          }
+        ],
         order: [['order_id', 'ASC']]
       });
     } else {
@@ -50,13 +63,20 @@ router.get("/", authenticateToken, authorizeRoles('STAFF', 'RESIDENT'), async (r
   }
 });
 
+// Fetch a specific order with associated Resident and Course details
 router.get("/:id", async (req, res) => {
   try {
     let id = req.params.id;
     let result = await Orders.findByPk(id, {
-      include: {
-        model: Course,
-      }
+      include: [
+        {
+          model: Course,
+        },
+        {
+          model: Resident,
+          attributes: ['name']  // Fetch only the name of the resident
+        }
+      ]
     });
     res.json(result);
   } catch (error) {
