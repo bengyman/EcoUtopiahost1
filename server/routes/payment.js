@@ -45,32 +45,41 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
 
 router.post('/process-order', async (req, res) => {
     const { sessionId } = req.body;
-
-    console.log('Received request to process order with sessionId:', sessionId);
-
     try {
-        const session = await stripe.checkout.sessions.retrieve(sessionId);
-
-        if (session.payment_status === 'paid') {
-            const { resident_id, course_id } = session.metadata;
-
-            await Orders.create({
-                course_id,
-                resident_id,
-                order_date: new Date(),
-                order_status: 'Upcoming',
-                payment_intent: session.payment_intent, // Store the payment_intent
-            });
-
-            res.sendStatus(200);
-        } else {
-            res.status(400).json({ error: 'Payment not completed' });
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+      if (session.payment_status === 'paid') {
+        const { resident_id, course_id } = session.metadata;
+  
+        // Check if the order already exists
+        const existingOrder = await Orders.findOne({
+          where: {
+            course_id,
+            resident_id,
+            payment_intent: session.payment_intent,
+          },
+        });
+  
+        if (existingOrder) {
+          return res.status(200).json({ message: 'Order already exists' });
         }
+  
+        await Orders.create({
+          course_id,
+          resident_id,
+          order_date: new Date(),
+          order_status: 'Upcoming',
+          payment_intent: session.payment_intent, // Store the payment_intent
+        });
+  
+        res.sendStatus(200);
+      } else {
+        res.status(400).json({ error: 'Payment not completed' });
+      }
     } catch (error) {
-        console.error('Error processing order:', error);
-        res.status(500).json({ error: 'Failed to process order' });
+      console.error('Error processing order:', error);
+      res.status(500).json({ error: 'Failed to process order' });
     }
-});
+  });
 
-
+  
 module.exports = router;

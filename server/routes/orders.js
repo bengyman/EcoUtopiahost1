@@ -82,25 +82,6 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.post("/addCourse", authenticateToken, authorizeRoles('RESIDENT'), async (req, res) => {
-  try {
-    const { course_id } = req.body;
-    const resident = await Resident.findOne({ where: { user_id: req.user.id } });
-    if (!resident) {
-      return res.status(404).json({ error: 'Resident details not found' });
-    }
-    const order = await Orders.create({
-      course_id,
-      resident_id: resident.resident_id,
-      order_date: new Date(),
-      order_status: 'Upcoming'
-    });
-    res.status(201).json(order);
-  } catch (error) {
-    console.error("Error adding course to orders:", error);
-    res.status(500).json({ error: 'Failed to add course to orders' });
-  }
-});
 
 router.put("/refund/:id", authenticateToken, authorizeRoles('RESIDENT'), async (req, res) => {
   let id = req.params.id;
