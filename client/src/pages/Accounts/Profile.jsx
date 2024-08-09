@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Button,
   Container,
@@ -9,7 +9,6 @@ import {
   Box,
   Grid,
   TextInput,
-  FileInput,
 } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
@@ -31,6 +30,7 @@ function Profile() {
     role: "",
   });
   const [loading, setLoading] = useState(true);
+  const fileInputRef = useRef(null); // Create a ref for the file input
 
   useEffect(() => {
     let timer = setTimeout(() => {
@@ -154,10 +154,6 @@ function Profile() {
               <Avatar
                 src={
                   profileData.profilePic
-                    ? `${import.meta.env.VITE_FILE_BASE_URL}${
-                        profileData.profilePic
-                      }`
-                    : ""
                 }
                 size={270}
                 radius={180}
@@ -171,21 +167,27 @@ function Profile() {
                 accept="image/*"
                 style={{ display: "none" }}
                 onChange={handleProfilePicChange}
+                ref={fileInputRef}
               />
-              <Button color="blue" variant="filled" type="submit">
+              <Button 
+              color="blue" 
+              variant="filled"
+              onClick={() => fileInputRef.current.click()} // Trigger click on file input
+              >
                 Upload Image
-                {/*<input
+                <input
                   hidden
                   accept="image/*"
                   type="file"
+                  name="profilePic"
                   onChange={handleProfilePicChange}
-                />*/}
-                <FileInput
+                />
+                {/*<FileInput
                   accept="image/*"
                   onChange={handleProfilePicChange}
                   type="file"
                   style={{ display: "none" }}
-                />
+                />*/}
               </Button>
             </label>
             <Button
