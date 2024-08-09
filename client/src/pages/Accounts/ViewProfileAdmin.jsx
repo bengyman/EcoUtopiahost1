@@ -86,7 +86,7 @@ function ViewProfileAdmin() {
           <Grid.Col span={4} style={{ textAlign: 'center' }}>
             <label htmlFor="profilePicInput">
               <Avatar
-                src={profileData.profilePic ? `${import.meta.env.VITE_FILE_BASE_URL}${profileData.profilePic}` : ''}
+                src={profileData.profilePic}
                 size={270}
                 radius={180}
                 style={{ cursor: 'pointer', marginBottom: '1rem' }}
