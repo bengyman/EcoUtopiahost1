@@ -30,6 +30,13 @@ module.exports = (sequelize, DataTypes) => {
         Instructor.belongsTo(models.User, { foreignKey: 'user_id' });
     };
 
+    Instructor.associate = (models) => {
+        Instructor.hasOne(models.Settings, { foreignKey: 'instructorid' });
+    }
+
+    Instructor.associate = (models) => {
+        Instructor.hasMany(models.Course, { foreignKey: 'instructorid' });
+    };
+
     return Instructor;
 };
-
