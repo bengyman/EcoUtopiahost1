@@ -25,12 +25,6 @@ module.exports = (sequelize, DataTypes) => {
       payment_intent: {
         type: DataTypes.STRING, 
         allowNull: true
-      }
-
-      order_id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
       },
       resident_id: {
         type: DataTypes.INTEGER,
