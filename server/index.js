@@ -46,7 +46,6 @@ app.use('/uploads', express.static('uploads'));
 
 // Routes
 const courseRoute = require('./routes/course');
-const instructorRoute = require('./routes/instructor');
 const userRoute = require('./routes/user');
 const ordersRoute = require('./routes/orders');
 const paymentRoute = require('./routes/payment');
@@ -98,7 +97,7 @@ app.post('/api/translate', handleTranslation);
 
 app.use("/courses", courseRoute);
 app.use('/user', userRoute);
-app.use('/instructor', instructorRoute);
+// app.use('/rewards', rewardsRoute); // Remove this line
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 app.use("/orders", ordersRoute); 
 app.use("/payment", paymentRoute);

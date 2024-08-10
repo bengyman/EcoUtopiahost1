@@ -39,5 +39,5 @@ module.exports = (sequelize, DataTypes) => {
         Rewards.belongsTo(models.Resident, { foreignKey: 'resident_id'})
     };
 
-    return Rewards;
+    return Rewards;
 }

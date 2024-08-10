@@ -1,3 +1,4 @@
+// models/PostLikes.js
 module.exports = (sequelize, DataTypes) => {
     const PostLikes = sequelize.define('PostLikes', {
         id: {

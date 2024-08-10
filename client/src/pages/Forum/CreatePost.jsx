@@ -8,6 +8,8 @@ import {
   FileInput,
   Group,
   Select,
+  Text,
+  Stack,
 } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -97,55 +99,71 @@ function CreatePost() {
           Create New Post
         </Title>
         <form onSubmit={handleSubmit}>
-          <TextInput
-            label="Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            mb="md"
-            error={titleError ? "Required" : null}
-            styles={(theme) => ({
-              input: {
-                borderColor: titleError ? theme.colors.red[7] : undefined,
-                color: titleError ? theme.colors.dark[9] : undefined,
-              },
-            })}
-          />
-          <TextInput
-            label="Content"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            mb="md"
-            error={contentError ? "Required" : null}
-            styles={(theme) => ({
-              input: {
-                borderColor: contentError ? theme.colors.red[7] : undefined,
-                color: contentError ? theme.colors.dark[9] : undefined,
-              },
-            })}
-          />
-          <Select
-            label="Tag"
-            value={tags}
-            onChange={setTags}
-            data={[
-              { value: "Advice", label: "Advice" },
-              { value: "Discussion", label: "Discussion" },
-              { value: "Tips", label: "Tips" },
-            ]}
-            mb="md"
-            error={tagsError ? "Required" : null}
-            styles={(theme) => ({
-              input: {
-                borderColor: tagsError ? theme.colors.red[7] : undefined,
-                color: tagsError ? theme.colors.dark[9] : undefined,
-              },
-            })}
-          />
-          <FileInput
-            label="Image"
-            onChange={setImage} // Update this line to directly set the image
-            mb="md"
-          />
+          <Stack spacing="md">
+            <div>
+              <TextInput
+                label="Title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                maxLength={50}
+                mb="xs"
+                error={titleError ? "Required" : null}
+                styles={(theme) => ({
+                  input: {
+                    borderColor: titleError ? theme.colors.red[7] : undefined,
+                    color: titleError ? theme.colors.dark[9] : undefined,
+                  },
+                })}
+              />
+              <Text size="sm" color="dimmed" align="right">
+                {50 - title.length} characters remaining
+              </Text>
+            </div>
+            <div>
+              <TextInput
+                label="Content"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                maxLength={300}
+                mb="xs"
+                error={contentError ? "Required" : null}
+                styles={(theme) => ({
+                  input: {
+                    borderColor: contentError ? theme.colors.red[7] : undefined,
+                    color: contentError ? theme.colors.dark[9] : undefined,
+                  },
+                })}
+              />
+              <Text size="sm" color="dimmed" align="right">
+                {300 - content.length} characters remaining
+              </Text>
+            </div>
+            <Select
+              label="Tag"
+              value={tags}
+              onChange={setTags}
+              data={[
+                { value: "Advice", label: "Advice" },
+                { value: "Discussion", label: "Discussion" },
+                { value: "Tips", label: "Tips" },
+                { value: "Question", label: "Question" },
+                { value: "Announcement", label: "Announcement" },
+              ]}
+              mb="md"
+              error={tagsError ? "Required" : null}
+              styles={(theme) => ({
+                input: {
+                  borderColor: tagsError ? theme.colors.red[7] : undefined,
+                  color: tagsError ? theme.colors.dark[9] : undefined,
+                },
+              })}
+            />
+            <FileInput
+              label="Image"
+              onChange={setImage} // Update this line to directly set the image
+              mb="md"
+            />
+          </Stack>
           <Group position="right" mt="md">
             <Button type="submit">Create Post</Button>
           </Group>
