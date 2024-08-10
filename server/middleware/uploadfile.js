@@ -35,8 +35,8 @@ const s3Storage = multerS3({
 // function to sanitize files and send error for unsupported files
 function sanitizeFile(file, cb) {
     // Define the allowed extension
-    //const fileExts = ["jpg", "jpeg", "png", "gif", "mp4", "mov", "webm", "pdf", "doc", "docx", "ppt", "pptx", "xls", "xlsx"];
-    const fileExts = [".png", ".jpg", ".jpeg", ".gif", ".mp4", ".avif", ".pdf", ".gif", ".webp"];
+     //const fileExts = ["jpg", "jpeg", "png", "gif", "mp4", "mov", "webm", "pdf", "doc", "docx", "ppt", "pptx", "xls", "xlsx"];
+     const fileExts = [".png", ".jpg", ".jpeg", ".gif", ".mp4"];
 
     // Check allowed extensions
     const isAllowedExt = fileExts.includes(
