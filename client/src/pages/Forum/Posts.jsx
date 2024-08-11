@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHeart, faComment } from '@fortawesome/free-solid-svg-icons'; // Import the heart icon
+import { faHeart, faComment, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons'; // Import the heart icon
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -186,40 +186,42 @@ const Posts = () => {
                 shadow="sm"
                 mb={20}
                 onClick={() => navigate(`/posts/${post.post_id}`)}
-                style={{ cursor: "pointer" }}
+                style={{ cursor: "pointer", position: "relative" }}
               >
-                <Group position="apart">
+                <Group position="right" style={{ position: "absolute", top: 10, right: 10 }}>
                   {post.resident_id === user?.resident?.resident_id && (
-                    <Group position="left">
+                    <>
                       <Button
                         variant="outline"
                         color="red"
+                        style={{ border: "none" }}
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedPostId(post.post_id);
                           setIsModalOpen(true);
                         }}
                       >
-                        Delete
+                        <FontAwesomeIcon icon={faTrash} />
                       </Button>
                       <Link to={`/edit/${post.post_id}`}>
                         <Button
                           variant="outline"
+                          style={{ border: "none" }}
                           onClick={(e) => e.stopPropagation()}
                         >
-                          Edit
+                          <FontAwesomeIcon icon={faPencil} />
                         </Button>
                       </Link>
-                    </Group>
+                    </>
                   )}
-                  <Group position="right">
-                    <Text size="sm" color="dimmed">
-                      {post.residentName ? post.residentName : "Anonymous"}
-                    </Text>
-                    <Text size="sm">
-                      {new Date(post.createdAt).toLocaleString()}
-                    </Text>
-                  </Group>
+                </Group>
+                <Group position="right" style={{ marginTop: 30 }}>
+                  <Text size="sm" color="dimmed">
+                    {post.residentName ? post.residentName : "Anonymous"}
+                  </Text>
+                  <Text size="sm">
+                    {new Date(post.createdAt).toLocaleString()}
+                  </Text>
                 </Group>
                 <Text weight={500} size="lg" mt="md">
                   {post.title}
