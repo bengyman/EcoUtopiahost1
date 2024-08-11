@@ -121,8 +121,8 @@ function Navbar() {
                   <Menu.Item icon={<IconUser size={14} />} onClick={() => navigate(`/profile/${user.user_id}`)}>
                     Profile
                   </Menu.Item>
-                  <Menu.Item icon={<IconGift size={14} />} onClick={() => navigate('/rewards')}>
-                    Rewards
+                  <Menu.Item icon={<IconGift size={14} />} onClick={() => navigate(`/${user.resident.resident_id}/reward`)}>
+                    View Rewards
                   </Menu.Item>
                   <Menu.Item icon={<IconLogout size={14} />} onClick={handleLogout} >
                     Log Out

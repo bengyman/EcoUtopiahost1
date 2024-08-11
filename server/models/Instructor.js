@@ -21,7 +21,11 @@ module.exports = (sequelize, DataTypes) => {
         profile_pic: {
             type: DataTypes.STRING,
             allowNull: true
-        }
+        },
+        background_pic: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
     }, {
         tableName: 'instructor'
     });

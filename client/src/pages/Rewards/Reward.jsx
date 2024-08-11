@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, TextInput, Textarea, NumberInput, Image, Notification, Container, Group, Title, Paper, Switch } from '@mantine/core';
-import { DateInput } from '@mantine/dates'; // Import DateInput from mantine
+import { Table, Button, Modal, TextInput, Textarea, NumberInput, Image, Notification, Container, Group, Title, Paper, Switch, Grid, Card, Badge, Text } from '@mantine/core';
+import { DateInput } from '@mantine/dates'; 
 import { Check, X } from 'tabler-icons-react';
 import { useForm } from '@mantine/form';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import dayjs from 'dayjs'; // Import dayjs for date formatting
+import dayjs from 'dayjs'; 
+import LoaderComponent from "../../components/Loader.jsx";
 
 const Rewards = () => {
   const [rewards, setRewards] = useState([]);
@@ -16,6 +18,8 @@ const Rewards = () => {
   const { user } = useAuth();
   const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const form = useForm({
     initialValues: {
@@ -34,6 +38,14 @@ const Rewards = () => {
 
   useEffect(() => {
     fetchRewards();
+  }, []);
+
+  useEffect(() => {
+    let timer = setTimeout(() => {
+      setLoading(false);
+    }, 300); // Display loader for at least 0.3 seconds
+
+    return () => clearTimeout(timer);
   }, []);
 
   const fetchRewards = async () => {
@@ -143,100 +155,51 @@ const Rewards = () => {
     setSelectedReward(null);
   };
 
-  if (!user) {
-    return null; // or a loading indicator
+  if (!user || loading) {
+    return <LoaderComponent />;
   }
 
   return (
     <Container size="xl" style={{ position: 'relative' }}>
-      <Title align="center" style={{ marginTop: 20 }}>Rewards Management</Title>
-      {user.role === 'STAFF' && (
-        <Button 
-          color="green"
-          style={{ position: 'absolute', top: 20, right: 20 }} 
-          onClick={openCreateModal}
-        >
-          Create Reward
-        </Button>
-      )}
-      {notification && (
-        <Notification
-          color={notification.type}
-          onClose={() => setNotification(null)}
-        >
-          {notification.message}
-        </Notification>
-      )}
-      <Paper withBorder shadow="md" p={30} mt={30} radius="md">
-        {user.role === 'STAFF' && (
-          <Table highlightOnHover withBorder="true">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Points</th>
-                <th>Expiry Date</th>
-                <th>Image</th>
-                <th>Deleted</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rewards.map((reward, index) => (
-                <tr key={reward.reward_id} style={{ backgroundColor: index % 2 === 0 ? '#f9f9f9' : '#ffffff' }}>
-                  <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>{reward.reward_name}</td>
-                  <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>{reward.reward_description}</td>
-                  <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>{reward.reward_points}</td>
-                  <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>{new Date(reward.reward_expiry_date).toLocaleDateString()}</td>
-                  <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>
-                    <Image 
-                      src={reward.reward_image} 
-                      alt={reward.reward_name} 
-                      style={{ width: '50px', height: '50px', objectFit: 'contain' }} 
-                    />
-                  </td>
-                  <td style={{ border: '1px solid #e0e0e0', padding: '8px', justifyContent: 'center', alignItems: 'center' }}>
-                     <Group align="center">
-                      <Switch
-                        checked={reward.is_deleted}
-                        onChange={() => handleToggleDelete(reward.reward_id, !reward.is_deleted)}
-                      />
-                      {reward.is_deleted ? (
-                        <Check color="green" size={16} />
-                      ) : (
-                        <X color="red" size={16} />
-                      )}
-                    </Group>
-                  </td>
-                  <td style={{ border: '1px solid #e0e0e0', padding: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <Button color="blue" onClick={() => openEditModal(reward)}>Edit</Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        )}
 
-        {user.role === 'RESIDENT' && (
-          <div>
-            <h3>Catalog of Rewards</h3>
-            <Table highlightOnHover withBorder="true">
+      {user.role === 'STAFF' && (
+        <>
+          <Title align="center" style={{ marginTop: 20 }}>Reward Management</Title>
+          <Button 
+            color="green"
+            style={{ position: 'absolute', top: 20, right: 20 }} 
+            onClick={openCreateModal}
+          >
+            Create Reward
+          </Button>
+
+          {notification && (
+            <Notification
+              color={notification.type}
+              onClose={() => setNotification(null)}
+            >
+              {notification.message}
+            </Notification>
+          )}
+
+          <Paper withBorder shadow="md" p={30} mt={30} radius="md">
+            <Table highlightOnHover>
               <thead>
                 <tr>
-                  <th>Name</th>
+                  <th>RewardID</th>
+                  <th>Image</th>
+                  <th>Reward</th>
                   <th>Description</th>
                   <th>Points</th>
                   <th>Expiry Date</th>
-                  <th>Image</th>
+                  <th>Deleted</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {rewards.map((reward, index) => (
                   <tr key={reward.reward_id} style={{ backgroundColor: index % 2 === 0 ? '#f9f9f9' : '#ffffff' }}>
-                    <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>{reward.reward_name}</td>
-                    <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>{reward.reward_description}</td>
-                    <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>{reward.reward_points}</td>
-                    <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>{new Date(reward.reward_expiry_date).toLocaleDateString()}</td>
+                    <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>{reward.reward_id}</td>
                     <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>
                       <Image 
                         src={reward.reward_image} 
@@ -244,13 +207,80 @@ const Rewards = () => {
                         style={{ width: '50px', height: '50px', objectFit: 'contain' }} 
                       />
                     </td>
+                    <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>{reward.reward_name}</td>
+                    <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>{reward.reward_description}</td>
+                    <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>{reward.reward_points}</td>
+                    <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>{new Date(reward.reward_expiry_date).toLocaleDateString()}</td>
+                    <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>
+                      <Group position="center" align="center">
+                        <Switch
+                          checked={reward.is_deleted}
+                          onChange={() => handleToggleDelete(reward.reward_id, !reward.is_deleted)}
+                        />
+                        {reward.is_deleted ? (
+                          <Check color="green" size={16} />
+                        ) : (
+                          <X color="red" size={16} />
+                        )}
+                      </Group>
+                    </td>
+                    <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>
+                      <Group position="center" align="center">
+                        <Button color="blue" onClick={() => openEditModal(reward)}>Edit</Button>
+                      </Group>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </Table>
-          </div>
-        )}
-      </Paper>
+          </Paper>
+        </>
+      )}
+
+      {user.role === 'RESIDENT' && (
+        <>
+          <Title align="center" style={{ marginTop: 20 }}>Catalog of Rewards</Title>
+          <Grid gutter="md" mt={30}>
+            {rewards.map((reward) => (
+              <Grid.Col key={reward.reward_id} span={4}>
+                <Card shadow="sm" padding="lg" radius="md" withBorder>
+                  <Card.Section>
+                    <Image
+                      src={reward.reward_image}
+                      alt={reward.reward_name}
+                      height={160}
+                      style={{ objectFit: 'contain' }}
+                    />
+                  </Card.Section>
+
+                  <Group position="apart" style={{ marginBottom: 5, marginTop: 5 }}>
+                    <Text weight={500}>{reward.reward_name}</Text>
+                    <Badge color="blue" variant="light">
+                      {reward.reward_points} Points
+                    </Badge>
+                  </Group>
+
+                  <Text size="sm" style={{ lineHeight: 1.5 }}>
+                    {reward.reward_description}
+                  </Text>
+
+                  <Text size="xs" color="dimmed" style={{ marginTop: 10 }}>
+                    Expiry Date: {new Date(reward.reward_expiry_date).toLocaleDateString()}
+                  </Text>
+
+                  <Button
+                    fullWidth
+                    style={{ marginTop: 10 }}
+                    onClick={() => navigate(`/reward/${reward.reward_id}`)}
+                  >
+                    View Details
+                  </Button>
+                </Card>
+              </Grid.Col>
+            ))}
+        </Grid>
+        </>
+      )}
 
       {/* Create Reward Modal */}
       <Modal opened={isCreating} onClose={closeModal} title="Create Reward">
@@ -262,7 +292,7 @@ const Rewards = () => {
           <Textarea label="Reward Description" {...form.getInputProps('reward_description')} />
           <NumberInput label="Reward Points" {...form.getInputProps('reward_points')} />
           <DateInput label="Expiry Date" {...form.getInputProps('reward_expiry_date')} />
-          <input type="file" onChange={handleFileChange} />
+          <TextInput label="Reward Image" type="file" onChange={handleFileChange} />
           {filePreview && <Image src={filePreview} alt="Selected file" style={{ width: '200px', height: '200px', objectFit: 'contain' }} />}
           <Group position="right" mt="md">
             <Button onClick={closeModal}>Cancel</Button>
@@ -281,7 +311,7 @@ const Rewards = () => {
           <Textarea label="Reward Description" {...form.getInputProps('reward_description')} />
           <NumberInput label="Reward Points" {...form.getInputProps('reward_points')} />
           <DateInput label="Expiry Date" {...form.getInputProps('reward_expiry_date')} />
-          <input type="file" onChange={handleFileChange} />
+          <TextInput label="Reward Image" type="file" onChange={handleFileChange} />
           {filePreview && <Image src={filePreview} alt="Selected file" style={{ width: '200px', height: '200px', objectFit: 'contain' }} />}
           <Group position="right" mt="md">
             <Button onClick={closeModal}>Cancel</Button>
