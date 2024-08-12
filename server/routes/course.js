@@ -124,6 +124,39 @@ router.get("/getCourses", async (req, res) => {
   }
 });
 
+/*router.get("/getInstructorCourses", async (req, res) => {
+  try {
+    const courses = await Course.findAll({
+      include: [{
+        model: Instructor,
+        attributes: ['name'],  // Include the instructor's name
+      }],
+    })
+    res.json(courses);
+    const instructorId = req.query.instructorId; // Get the instructor ID from the query parameter
+    const courses = await Course.findAll({
+      where: { instructorid: instructorId },
+      include: [{
+        model: Instructor,
+        attributes: ['name'],  // Include the instructor's name
+      }],
+    });
+    res.json(courses);
+  } catch (error) {
+    res.status(400).json({ error: error.errors });
+  }
+});*/
+
+router.get('/getInstructorCourses', async (req, res) => {
+  try {
+    const instructorId = req.user.id; // Assuming req.user contains the authenticated instructor's info
+    const courses = await Course.find({ course_instructor: instructorId });
+    res.json(courses);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.get("/getCourse/:id", async (req, res) => {
   try {
     const course = await Course.findByPk(req.params.id, {
