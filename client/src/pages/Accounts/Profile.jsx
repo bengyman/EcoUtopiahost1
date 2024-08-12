@@ -166,55 +166,64 @@ function Profile() {
     <Container size="md" my={40}>
       <Card shadow="sm" padding="lg" radius="md" withBorder>
         <Card.Section>
-          {profileData.backgroundImage ? (
-            <img
-              src={profileData.backgroundImage}
-              alt="Background"
-              style={{
-                width: "100%",
-                height: "auto",
-                maxHeight: "50vh", // Adjust max height relative to viewport height
-                objectFit: "cover",
-              }}
-            />
-          ) : (
+          <Box style={{ position: "relative", width: "100%", height: "50vh" }}>
+            {profileData.backgroundImage ? (
+              <img
+                src={profileData.backgroundImage}
+                alt="Background"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  zIndex: 0,
+                }}
+              />
+            ) : (
+              <Box
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  backgroundColor: "lightgray",
+                  borderRadius: "8px",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <IconPhoto width="100%" height="100%" color="gray" />
+              </Box>
+            )}
             <Box
-              sx={{
-                width: "100%",
-                height: "50vh",
-                backgroundColor: "lightgray",
-                borderRadius: "8px",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
+              style={{
+                position: "absolute",
+                bottom: "-8rem",
+                left: "50%",
+                transform: "translateX(-50%)",
+                zIndex: 1,
               }}
             >
-              <IconPhoto width="100%" height="100%" color="gray" />
-            </Box>
-          )}
-        </Card.Section>
-
-        <Grid align="center" mt="md">
-          <Grid.Col span={4} style={{ textAlign: "center" }}>
-            <label htmlFor="profilePicInput">
               {profileData.profilePic ? (
                 <img
                   src={profileData.profilePic}
                   alt="Profile"
                   style={{
-                    width: "100%",
-                    maxWidth: "15vw", // Adjust max width relative to viewport width
-                    maxHeight: "15vw", // Ensure the profile pic maintains aspect ratio
+                    width: "250px", // Adjust as needed
+                    height: "250px", // Ensure it matches width for a perfect circle
                     borderRadius: "50%",
                     objectFit: "cover",
                     cursor: "pointer",
+                    border: "3px solid white",
+                    marginRight: "38rem",
                   }}
                 />
               ) : (
                 <Avatar
-                  size="20vw"
+                  size="120px" // Adjust as needed
                   radius="50%"
-                  style={{ cursor: "pointer", marginBottom: "1rem" }}
+                  style={{ cursor: "pointer", marginBottom: "1rem", border: "3px solid white" }}
                 >
                   <Box
                     sx={{
@@ -231,6 +240,12 @@ function Profile() {
                   </Box>
                 </Avatar>
               )}
+            </Box>
+          </Box>
+        </Card.Section>
+        <Grid align="center" mt="md">
+          <Grid.Col span={4} style={{ textAlign: "center" }}>
+            <label htmlFor="profilePicInput">
               <input
                 id="profilePicInput"
                 type="file"
