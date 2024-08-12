@@ -16,6 +16,7 @@ import TestPage from './pages/Test/TestPage.jsx';
 import Registration from './pages/Accounts/Registration.jsx';
 import Login from './pages/Accounts/Login.jsx';
 import Profile from './pages/Accounts/Profile.jsx';
+import PublicProfile from './pages/Accounts/PublicProfile.jsx';
 import EditProfile from './pages/Accounts/EditProfile.jsx';
 import ChangePassword from './pages/Accounts/ChangePassword.jsx';
 import ResetPasswordEnterEmail from './pages/Accounts/ResetPasswordEnterEmail.jsx';
@@ -43,6 +44,10 @@ import Orders from './pages/Orders/Orders.jsx';
 import OrderDetails from './pages/Orders/OrderDetails.jsx';
 import AdminOrders from './pages/Orders/AdminOrders.jsx';
 import Success from './pages/Orders/Success.jsx';
+//rewards
+import Rewards from './pages/Rewards/Reward.jsx';
+import RewardDetail from './pages/Rewards/RewardDetail.jsx';
+import ViewReward from './pages/Rewards/ViewReward.jsx';
 
 
 import {
@@ -100,6 +105,7 @@ function Main() {
         <Route path="/register" element={<Registration />} />
         <Route path="/login" element={<Login />} />
         <Route path="/profile/:paramId" element={<Profile />} />
+        <Route path="/publicprofile/:paramId" element={<PublicProfile />} />
         <Route path="/edit-profile/:id" element={<EditProfile />} />
         <Route path="/change-password/:id" element={<ChangePassword />} />
         <Route path="/reset-password-email" element={<ResetPasswordEnterEmail />} />
@@ -125,7 +131,14 @@ function Main() {
         <Route path="/orderdetails/:orderId" element={<OrderDetails />} />
         <Route path="/admin/orders" element={<AdminOrders />} />
         <Route path="/success" element={<Success />} />
+
         <Route path="/admin/comment" element={<CommentTable />} />
+
+
+        <Route path="/rewards" element={<Rewards />} />
+        <Route path="/reward/:rewardId" element={<RewardDetail />} />
+        <Route path="/:residentId/reward" element={<ViewReward/>} />
+
       </Routes>
     </>
   )
