@@ -58,13 +58,11 @@ function Navbar() {
     fetchStaffData();
   }, [user]);
 
-
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  const isProfilePage = user && location.pathname === `/profile/${user.user_id}`;
   const isStaff = user && user.role === 'STAFF';
   const isResident = user && user.role === 'RESIDENT';
   const isInstructor = user && user.role === 'INSTRUCTOR';
@@ -171,7 +169,7 @@ function Navbar() {
                 </Button>
               </Anchor>
             )}
-            {user && !isProfilePage && (
+            {user && (
               <Menu shadow="md" width={200}>
                 <Menu.Target>
                   <Avatar
@@ -183,12 +181,15 @@ function Navbar() {
                 </Menu.Target>
                 <Menu.Dropdown>
                   <Menu.Item icon={<IconUser size={14} />} onClick={() => navigate(`/profile/${user.user_id}`)}>
-                    Profile
+                    Personal Info
                   </Menu.Item>
-                  <Menu.Item icon={<IconGift size={14} />} onClick={() => navigate(`/${user.resident.resident_id}/reward`)}>
+                  <Menu.Item icon={<IconUser size={14} />} onClick={() => navigate(`/publicprofile/${user.user_id}`)}>
+                    Public Profile
+                  </Menu.Item>
+                  <Menu.Item icon={<IconGift size={14} />} onClick={() => navigate(`/${user.resident?.resident_id}/reward`)}>
                     View Rewards
                   </Menu.Item>
-                  <Menu.Item icon={<IconLogout size={14} />} onClick={handleLogout} >
+                  <Menu.Item icon={<IconLogout size={14} />} onClick={handleLogout}>
                     Log Out
                   </Menu.Item>
                 </Menu.Dropdown>

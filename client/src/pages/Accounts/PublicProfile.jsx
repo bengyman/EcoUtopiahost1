@@ -6,6 +6,7 @@ import {
   Box,
   Button,
   Grid,
+  Text,
 } from "@mantine/core";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -26,6 +27,7 @@ function PublicProfile() {
     isFollowing: false,
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -36,6 +38,11 @@ function PublicProfile() {
         const isFollowing = user
           ? followersResponse.data.some((f) => f.Follower.user_id === user.user_id)
           : false;
+
+        if (!profileResponse.data.name) {
+          throw new Error("User not found");
+        }
+
         setProfileData({
           ...profileResponse.data,
           followers: followersResponse.data,
@@ -45,11 +52,12 @@ function PublicProfile() {
         setLoading(false);
       } catch (error) {
         console.error("Error fetching public profile:", error);
+        setError("404 ERROR User not found");
         setLoading(false);
       }
     };
     fetchProfile();
-  }, [paramId, user]);
+  }, [paramId, user, navigate]);
 
   const handleFollow = async () => {
     if (!user) {
@@ -70,7 +78,7 @@ function PublicProfile() {
         ...prevData,
         isFollowing: !prevData.isFollowing,
         followers: prevData.isFollowing
-          ? prevData.followers.filter((f) => f.Follower.user_id !== (user?.user_id))
+          ? prevData.followers.filter((f) => f.Follower.user_id !== user.user_id)
           : [...prevData.followers, { Follower: user }],
       }));
     } catch (error) {
@@ -81,6 +89,27 @@ function PublicProfile() {
   if (loading) {
     return <LoaderComponent />;
   }
+
+  if (error) {
+    return (
+      <Container size="lg" my={40} style={{ textAlign: "center", marginTop: "20px" }}>
+        <div>
+          <h1 style={{ fontSize: "150px", marginBottom: "20px", color: "#dc3545" }}>
+            404
+          </h1>
+          <h1 style={{ fontSize: "2rem", marginBottom: "20px", color: "#495057" }}>
+            Not Found
+          </h1>
+          <p style={{ fontSize: "1.2em", marginBottom: "20px", color: "#495057" }}>
+            The user you are looking for might be in another place.
+          </p>
+          <p>
+            Return to <span onClick={() => navigate("/")} style={{ color: "#007bff", cursor: "pointer" }}>Homepage</span>.
+          </p>
+        </div>
+      </Container>
+    );
+  }  
 
   return (
     <Container size="lg" my={40}>
@@ -107,7 +136,7 @@ function PublicProfile() {
                 height: "60px",
                 width: "200px",
                 position: "absolute",
-                bottom: "-30px",  // Positioned just below the background image
+                bottom: "-80px",  // Positioned just below the background image
                 right: "20px",  // Positioned to the bottom right corner
                 zIndex: 2,  // Ensure the button is above other elements
               }}
@@ -139,22 +168,22 @@ function PublicProfile() {
           <h2 style={{ marginBottom: "40px" }}>{profileData.name}</h2>
         </Box>
         <Grid align="center" justify="space-between" mt="md">
-          <Grid.Col span={5} style={{ padding: "0 15px" }}>  
+          <Grid.Col span={5} style={{ padding: "0 15px" }}>
             <Button
               fullWidth
               variant="outline"
               onClick={() => navigate(`/followers/${paramId}`)}
-              style={{ fontSize: "1.2rem", height: "60px" }}  
+              style={{ fontSize: "1.2rem", height: "60px" }}
             >
               {profileData.followers.length} Followers
             </Button>
           </Grid.Col>
-          <Grid.Col span={5} style={{ padding: "0 15px" }}>  
+          <Grid.Col span={5} style={{ padding: "0 15px" }}>
             <Button
               fullWidth
               variant="outline"
               onClick={() => navigate(`/following/${paramId}`)}
-              style={{ fontSize: "1.2rem", height: "60px" }}  
+              style={{ fontSize: "1.2rem", height: "60px" }}
             >
               {profileData.following.length} Following
             </Button>
