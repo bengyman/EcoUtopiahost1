@@ -43,9 +43,13 @@ module.exports = (sequelize) => {
             type: DataTypes.INTEGER,
             allowNull: true,
         },
-        residentName: {
+        residentName: {  // Make residentName nullable
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true,
+        },
+        name: {  // Add new column for name
+            type: DataTypes.STRING,
+            allowNull: true,  // Adjust according to your needs
         },
         commentsCount: {
             type: DataTypes.VIRTUAL,
@@ -78,7 +82,7 @@ module.exports = (sequelize) => {
 
     Post.associate = function (models) {
         Post.belongsTo(models.Resident, { foreignKey: 'resident_id' });
-        Post.belongsTo(models.Instructor, { foreignKey: 'instructor_id' }); // New association with Instructor
+        Post.belongsTo(models.Instructor, { foreignKey: 'instructor_id' });
         Post.hasMany(models.Comment, { foreignKey: 'post_id', onDelete: 'CASCADE' });
         Post.belongsToMany(models.User, { through: 'PostLikes', as: 'likedByUsers', foreignKey: 'postId' });
     };
