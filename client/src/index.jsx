@@ -117,7 +117,7 @@ function Main() {
         <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
         <Route path="/account-management" element={<AccountManagement />} />
         <Route path="/account-activation" element={<AccountActivation />} />
-        <Route path="/follower/:paramId" element={<FollowersList />} />
+        <Route path="/followers/:paramId" element={<FollowersList />} />
         <Route path="/following/:paramId" element={<FollowingList />} />
 
         <Route path="/courses" element={<Courses />} />
