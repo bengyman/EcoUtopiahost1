@@ -32,6 +32,7 @@ function AdminCourses() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [courseToDelete, setCourseToDelete] = useState(null);
+    const [instructors, setInstructors] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
@@ -47,7 +48,22 @@ function AdminCourses() {
           setLoading(false);
         }
       };
+
+      const fetchInstructors = async () => {
+        try {
+          const response = await axios.get(
+            "http://localhost:3000/api/instructor/getInstructors"
+          );
+          setInstructors(response.data);
+          setLoading(false);
+        } catch (error) {
+          setError(error);
+          setLoading(false);
+        }
+      };
+
       fetchCourses();
+      fetchInstructors();
       document.title = "Admin - EcoUtopia";
     }, []);
 
@@ -152,7 +168,11 @@ function AdminCourses() {
           </Table.Td>
         </Table.Tr>
       ));
+      let test = instructors.map((instructor) => (
+        console.log(instructor.name)
+      ));
   return (
+    console.log(test),
     <Container size="xl">
         <Box padding="xl" style={{marginTop: '30px'}} />
         <Title>Manage Courses</Title>
