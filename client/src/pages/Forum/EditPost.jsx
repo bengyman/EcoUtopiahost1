@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { TextInput, Container, Paper, Title, Button, Group } from '@mantine/core';
+import { TextInput, Container, Paper, Title, Button, Group, Text } from '@mantine/core';
 import LoaderComponent from '../../components/Loader.jsx';
 
 const EditPost = () => {
@@ -11,6 +11,17 @@ const EditPost = () => {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [loading, setLoading] = useState(false);
+
+    const TITLE_LIMIT = 50;
+    const CONTENT_LIMIT = 300;
+
+    const handleTitleChange = (e) => {
+        setTitle(e.target.value);
+    };
+
+    const handleContentChange = (e) => {
+        setContent(e.target.value);
+    };
 
     useEffect(() => {
         const fetchPost = async () => {
@@ -57,17 +68,27 @@ const EditPost = () => {
                         <TextInput
                             label="Title"
                             value={title}
-                            onChange={(e) => setTitle(e.target.value)}
+                            onChange={handleTitleChange}
                             required
                             mb="md"
+                            maxLength={TITLE_LIMIT}
                         />
+                        <Text align="right" color={title.length === TITLE_LIMIT ? 'red' : 'dimmed'}>
+                            {TITLE_LIMIT - title.length} characters remaining
+                        </Text>
                         <TextInput
                             label="Content"
                             value={content}
-                            onChange={(e) => setContent(e.target.value)}
+                            onChange={handleContentChange}
                             required
                             mb="md"
+                            maxLength={CONTENT_LIMIT}
+                            multiline
+                            rows={6}
                         />
+                        <Text align="right" color={content.length === CONTENT_LIMIT ? 'red' : 'dimmed'}>
+                            {CONTENT_LIMIT - content.length} characters remaining
+                        </Text>
                         <Group position="right" mt="md">
                             <Button type="submit">Update Post</Button>
                         </Group>

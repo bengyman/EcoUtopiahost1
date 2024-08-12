@@ -20,6 +20,7 @@ const PostDetails = () => {
   const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [translatedContent, setTranslatedContent] = useState('');
   const maxCommentLength = 100;
+  const maxEditingCommentLength = 100;
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -292,8 +293,15 @@ const PostDetails = () => {
                 <Textarea
                   value={editingContent}
                   onChange={(event) => setEditingContent(event.target.value)}
+                  required
+                  minLength={5}
+                  maxLength={maxCommentLength} // Added maxEditingCommentLength prop
                   style={{ width: '100%', height: '150px', marginBottom: '10px', borderRadius: '8px', padding: '10px', boxSizing: 'border-box' }} // Increased height and added box-sizing
                 />
+                <div style={{ textAlign: 'right', fontSize: '12px', color: maxEditingCommentLength - editingContent.length <= 0 ? 'red' : 'inherit' }}>
+                  {maxEditingCommentLength - editingContent.length} characters remaining
+                </div>
+
                 <Button type="submit" color="teal" style={{ marginRight: '10px' }}>
                   Save
                 </Button>
