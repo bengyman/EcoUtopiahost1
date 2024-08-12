@@ -630,27 +630,23 @@ router.post('/profile-picture', uploadfile.single('profilePic'), async (req, res
     try {
         const resident = await Resident.findOne({ where: { user_id: userId } });
         const staff = await Staff.findOne({ where: { user_id: userId } });
+        const instructor = await Instructor.findOne({ where: { user_id: userId } });
 
         if (resident) {
-            // Delete old profile picture if exists
-            /*if (resident.profile_pic && fs.existsSync(`./public/uploads/${resident.profile_pic}`)) {
-                fs.unlinkSync(`./public/uploads/${resident.profile_pic}`);
-            }*/
-
-            // Update new profile picture filename in the database
+            // Update new profile picture URL in the database
             resident.profile_pic = req.file.location;
             await resident.save();
-            res.send({ message: 'Resident profile picture updated successfully', fileName: req.file.filename });
+            res.send({ message: 'Resident profile picture updated successfully', fileName: req.file.location });
         } else if (staff) {
-            // Delete old profile picture if exists
-            /*if (staff.profile_pic && fs.existsSync(`./public/uploads/${staff.profile_pic}`)) {
-                fs.unlinkSync(`./public/uploads/${staff.profile_pic}`);
-            }*/
-
-            // Update new profile picture filename in the database
+            // Update new profile picture URL in the database
             staff.profile_pic = req.file.location;
             await staff.save();
-            res.send({ message: 'Staff profile picture updated successfully', fileName: req.file.filename });
+            res.send({ message: 'Staff profile picture updated successfully', fileName: req.file.location });
+        } else if (instructor) {
+            // Update new profile picture URL in the database
+            instructor.profile_pic = req.file.location;
+            await instructor.save();
+            res.send({ message: 'Instructor profile picture updated successfully', fileName: req.file.location });
         } else {
             res.status(404).send({ message: 'User not found' });
         }
@@ -658,6 +654,7 @@ router.post('/profile-picture', uploadfile.single('profilePic'), async (req, res
         res.status(500).send({ message: 'Server error', error: error.message });
     }
 });
+
 
 // Route to upload or update a background image
 router.post('/background-image', uploadfile.single('backgroundImage'), async (req, res) => {
