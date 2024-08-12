@@ -47,6 +47,16 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING(500),
             allowNull: true
         },
+        course_status: {
+            type: DataTypes.STRING(10),
+            allowNull: false,
+            defaultValue: 'draft'
+        },
+        // Foreign key
+        instructorid: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        }
 
     }, {
         tableName: 'courses',
@@ -61,5 +71,5 @@ module.exports = (sequelize, DataTypes) => {
     };
 
 
-    return Course;
+    return Course;
 }

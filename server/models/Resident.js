@@ -23,6 +23,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: true
         },
+        background_pic: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
         ecoPoints: {
             type: DataTypes.INTEGER,
             allowNull: true,
