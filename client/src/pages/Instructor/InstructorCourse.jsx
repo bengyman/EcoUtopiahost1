@@ -1,13 +1,19 @@
-import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, Table, Text, Button, Group } from '@mantine/core';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import {
+  IconChecklist,
+  IconFileCertificate,
+  IconSearch,
+} from '@tabler/icons-react';
+import { Container, Table, Text, ActionIcon, Group, Title, Box } from '@mantine/core';
 
 function InstructorCourse() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { instructorId } = useParams();
+  //const navigate = useNavigate();
 
   useEffect(() => {
     const fetchInstructorCourses = async () => {
@@ -32,30 +38,37 @@ function InstructorCourse() {
   if (loading) return <Text>Loading...</Text>;
   if (error) return <Text>Error: {error.message}</Text>;
 
+  const rows = courses.map(course => (
+    <Table.Tr key={course.course_id}>
+      <Table.Td>{course.course_name}</Table.Td>
+      <Table.Td>
+        <Group>
+          <ActionIcon variant="subtle" color="gray" onClick={() => viewCourseDetails(course.course_id)}>
+            <IconSearch />
+          </ActionIcon>
+          <ActionIcon variant="subtle" color="blue" onClick={() => checkAttendance(course.course_id)}>
+            <IconChecklist />
+          </ActionIcon>
+          <ActionIcon variant="subtle" color="green" onClick={() => giveCertificate(course.course_id)}>
+            <IconFileCertificate />
+          </ActionIcon>
+        </Group>
+      </Table.Td>
+    </Table.Tr>
+  ));
+
   return (
     <Container>
-      <Text size="xl" weight={700}>Assigned Courses</Text>
+      <Title order={2}>Assigned Courses</Title>
+      <Box padding="xl" style={{marginTop: '40px'}} />
       <Table>
-        <thead>
-          <tr>
-            <th>Course Name</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {courses.map(course => (
-            <tr key={course.course_id}>
-              <td>{course.course_name}</td>
-              <td>
-                <Group>
-                  <Button onClick={() => viewCourseDetails(course.course_id)}>View Details</Button>
-                  <Button onClick={() => checkAttendance(course.course_id)}>Check Attendance</Button>
-                  <Button onClick={() => giveCertificate(course.course_id)}>Give Certificate</Button>
-                </Group>
-              </td>
-            </tr>
-          ))}
-        </tbody>
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Course Name</Table.Th>
+            <Table.Th>Actions</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>{rows}</Table.Tbody>
       </Table>
     </Container>
   );
@@ -68,7 +81,8 @@ const viewCourseDetails = (courseId) => {
 
 const checkAttendance = (courseId) => {
   // Implement attendance checking logic
-  console.log(`Checking attendance for course ID: ${courseId}`);
+  //console.log(`Checking attendance for course ID: ${courseId}`);
+  window.location.href = `/instructor/check-attendance/${courseId}`;
 };
 
 const giveCertificate = (courseId) => {

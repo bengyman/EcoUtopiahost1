@@ -217,7 +217,7 @@ function AdminCourses() {
                 <Table.Th>Actions</Table.Th>
                 <Table.Th />
             </Table.Tr>
-            </Table.Thead>
+          </Table.Thead>
             <Table.Tbody>{rows}</Table.Tbody>
         </Table>
         </Table.ScrollContainer>
