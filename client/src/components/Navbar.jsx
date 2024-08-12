@@ -14,6 +14,10 @@ function Navbar() {
   const [residentDetails, setResidentDetails] = useState(null);
   const [staffDetails, setStaffDetails] = useState(null);
   const [profilePicUrl, setProfilePicUrl] = useState(null);
+  //const [courseId, setCourseId] = useState(null);
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchResidentData = async () => {
@@ -78,7 +82,44 @@ function Navbar() {
     };
     fetchInstructorData();
   }, [user]);
-    
+
+  /*useEffect(() => {
+    const fetchCourseId = async () => {
+      if (user && user.role === 'INSTRUCTOR') {
+        try {
+          const response = await axios.get(`/instructor/getCourses`, {
+            headers: {
+              Authorization: `Bearer ${sessionStorage.getItem('token')}`
+            }
+          });
+          setCourseId(response.data.course_id);
+        } catch (error) {
+          console.error('Error fetching course ID:', error);
+        }
+      }
+    };
+    fetchCourseId();
+  }, [user]);*/
+
+  useEffect(() => {
+    const fetchInstructorCourses = async () => {
+      try {
+        const response = await axios.get('localhost:3000/api/courses/getInstructorCourses', {
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem('token')}`,
+          },
+        });
+        setCourses(response.data);
+        setLoading(false);
+      } catch (error) {
+        setError(error);
+        setLoading(false);
+      }
+    };
+
+    fetchInstructorCourses();
+  }, []);
+
 
   const handleLogout = () => {
     logout();

@@ -14,4 +14,16 @@ router.get("/getInstructors", async (req, res) => {
   }
 });
 
+router.get("/getCourses/:instructorId", async (req, res) => {
+  try {
+    const courses = await Course.findAll({
+      where: { instructorid: req.params.instructorId },
+    });
+    res.json(courses);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 module.exports = router;

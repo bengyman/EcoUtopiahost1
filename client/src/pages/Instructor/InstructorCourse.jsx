@@ -12,7 +12,7 @@ function InstructorCourse() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await axios.get(`/api/courses/getCourses/${instructorId}`);
+        const response = await axios.get(`http://localhost:3000/api/instructor/getCourses/${instructorId}`);
         setCourses(response.data);
       } catch (error) {
         setError(error);
