@@ -73,6 +73,7 @@ function Courses() {
   //if (filteredCourses.length === 0) return <Text align="center">No courses found</Text>;
 
   return (
+    console.log(courses),
     <Container size="xl" style={{ marginTop: 20 }}>
       <Box padding="xl" style={{marginTop: '70px'}} />
       <Navbar />
@@ -89,13 +90,13 @@ function Courses() {
             value={selectedType}
             onChange={setSelectedType}
           />
-          {/*<Select
+          <Select
             label="Instructor"
             placeholder="Select instructor"
-            data={[...new Set(courses.map((course) => course.course_instructor))]}
+            data={[...new Set(courses.map((course) => course.Instructor.name))]}
             value={selectedInstructor}
             onChange={setSelectedInstructor}
-          />*.*/}
+          />
           <Checkbox
             label="Show only free courses"
             style={{ marginTop: 20 }}
