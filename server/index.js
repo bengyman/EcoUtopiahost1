@@ -50,6 +50,8 @@ const userRoute = require('./routes/user');
 const ordersRoute = require('./routes/orders');
 const paymentRoute = require('./routes/payment');
 const postsRoute = require('./routes/post');
+const rewardRoute = require('./routes/reward');
+const redeemrewardRoute = require('./routes/redeemreward');
 
 // Translation logic
 const translateText = async (text, targetLanguage) => {
@@ -97,11 +99,12 @@ app.post('/api/translate', handleTranslation);
 
 app.use("/courses", courseRoute);
 app.use('/user', userRoute);
-// app.use('/rewards', rewardsRoute); // Remove this line
+app.use('/reward', rewardRoute);
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 app.use("/orders", ordersRoute); 
 app.use("/payment", paymentRoute);
 app.use("/posts", postsRoute);
+app.use("/redeemreward", redeemrewardRoute);
 
 // Schedule the job to run every 15 minutes
 cron.schedule('*/15 * * * *', async () => {

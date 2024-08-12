@@ -9,6 +9,8 @@ import {
   Box,
   Grid,
   TextInput,
+  Card,
+  Image,
 } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
@@ -19,14 +21,15 @@ import LoaderComponent from "../../components/Loader.jsx";
 function Profile() {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
-  const { paramId } = useParams(); // Get paramId from route parameters
+  const { paramId } = useParams();
 
   const [profileData, setProfileData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     mobileNumber: "",
-    profile_pic_url: "",
+    profilePic: "",
+    backgroundImage: "",
     role: "",
   });
   const [loading, setLoading] = useState(true);
@@ -35,7 +38,7 @@ function Profile() {
   useEffect(() => {
     let timer = setTimeout(() => {
       setLoading(false);
-    }, 300); // Display loader for at least 0.3 seconds
+    }, 300);
 
     return () => clearTimeout(timer);
   }, []);
@@ -50,14 +53,12 @@ function Profile() {
 
         let response;
         if (user.user_id === parseInt(paramId)) {
-          // Fetch the personal profile data
           response = await axios.get(`/user/${user.user_id}`, {
             headers: {
               Authorization: `Bearer ${sessionStorage.getItem("token")}`,
             },
           });
         } else if (user.role === "STAFF") {
-          // Fetch the profile data of the user with the given paramId
           response = await axios.get(`/user/${paramId}`, {
             headers: {
               Authorization: `Bearer ${sessionStorage.getItem("token")}`,
@@ -68,8 +69,6 @@ function Profile() {
         }
 
         const { user: userData, resident, staff, instructor } = response.data;
-        console.log(userData);
-        console.log(userData.role);
 
         if (userData.role === "RESIDENT" && resident) {
           setProfileData({
@@ -78,6 +77,7 @@ function Profile() {
             lastName: resident.name.split(" ")[1] || "",
             mobileNumber: resident.mobile_num || "",
             profilePic: resident.profile_pic || "",
+            backgroundImage: resident.background_image || "",
             role: "RESIDENT",
           });
         } else if (userData.role === "STAFF" && staff) {
@@ -87,6 +87,7 @@ function Profile() {
             lastName: staff.name.split(" ")[1] || "",
             mobileNumber: staff.mobilenum || "",
             profilePic: staff.profile_pic || "",
+            backgroundImage: staff.background_image || "",
             role: "STAFF",
           });
         } else if (userData.role === "INSTRUCTOR" && instructor) {
@@ -96,6 +97,7 @@ function Profile() {
             lastName: instructor.name.split(" ")[1] || "",
             mobileNumber: instructor.mobilenum || "",
             profilePic: instructor.profile_pic || "",
+            backgroundImage: instructor.background_image || "",
             role: "INSTRUCTOR",
           });
         } else {
@@ -105,6 +107,7 @@ function Profile() {
             lastName: userData.lastName || "",
             mobileNumber: userData.mobileNumber || "",
             profilePic: userData.profile_pic || "",
+            backgroundImage: userData.background_image || "",
             role: userData.role || "",
           });
         }
@@ -141,25 +144,87 @@ function Profile() {
     }
   };
 
+  const handleBackgroundImageChange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("backgroundImage", file);
+    formData.append("userId", paramId);
+
+    try {
+      const response = await axios.post("/user/background-image", formData, {
+        headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
+      });
+      setProfileData((prevData) => ({
+        ...prevData,
+        backgroundImage: response.data.fileName,
+      }));
+    } catch (error) {
+      console.error("Error uploading background image:", error);
+    }
+  };
+
   if (!paramId || loading) {
     return <LoaderComponent />;
   }
 
   return (
     <Container size="md" my={40}>
-      <Paper withBorder shadow="md" p={30} radius="md">
-        <Grid align="center">
+      <Card shadow="sm" padding="lg" radius="md" withBorder>
+        <Card.Section>
+          {profileData.backgroundImage ? (
+            <Image
+              src={`${import.meta.env.VITE_FILE_BASE_URL}${profileData.backgroundImage}`}
+              alt="Background"
+              height={350}
+              style={{ objectFit: "cover", width: "100%" }}
+            />
+          ) : (
+            <Box
+              sx={{
+                width: "100%",
+                height: "350px",
+                backgroundColor: "lightgray",
+                borderRadius: "8px",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+                <IconPhoto width="100%" height="350px" color="gray"/>
+              </Box>
+            )}
+        </Card.Section>
+
+        <Grid align="center" mt="md">
           <Grid.Col span={4} style={{ textAlign: "center" }}>
             <label htmlFor="profilePicInput">
               <Avatar
                 src={
                   profileData.profilePic
+                    ? `${import.meta.env.VITE_FILE_BASE_URL}${profileData.profilePic}`
+                    : ""
                 }
                 size={270}
                 radius={180}
                 style={{ cursor: "pointer", marginBottom: "1rem" }}
               >
-                {!profileData.profilePic && <IconPhoto size={50} />}
+                {!profileData.profilePic && (
+                  <Box
+                    sx={{
+                      width: "100px",
+                      height: "100px",
+                      backgroundColor: "lightgray",
+                      borderRadius: "50%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <IconPhoto size={50} color="gray"/>
+                  </Box>
+                )}
               </Avatar>
               <input
                 id="profilePicInput"
@@ -188,8 +253,27 @@ function Profile() {
                   type="file"
                   style={{ display: "none" }}
                 />*/}
+
               </Button>
             </label>
+            <Button
+              color="gray"
+              variant="filled"
+              onClick={() =>
+                document.getElementById("backgroundImageInput").click()
+              }
+              fullWidth
+              mt="md"
+            >
+              Upload Background Image
+            </Button>
+            <input
+              id="backgroundImageInput"
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={handleBackgroundImageChange}
+            />
             <Button
               variant="outline"
               fullWidth
@@ -202,9 +286,9 @@ function Profile() {
               variant="outline"
               fullWidth
               mt="md"
-              onClick={() => navigate("/payment-methods")}
+              onClick={() => navigate(`/${paramId}/reward`)}
             >
-              Payment Methods
+              Redeemed Rewards
             </Button>
           </Grid.Col>
           <Grid.Col span={8}>
@@ -257,6 +341,7 @@ function Profile() {
             </Box>
           </Grid.Col>
         </Grid>
+
         <Box mt="xl" style={{ textAlign: "center" }}>
           <Text size="xl" weight={500}>
             Membership Information
@@ -277,7 +362,7 @@ function Profile() {
         >
           Logout
         </Button>
-      </Paper>
+      </Card>
     </Container>
   );
 }

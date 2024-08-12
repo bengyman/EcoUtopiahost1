@@ -20,6 +20,12 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  // Function to update user state and session storage
+  const setUserState = (userData) => {
+    setUser(userData);
+    sessionStorage.setItem('user', JSON.stringify(userData));
+  };
+
   const login = async (email, password, recaptchaToken) => {
     try {
       const response = await axios.post('/user/login', { email, password, recaptchaToken });
@@ -128,7 +134,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, loginWithOAuth, logout }}>
+    <AuthContext.Provider value={{ user, setUser: setUserState, login, register, loginWithOAuth, logout }}>
       {children}
     </AuthContext.Provider>
   );
