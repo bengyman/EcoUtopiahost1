@@ -17,9 +17,19 @@ const Success = () => {
 
             try {
                 console.log('Processing order with sessionId:', sessionId);
-                const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/payment/process-order`, { sessionId });
+                const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/payment/process-order`, { 
+                    sessionId,
+                });
                 if (response.status === 200) {
                     console.log('Order processed successfully');
+
+                    // Here you might want to handle the voucherCode update as well
+                    const { voucherCode } = response.data;
+                    if (voucherCode) {
+                        await axios.post(`${import.meta.env.VITE_API_BASE_URL}/redeemreward/use`, { voucherCode });
+                        console.log('Voucher code marked as used:', voucherCode);
+                    }
+
                     setTimeout(() => {
                         navigate('/orders');
                     }, 3000); // 3 seconds delay

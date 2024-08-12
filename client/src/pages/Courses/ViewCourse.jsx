@@ -19,7 +19,7 @@ import {
 } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { useState, useEffect } from "react";
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';  // Import useNavigate
 import { useStripe } from '@stripe/react-stripe-js';
 
 function ViewCourse() {
@@ -28,52 +28,25 @@ function ViewCourse() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showNotification, setShowNotification] = useState(false);
+  const navigate = useNavigate();  // Initialize useNavigate
   const stripe = useStripe();
 
-  useEffect(() => {
-    document.title = 'Course Details - EcoUtopia';
-    const fetchCourse = async () => {
-      try {
-        const response = await axios.get(`http://localhost:3000/api/courses/getCourse/${courseId}`);
-        setCourse(response.data);
+  useEffect(() => { 
+    document.title = 'Course Details - EcoUtopia'; 
+    const fetchCourse = async () => { 
+      try { const response = await axios.get(`http://localhost:3000/api/courses/getCourse/${courseId}`); 
+        setCourse(response.data); 
         setLoading(false);
-      } catch (error) {
-        setError(error);
-        setLoading(false);
-      }
-    };
-    fetchCourse();
+      } 
+      catch (error) { 
+        setError(error); 
+        setLoading(false); 
+      } 
+    }; fetchCourse(); 
   }, [courseId]);
 
-
-  const handleAddToOrder = async () => {
-    if (!stripe) {
-      return;
-    }
-
-    try {
-      const { data: { id } } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/payment/create-checkout-session`, {
-        items: [
-          { name: course.course_name, price: course.course_price * 100, quantity: 1 },
-        ],
-        course_id: course.course_id,
-        cancel_url: `${window.location.origin}/course/${courseId}`, // Set cancel URL
-      });
-
-      const { error } = await stripe.redirectToCheckout({ sessionId: id });
-
-      if (error) {
-        console.error('Stripe checkout error:', error);
-        setError(error);
-        setShowNotification(true);
-        setTimeout(() => setShowNotification(false), 3000);
-      }
-    } catch (error) {
-      console.error('There was an error creating the checkout session!', error);
-      setError(error);
-      setShowNotification(true);
-      setTimeout(() => setShowNotification(false), 3000);
-    }
+  const handleGoToApplyDiscount = () => {
+    navigate(`/apply-discount/${courseId}`);
   };
 
   if (loading) {
@@ -84,12 +57,9 @@ function ViewCourse() {
     );
   }
 
-
-
   if (!course) return <Text align="center">Course not found</Text>;
 
   return (
-    console.log(course),
     <Container size="xl" style={{ marginTop: 30 }}>
       <Paper padding="xl" shadow="md" radius="md" withBorder>
         <Title align="center" order={1} mb="md">
@@ -122,7 +92,7 @@ function ViewCourse() {
               <Button
                 size="lg"
                 radius="md"
-                onClick={handleAddToOrder}
+                onClick={handleGoToApplyDiscount}  // Call the navigation function
               >
                 Buy Course
               </Button>
@@ -152,7 +122,6 @@ function ViewCourse() {
               </ul>
             </Box>
           </Tabs.Panel>
-
 
           <Tabs.Panel value="instructor" pt="xs">
             <Group direction="row" align="center">

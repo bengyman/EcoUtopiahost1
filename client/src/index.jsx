@@ -47,6 +47,7 @@ import Orders from './pages/Orders/Orders.jsx';
 import OrderDetails from './pages/Orders/OrderDetails.jsx';
 import AdminOrders from './pages/Orders/AdminOrders.jsx';
 import Success from './pages/Orders/Success.jsx';
+import ApplyDiscount from './pages/Orders/ApplyDiscount.jsx';
 //rewards
 import Rewards from './pages/Rewards/Reward.jsx';
 import RewardDetail from './pages/Rewards/RewardDetail.jsx';
@@ -136,10 +137,12 @@ function Main() {
         <Route path="/posts/:id" element={<PostDetails />} />
         <Route path ="/admin/posts" element={<AdminPostsTable />} />
         <Route path="/image/:imageUrl" element={<ImagePage />} />
+
         <Route path="/orders" element={<Orders />} />
         <Route path="/orderdetails/:orderId" element={<OrderDetails />} />
         <Route path="/admin/orders" element={<AdminOrders />} />
         <Route path="/success" element={<Success />} />
+        <Route path="/apply-discount/:courseId" element={<ApplyDiscount />} />
 
         <Route path="/admin/comment" element={<CommentTable />} />
 
