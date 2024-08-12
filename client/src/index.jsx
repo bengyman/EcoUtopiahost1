@@ -47,10 +47,13 @@ import Orders from './pages/Orders/Orders.jsx';
 import OrderDetails from './pages/Orders/OrderDetails.jsx';
 import AdminOrders from './pages/Orders/AdminOrders.jsx';
 import Success from './pages/Orders/Success.jsx';
+import ApplyDiscount from './pages/Orders/ApplyDiscount.jsx';
 //rewards
 import Rewards from './pages/Rewards/Reward.jsx';
 import RewardDetail from './pages/Rewards/RewardDetail.jsx';
 import ViewReward from './pages/Rewards/ViewReward.jsx';
+import AddReward from './pages/Rewards/AddReward.jsx';
+import EditReward from './pages/Rewards/EditReward.jsx';
 // instructor
 import InstructorCourse from './pages/Instructor/InstructorCourse.jsx';
 
@@ -134,17 +137,20 @@ function Main() {
         <Route path="/posts/:id" element={<PostDetails />} />
         <Route path ="/admin/posts" element={<AdminPostsTable />} />
         <Route path="/image/:imageUrl" element={<ImagePage />} />
+
         <Route path="/orders" element={<Orders />} />
         <Route path="/orderdetails/:orderId" element={<OrderDetails />} />
         <Route path="/admin/orders" element={<AdminOrders />} />
         <Route path="/success" element={<Success />} />
+        <Route path="/apply-discount/:courseId" element={<ApplyDiscount />} />
 
         <Route path="/admin/comment" element={<CommentTable />} />
-
 
         <Route path="/rewards" element={<Rewards />} />
         <Route path="/reward/:rewardId" element={<RewardDetail />} />
         <Route path="/:residentId/reward" element={<ViewReward/>} />
+        <Route path="/addreward" element={<AddReward />} />
+        <Route path="/editreward/:id" element={<EditReward />} />
 
         <Route path="/instructor/courses/:instructorId" element={<InstructorCourse />} />
 

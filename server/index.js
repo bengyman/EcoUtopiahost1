@@ -54,6 +54,7 @@ const rewardRoute = require('./routes/reward');
 const redeemrewardRoute = require('./routes/redeemreward');
 const instructorRoute = require('./routes/instructor');
 const followRoute = require('./routes/follow')
+const discountRoute = require('./routes/discount')
 
 // Translation logic
 const translateText = async (text, targetLanguage) => {
@@ -109,6 +110,7 @@ app.use("/posts", postsRoute);
 app.use("/redeemreward", redeemrewardRoute);
 app.use('/instructor', instructorRoute);
 app.use('/follow', followRoute);
+app.use('/discount', discountRoute);
 
 db.sequelize.sync({ alter: true }).then(async () => {
     await seedAdmin(); // Seed the admin user

@@ -16,7 +16,8 @@ const ViewReward = () => {
   const fetchRedeemedRewards = async () => {
     try {
       const response = await axios.get(`/redeemreward/${user.resident.resident_id}`);
-      setRedeemedRewards(response.data);
+      const filteredRewards = response.data.filter(reward => !reward.reward_used); // Filter out used rewards
+      setRedeemedRewards(filteredRewards);
     } catch (error) {
       console.error('Error fetching redeemed rewards:', error);
     } finally {

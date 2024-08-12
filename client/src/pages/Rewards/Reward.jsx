@@ -1,40 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, TextInput, Textarea, NumberInput, Image, Notification, Container, Group, Title, Paper, Switch, Grid, Card, Badge, Text } from '@mantine/core';
-import { DateInput } from '@mantine/dates'; 
+import { Table, Button, Paper, Notification, Container, Group, Title, Switch, Grid, Card, Badge, Text, Image } from '@mantine/core';
 import { Check, X } from 'tabler-icons-react';
-import { useForm } from '@mantine/form';
+import axios from 'axios';
+import LoaderComponent from "../../components/Loader.jsx";
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import dayjs from 'dayjs'; 
-import LoaderComponent from "../../components/Loader.jsx";
 
 const Rewards = () => {
   const [rewards, setRewards] = useState([]);
-  const [selectedReward, setSelectedReward] = useState(null);
-  const [isCreating, setIsCreating] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [notification, setNotification] = useState(null);
-  const { user } = useAuth();
-  const [file, setFile] = useState(null);
-  const [filePreview, setFilePreview] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
   const navigate = useNavigate();
-
-  const form = useForm({
-    initialValues: {
-      reward_name: '',
-      reward_description: '',
-      reward_points: 0,
-      reward_expiry_date: new Date(),
-      reward_image: ''
-    },
-    validate: {
-      reward_name: (value) => value.length > 0 ? null : 'Reward name is required',
-      reward_points: (value) => value > 0 ? null : 'Reward points must be greater than 0',
-      reward_expiry_date: (value) => value ? null : 'Expiry date is required',
-    }
-  });
 
   useEffect(() => {
     fetchRewards();
@@ -57,70 +34,10 @@ const Rewards = () => {
     }
   };
 
-  const handleFileChange = (event) => {
-    const selectedFile = event.currentTarget.files[0];
-    setFile(selectedFile);
-    setFilePreview(URL.createObjectURL(selectedFile));
-  };
-
-  const handleCreateReward = async () => {
-    const formData = new FormData();
-    formData.append('reward_name', form.values.reward_name);
-    formData.append('reward_description', form.values.reward_description);
-    formData.append('reward_points', form.values.reward_points);
-    formData.append('reward_expiry_date', dayjs(form.values.reward_expiry_date).format('YYYY-MM-DD'));
-    if (file) {
-      formData.append('reward_image', file);
-    }
-
-    try {
-      const response = await axios.post('/reward', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      setRewards([...rewards, response.data]);
-      setIsCreating(false);
-      setNotification({ type: 'success', message: 'Reward created successfully!' });
-      setFile(null);
-      setFilePreview(null);
-    } catch (error) {
-      console.error('Error creating reward:', error.response.data);
-      setNotification({ type: 'error', message: 'Error creating reward.' });
-    }
-  };
-
-  const handleUpdateReward = async () => {
-    const formData = new FormData();
-    formData.append('reward_name', form.values.reward_name);
-    formData.append('reward_description', form.values.reward_description);
-    formData.append('reward_points', form.values.reward_points);
-    formData.append('reward_expiry_date', dayjs(form.values.reward_expiry_date).format('YYYY-MM-DD'));
-    if (file) {
-      formData.append('reward_image', file);
-    }
-
-    try {
-      const response = await axios.put(`/reward/${selectedReward.reward_id}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      setRewards(rewards.map(reward => reward.reward_id === selectedReward.reward_id ? response.data : reward));
-      setIsEditing(false);
-      setNotification({ type: 'success', message: 'Reward updated successfully!' });
-      setFile(null);
-      setFilePreview(null);
-    } catch (error) {
-      console.error('Error updating reward:', error.response.data);
-      setNotification({ type: 'error', message: 'Error updating reward.' });
-    }
-  };
-
   const handleToggleDelete = async (rewardId, isDeleted) => {
     try {
       const endpoint = isDeleted ? `/reward/softdelete/${rewardId}` : `/reward/softrestore/${rewardId}`;
-      const response = await axios.put(endpoint);
+      await axios.put(endpoint);
       setRewards(rewards.map(reward => reward.reward_id === rewardId ? { ...reward, is_deleted: isDeleted } : reward));
       setNotification({ type: 'success', message: 'Reward deletion status updated successfully!' });
     } catch (error) {
@@ -129,46 +46,20 @@ const Rewards = () => {
     }
   };
 
-  const openCreateModal = () => {
-    form.reset();
-    setFile(null);
-    setFilePreview(null);
-    setIsCreating(true);
-  };
-
-  const openEditModal = (reward) => {
-    setSelectedReward(reward);
-    form.setValues({
-      reward_name: reward.reward_name,
-      reward_description: reward.reward_description,
-      reward_points: reward.reward_points,
-      reward_expiry_date: new Date(reward.reward_expiry_date),
-      reward_image: reward.reward_image
-    });
-    setFilePreview(reward.reward_image);
-    setIsEditing(true);
-  };
-
-  const closeModal = () => {
-    setIsCreating(false);
-    setIsEditing(false);
-    setSelectedReward(null);
-  };
-
-  if (!user || loading) {
+  if (loading) {
     return <LoaderComponent />;
   }
 
   return (
     <Container size="xl" style={{ position: 'relative' }}>
-
       {user.role === 'STAFF' && (
         <>
           <Title align="center" style={{ marginTop: 20 }}>Reward Management</Title>
+
           <Button 
             color="green"
             style={{ position: 'absolute', top: 20, right: 20 }} 
-            onClick={openCreateModal}
+            onClick={() => navigate('/addreward')}
           >
             Create Reward
           </Button>
@@ -226,7 +117,7 @@ const Rewards = () => {
                     </td>
                     <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>
                       <Group position="center" align="center">
-                        <Button color="blue" onClick={() => openEditModal(reward)}>Edit</Button>
+                        <Button color="blue" onClick={() => navigate(`/editreward/${reward.reward_id}`)}>Edit</Button>
                       </Group>
                     </td>
                   </tr>
@@ -278,47 +169,9 @@ const Rewards = () => {
                 </Card>
               </Grid.Col>
             ))}
-        </Grid>
+          </Grid>
         </>
       )}
-
-      {/* Create Reward Modal */}
-      <Modal opened={isCreating} onClose={closeModal} title="Create Reward">
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          handleCreateReward();
-        }}>
-          <TextInput label="Reward Name" {...form.getInputProps('reward_name')} />
-          <Textarea label="Reward Description" {...form.getInputProps('reward_description')} />
-          <NumberInput label="Reward Points" {...form.getInputProps('reward_points')} />
-          <DateInput label="Expiry Date" {...form.getInputProps('reward_expiry_date')} />
-          <TextInput label="Reward Image" type="file" onChange={handleFileChange} />
-          {filePreview && <Image src={filePreview} alt="Selected file" style={{ width: '200px', height: '200px', objectFit: 'contain' }} />}
-          <Group position="right" mt="md">
-            <Button onClick={closeModal}>Cancel</Button>
-            <Button type="submit">Create Reward</Button>
-          </Group>
-        </form>
-      </Modal>
-
-      {/* Edit Reward Modal */}
-      <Modal opened={isEditing} onClose={closeModal} title="Edit Reward">
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          handleUpdateReward();
-        }}>
-          <TextInput label="Reward Name" {...form.getInputProps('reward_name')} />
-          <Textarea label="Reward Description" {...form.getInputProps('reward_description')} />
-          <NumberInput label="Reward Points" {...form.getInputProps('reward_points')} />
-          <DateInput label="Expiry Date" {...form.getInputProps('reward_expiry_date')} />
-          <TextInput label="Reward Image" type="file" onChange={handleFileChange} />
-          {filePreview && <Image src={filePreview} alt="Selected file" style={{ width: '200px', height: '200px', objectFit: 'contain' }} />}
-          <Group position="right" mt="md">
-            <Button onClick={closeModal}>Cancel</Button>
-            <Button type="submit">Update Reward</Button>
-          </Group>
-        </form>
-      </Modal>
     </Container>
   );
 };
