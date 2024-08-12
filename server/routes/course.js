@@ -96,6 +96,10 @@ router.post("/create-course", uploadFile.single('course_image_url'), async (req,
 router.get('/publishedCourses', async (req, res) => {
   try {
     const courses = await Course.findAll({
+      include: [{
+        model: Instructor,
+        attributes: ['name', 'profile_pic'],   // Include the instructor's name
+      }],
       where: {
         course_status: 'published'
       }
@@ -108,7 +112,12 @@ router.get('/publishedCourses', async (req, res) => {
 
 router.get("/getCourses", async (req, res) => {
   try {
-    const courses = await Course.findAll();
+    const courses = await Course.findAll({
+      include: [{
+        model: Instructor,
+        attributes: ['name'],  // Include the instructor's name
+      }],
+    })
     res.json(courses);
   } catch (error) {
     res.status(400).json({ error: error.errors });
@@ -120,7 +129,7 @@ router.get("/getCourse/:id", async (req, res) => {
     const course = await Course.findByPk(req.params.id, {
       include: [{
         model: Instructor,
-        attributes: ['name'],  // Include the instructor's name
+        attributes: ['name', 'profile_pic']  // Include the instructor's name
       }],
     });
 

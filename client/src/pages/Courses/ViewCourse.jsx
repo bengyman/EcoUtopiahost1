@@ -14,6 +14,7 @@ import {
   Tabs,
   Rating,
   Box,
+  Avatar,
   Notification,
 } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
@@ -88,6 +89,7 @@ function ViewCourse() {
   if (!course) return <Text align="center">Course not found</Text>;
 
   return (
+    console.log(course),
     <Container size="xl" style={{ marginTop: 30 }}>
       <Paper padding="xl" shadow="md" radius="md" withBorder>
         <Title align="center" order={1} mb="md">
@@ -154,11 +156,12 @@ function ViewCourse() {
 
           <Tabs.Panel value="instructor" pt="xs">
             <Group direction="row" align="center">
-              <Image
-                src={course.instructor_image_url}
+              <Avatar
+                src={course.Instructor.profile_pic}
                 alt={course.course_instructor}
                 radius="xl"
-                width={100}
+                size="lg"
+                style={{ marginRight: 15 }}
               />
               <Text size="lg">{course.course_instructor}</Text>
             </Group>

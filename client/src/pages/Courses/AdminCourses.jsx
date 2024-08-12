@@ -32,6 +32,7 @@ function AdminCourses() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [courseToDelete, setCourseToDelete] = useState(null);
+    //const [instructor, setInstructor] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
@@ -47,7 +48,22 @@ function AdminCourses() {
           setLoading(false);
         }
       };
+
+      /*const fetchSingleInstructor = async (instructorId) => {
+        try {
+          const response = await axios.get(
+            `http://localhost:3000/api/courses/getCourse/${instructorId}`
+          );
+          setInstructor(response.data);
+          setLoading(false);
+        } catch (error) {
+          setError(error);
+          setLoading(false);
+        }
+      };*/
+
       fetchCourses();
+      //fetchSingleInstructor();
       document.title = "Admin - EcoUtopia";
     }, []);
 
@@ -89,6 +105,7 @@ function AdminCourses() {
     );
 
     const rows = filteredCourses.map((course) => (
+      console.log(course),
         <Table.Tr key={course.course_id}>
           <Table.Td>
             <Group gap="sm">
@@ -100,7 +117,7 @@ function AdminCourses() {
             </Group>
           </Table.Td>
           <Table.Td>
-            <Text fz="sm">{course.course_instructor}</Text>
+            <Text fz="sm">{course.Instructor.name}</Text>
           </Table.Td>
           <Table.Td>
             <Text fz="sm">{dayjs(course.createdAt).format('DD/MM/YYYY')}</Text>

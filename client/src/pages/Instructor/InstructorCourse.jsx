@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Container, Table, Text, Button, Group } from '@mantine/core';
 import { useParams } from 'react-router-dom';
@@ -12,7 +12,7 @@ function InstructorCourse() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await axios.get(`/api/instructor/${instructorId}/courses`);
+        const response = await axios.get(`/api/courses/getCourses/${instructorId}`);
         setCourses(response.data);
       } catch (error) {
         setError(error);

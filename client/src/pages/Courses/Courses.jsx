@@ -1,5 +1,5 @@
 import axios from "axios";
-//import dayjs from "dayjs";
+import dayjs from "dayjs";
 import Navbar from "../../components/Navbar";
 import { useState, useEffect } from "react";
 import {
@@ -73,6 +73,7 @@ function Courses() {
   //if (filteredCourses.length === 0) return <Text align="center">No courses found</Text>;
 
   return (
+    console.log(courses),
     <Container size="xl" style={{ marginTop: 20 }}>
       <Box padding="xl" style={{marginTop: '70px'}} />
       <Navbar />
@@ -89,13 +90,13 @@ function Courses() {
             value={selectedType}
             onChange={setSelectedType}
           />
-          {/*<Select
+          <Select
             label="Instructor"
             placeholder="Select instructor"
-            data={[...new Set(courses.map((course) => course.course_instructor))]}
+            data={[...new Set(courses.map((course) => course.Instructor.name))]}
             value={selectedInstructor}
             onChange={setSelectedInstructor}
-          />*.*/}
+          />
           <Checkbox
             label="Show only free courses"
             style={{ marginTop: 20 }}
@@ -184,10 +185,19 @@ function Courses() {
                 {formatMySQLTimeString(course.course_start_time)} -{" "}
                 {formatMySQLTimeString(course.course_end_time)}
               </Text>*/}
+              <Text>
+                {dayjs(course.course_start_date).format("DD MMM YYYY")} - {dayjs(course.course_end_date).format("DD MMM YYYY")}
+              </Text>
               <Flex align="center" style={{ marginTop: 10 }}>
-                <Avatar size="sm" />
+                <Avatar 
+                  size="sm" 
+                  radius="xl"
+                  src={course.Instructor.profile_pic}
+                  alt={course.Instructor.name}
+                  fallbackSrc="https://placehold.co/50x50?text=Avatar"
+                />
                 <Text size="sm" ml="sm">
-                  {course.course_instructor}
+                  {course.Instructor.name}
                 </Text>
               </Flex>
               <Group style={{ marginTop: 15 }} justify="space-between">

@@ -51,6 +51,8 @@ import Success from './pages/Orders/Success.jsx';
 import Rewards from './pages/Rewards/Reward.jsx';
 import RewardDetail from './pages/Rewards/RewardDetail.jsx';
 import ViewReward from './pages/Rewards/ViewReward.jsx';
+// instructor
+import InstructorCourse from './pages/Instructor/InstructorCourse.jsx';
 
 
 import {
@@ -143,6 +145,8 @@ function Main() {
         <Route path="/rewards" element={<Rewards />} />
         <Route path="/reward/:rewardId" element={<RewardDetail />} />
         <Route path="/:residentId/reward" element={<ViewReward/>} />
+
+        <Route path="/instructor/courses/:instructorId" element={<InstructorCourse />} />
 
       </Routes>
     </>
