@@ -25,6 +25,9 @@ import ResetPassword from './pages/Accounts/ResetPassword.jsx';
 import PasswordResetSuccess from './pages/Accounts/ResetPasswordSuccess.jsx';
 import AccountManagement from './pages/Accounts/AccountManagement.jsx';
 import AccountActivation from './pages/Accounts/AccountActivation.jsx';
+import FollowersList from './pages/Accounts/FollowersList.jsx';
+import FollowingList from './pages/Accounts/FollowingList.jsx';
+
 //courses
 import Courses from './pages/Courses/Courses.jsx';
 import ViewCourse from './pages/Courses/ViewCourse.jsx';
@@ -114,6 +117,8 @@ function Main() {
         <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
         <Route path="/account-management" element={<AccountManagement />} />
         <Route path="/account-activation" element={<AccountActivation />} />
+        <Route path="/follower/:paramId" element={<FollowersList />} />
+        <Route path="/following/:paramId" element={<FollowingList />} />
 
         <Route path="/courses" element={<Courses />} />
         <Route path="/course/:courseId" element={<ViewCourse />} />
