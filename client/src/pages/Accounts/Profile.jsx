@@ -182,19 +182,19 @@ function Profile() {
                 }}
               />
             ) : (
-              <Box
-                sx={{
+              <img
+                src={"https://ecoutopia-bucket.s3.ap-southeast-1.amazonaws.com/eco-placeholder-image-cropped.jpg"}
+                alt="Background"
+                style={{
                   width: "100%",
                   height: "100%",
-                  backgroundColor: "lightgray",
-                  borderRadius: "8px",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
+                  objectFit: "cover",
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  zIndex: 0,
                 }}
-              >
-                <IconPhoto width="100%" height="100%" color="gray" />
-              </Box>
+              />
             )}
             <Box
               style={{
@@ -220,25 +220,18 @@ function Profile() {
                   }}
                 />
               ) : (
-                <Avatar
-                  size="120px" // Adjust as needed
-                  radius="50%"
-                  style={{ cursor: "pointer", marginBottom: "1rem", border: "3px solid white" }}
-                >
-                  <Box
-                    sx={{
-                      width: "100%",
-                      height: "100%",
-                      backgroundColor: "lightgray",
-                      borderRadius: "50%",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <IconPhoto size="50%" color="gray" />
-                  </Box>
-                </Avatar>
+                <img
+                  src={"https://ecoutopia-bucket.s3.ap-southeast-1.amazonaws.com/eco-Pfpimage.jpg"}
+                  alt="Profile"
+                  style={{
+                    width: "250px", // Adjust as needed
+                    height: "250px", // Ensure it matches width for a perfect circle
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    cursor: "pointer",
+                    marginRight: "38rem",
+                  }}
+                />
               )}
             </Box>
           </Box>
