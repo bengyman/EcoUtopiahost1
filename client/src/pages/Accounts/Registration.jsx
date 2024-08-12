@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TextInput, PasswordInput, Button, Container, Paper, Group, Title, Box, Alert } from '@mantine/core';
+import { TextInput, PasswordInput, Button, Container, Paper, Group, Title, Box, Alert, NumberInput } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
@@ -38,7 +38,7 @@ function Registration() {
         .oneOf([Yup.ref('password'), null], 'Passwords must match')
         .required('Confirm Password is required'),
       contactNumber: Yup.string()
-        .matches(/^[0-9]{8}$/, "Contact Number must be a Singapore Number and contain exactly 8 digits")
+        .matches(/^\+?\d{1,3}?\d{7,14}$/, "Please enter a valid contact number with an optional country code")
         .required('Contact Number is required')
     }),
     onSubmit: async (values) => {
