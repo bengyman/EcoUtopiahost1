@@ -104,7 +104,7 @@ function Navbar() {
   useEffect(() => {
     const fetchInstructorCourses = async () => {
       try {
-        const response = await axios.get('localhost:3000/api/courses/getInstructorCourses', {
+        const response = await axios.get('courses/getInstructorCourses', {
           headers: {
             Authorization: `Bearer ${sessionStorage.getItem('token')}`,
           },
@@ -129,6 +129,8 @@ function Navbar() {
   const isStaff = user && user.role === 'STAFF';
   const isResident = user && user.role === 'RESIDENT';
   const isInstructor = user && user.role === 'INSTRUCTOR';
+  const instructorid = user && user.instructor && user.instructor.instructorid;
+  console.log('Instructor ID:', instructorid);
 
   return (
     <AppShell header={{ height: 50 }} navbar={{ width: 200, breakpoint: "xl" }}>
@@ -195,7 +197,7 @@ function Navbar() {
               </Anchor>
             )}
             {isInstructor && (
-              <Anchor href="/instructor/courses" style={{ textDecoration: "none" }}>
+              <Anchor href={`/instructor/courses/${instructorid}`} style={{ textDecoration: "none" }}>
                 <Text tt="uppercase" fw={'500'} c="black" style={{ marginLeft: 10, marginRight: 10 }}>
                   Instructor Courses
                 </Text>

@@ -10,18 +10,23 @@ function InstructorCourse() {
   const { instructorId } = useParams();
 
   useEffect(() => {
-    const fetchCourses = async () => {
+    const fetchInstructorCourses = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/instructor/getCourses/${instructorId}`);
+        const response = await axios.get(`/courses/getInstructorCourses`, {
+          params: { instructorId },
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem('token')}`,
+          },
+        });
         setCourses(response.data);
+        setLoading(false);
       } catch (error) {
         setError(error);
-      } finally {
         setLoading(false);
       }
     };
 
-    fetchCourses();
+    fetchInstructorCourses();
   }, [instructorId]);
 
   if (loading) return <Text>Loading...</Text>;

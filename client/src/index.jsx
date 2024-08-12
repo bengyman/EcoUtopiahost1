@@ -146,7 +146,7 @@ function Main() {
         <Route path="/reward/:rewardId" element={<RewardDetail />} />
         <Route path="/:residentId/reward" element={<ViewReward/>} />
 
-        <Route path="/instructor/courses" element={<InstructorCourse />} />
+        <Route path="/instructor/courses/:instructorId" element={<InstructorCourse />} />
 
       </Routes>
     </>
