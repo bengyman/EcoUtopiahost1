@@ -313,6 +313,42 @@ router.put('/:id', authenticateToken, authorizeRoles('RESIDENT', 'STAFF', 'INSTR
     }
 });
 
+// Public profile route (no authentication required)
+router.get('/public-profile/:profileId', async (req, res) => {
+    try {
+      const { profileId } = req.params;
+  
+      // Logic to fetch the user's profile data from Resident, Instructor, or Staff
+      const user = await User.findByPk(profileId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+  
+      let profile;
+      if (user.role === 'RESIDENT') {
+        profile = await Resident.findOne({ where: { user_id: user.user_id } });
+      } else if (user.role === 'INSTRUCTOR') {
+        profile = await Instructor.findOne({ where: { user_id: user.user_id } });
+      } else if (user.role === 'STAFF') {
+        profile = await Staff.findOne({ where: { user_id: user.user_id } });
+      }
+  
+      if (!profile) {
+        return res.status(404).json({ error: 'Profile not found' });
+      }
+  
+      res.status(200).json({
+        name: profile.name,
+        profilePic: profile.profile_pic,
+        backgroundImage: profile.background_pic,
+      });
+    } catch (error) {
+      console.error('Error fetching public profile:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+
 // Delete a user (soft delete, accessible by STAFF only)
 router.put('/softdelete/:id', authenticateToken, authorizeRoles('STAFF'), async (req, res) => {
     try {

@@ -55,6 +55,8 @@ module.exports = (sequelize, DataTypes) => {
         User.hasMany(models.Resident, { foreignKey: 'user_id' });
         User.hasMany(models.Instructor, { foreignKey: 'user_id' });
         User.belongsToMany(models.Post, { through: 'PostLikes', as: 'likedPosts', foreignKey: 'userId' });
+        User.belongsToMany(models.User, { through: models.Follow, as: 'Followers', foreignKey: 'following_id'});
+        User.belongsToMany(models.User, { through: models.Follow, as: 'Following', foreignKey: 'follower_id'});
     };
 
     return User;
