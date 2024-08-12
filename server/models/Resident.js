@@ -60,5 +60,9 @@ module.exports = (sequelize, DataTypes) => {
         Resident.hasOne(models.Settings, { foreignKey: 'resident_id' });
     }
 
+    Resident.associate = (models) => {
+        Resident.hasMany(models.Comment, { foreignKey: 'resident_id' });
+    }
+
     return Resident;
 }
