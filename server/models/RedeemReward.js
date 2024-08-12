@@ -25,7 +25,16 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DATE,
         allowNull: true,
       }
-    }, {
+    }, 
+    {
+      indexes: [
+        {
+          unique: true,
+          fields: ['voucher_code']
+        }
+      ]
+    },
+    {
       tableName: 'redeem_reward',
     });
   

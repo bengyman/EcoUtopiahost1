@@ -108,7 +108,7 @@ router.get('/publishedCourses', async (req, res) => {
 
 router.get("/getCourses", async (req, res) => {
   try {
-    const courses = await Course.findAll();
+    const courses = await Course.find().populate('instructorid', 'name');
     res.json(courses);
   } catch (error) {
     res.status(400).json({ error: error.errors });
