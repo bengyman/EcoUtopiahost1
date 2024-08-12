@@ -207,7 +207,7 @@ const PostDetails = () => {
         </div>
 
         <div style={{ marginBottom: '10px', fontSize: '1.1em' }}>
-          <strong>Creator: {post.residentName}</strong>
+          <strong>Creator: {post.name}</strong>
         </div>
         <h1 style={{ marginBottom: '5px' }}>{post.title}</h1>
         {post.tags && <p style={{ fontStyle: 'italic', marginBottom: '10px' }}>Tags: {post.tags}</p>}

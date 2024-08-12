@@ -21,19 +21,21 @@ module.exports = (sequelize, DataTypes) => {
         profile_pic: {
             type: DataTypes.STRING,
             allowNull: true
-        }
+        },
+        background_pic: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
     }, {
         tableName: 'instructor'
     });
 
     Instructor.associate = (models) => {
         Instructor.belongsTo(models.User, { foreignKey: 'user_id' });
+        Instructor.hasOne(models.Settings, { foreignKey: 'instructorid' });
+        Instructor.hasMany(models.Course, { foreignKey: 'instructorid' });
+        Instructor.hasMany(models.Post, { foreignKey: 'instructor_id' }); // New association with Post
     };
-
-    Instructor.associate = (models) => {
-        Instructor.hasOne(models.Settings, { foreignKey: 'instructor_id' });
-    }
 
     return Instructor;
 };
-

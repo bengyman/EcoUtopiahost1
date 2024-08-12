@@ -189,7 +189,7 @@ const Posts = () => {
                 style={{ cursor: "pointer", position: "relative" }}
               >
                 <Group position="right" style={{ position: "absolute", top: 10, right: 10 }}>
-                  {post.resident_id === user?.resident?.resident_id && (
+                  {(post.resident_id === user?.resident?.resident_id || post.instructor_id === user?.instructor?.instructorid) && (
                     <>
                       <Button
                         variant="outline"
@@ -217,7 +217,7 @@ const Posts = () => {
                 </Group>
                 <Group position="right" style={{ marginTop: 30 }}>
                   <Text size="sm" color="dimmed">
-                    {post.residentName ? post.residentName : "Anonymous"}
+                    {post.name ? post.name : "Anonymous"}
                   </Text>
                   <Text size="sm">
                     {new Date(post.createdAt).toLocaleString()}
