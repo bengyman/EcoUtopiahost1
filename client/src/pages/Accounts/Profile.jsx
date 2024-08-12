@@ -33,7 +33,7 @@ function Profile() {
     role: "",
   });
   const [loading, setLoading] = useState(true);
-  const fileInputRef = useRef(null); // Create a ref for the file input
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     let timer = setTimeout(() => {
@@ -77,7 +77,7 @@ function Profile() {
             lastName: resident.name.split(" ")[1] || "",
             mobileNumber: resident.mobile_num || "",
             profilePic: resident.profile_pic || "",
-            backgroundImage: resident.background_image || "",
+            backgroundImage: resident.background_pic || "", // Make sure it's background_pic
             role: "RESIDENT",
           });
         } else if (userData.role === "STAFF" && staff) {
@@ -87,7 +87,7 @@ function Profile() {
             lastName: staff.name.split(" ")[1] || "",
             mobileNumber: staff.mobilenum || "",
             profilePic: staff.profile_pic || "",
-            backgroundImage: staff.background_image || "",
+            backgroundImage: staff.background_pic || "", // Make sure it's background_pic
             role: "STAFF",
           });
         } else if (userData.role === "INSTRUCTOR" && instructor) {
@@ -97,7 +97,7 @@ function Profile() {
             lastName: instructor.name.split(" ")[1] || "",
             mobileNumber: instructor.mobilenum || "",
             profilePic: instructor.profile_pic || "",
-            backgroundImage: instructor.background_image || "",
+            backgroundImage: instructor.background_pic || "", // Make sure it's background_pic
             role: "INSTRUCTOR",
           });
         } else {
@@ -107,7 +107,7 @@ function Profile() {
             lastName: userData.lastName || "",
             mobileNumber: userData.mobileNumber || "",
             profilePic: userData.profile_pic || "",
-            backgroundImage: userData.background_image || "",
+            backgroundImage: userData.background_pic || "", // Make sure it's background_pic
             role: userData.role || "",
           });
         }
@@ -137,7 +137,7 @@ function Profile() {
       });
       setProfileData((prevData) => ({
         ...prevData,
-        profilePic: response.data.fileName,
+        profilePic: response.data.fileUrl,
       }));
     } catch (error) {
       console.error("Error uploading profile picture:", error);
@@ -158,12 +158,14 @@ function Profile() {
       });
       setProfileData((prevData) => ({
         ...prevData,
-        backgroundImage: response.data.fileName,
+        backgroundImage: response.data.fileUrl,
       }));
     } catch (error) {
       console.error("Error uploading background image:", error);
     }
   };
+
+  console.log("Background Image URL:", profileData.backgroundImage); // Log the URL to debug
 
   if (!paramId || loading) {
     return <LoaderComponent />;
@@ -175,7 +177,7 @@ function Profile() {
         <Card.Section>
           {profileData.backgroundImage ? (
             <Image
-              src={`${import.meta.env.VITE_FILE_BASE_URL}${profileData.backgroundImage}`}
+              src={profileData.backgroundImage}
               alt="Background"
               height={350}
               style={{ objectFit: "cover", width: "100%" }}
@@ -192,20 +194,16 @@ function Profile() {
                 alignItems: "center",
               }}
             >
-                <IconPhoto width="100%" height="350px" color="gray"/>
-              </Box>
-            )}
+              <IconPhoto width="100%" height="350px" color="gray" />
+            </Box>
+          )}
         </Card.Section>
 
         <Grid align="center" mt="md">
           <Grid.Col span={4} style={{ textAlign: "center" }}>
             <label htmlFor="profilePicInput">
               <Avatar
-                src={
-                  profileData.profilePic
-                    ? `${import.meta.env.VITE_FILE_BASE_URL}${profileData.profilePic}`
-                    : ""
-                }
+                src={profileData.profilePic || ""}
                 size={270}
                 radius={180}
                 style={{ cursor: "pointer", marginBottom: "1rem" }}
@@ -222,7 +220,7 @@ function Profile() {
                       alignItems: "center",
                     }}
                   >
-                    <IconPhoto size={50} color="gray"/>
+                    <IconPhoto size={50} color="gray" />
                   </Box>
                 )}
               </Avatar>
@@ -234,26 +232,12 @@ function Profile() {
                 onChange={handleProfilePicChange}
                 ref={fileInputRef}
               />
-              <Button 
-              color="blue" 
-              variant="filled"
-              onClick={() => fileInputRef.current.click()} // Trigger click on file input
+              <Button
+                color="blue"
+                variant="filled"
+                onClick={() => fileInputRef.current.click()} // Trigger click on file input
               >
-                Upload Image
-                <input
-                  hidden
-                  accept="image/*"
-                  type="file"
-                  name="profilePic"
-                  onChange={handleProfilePicChange}
-                />
-                {/*<FileInput
-                  accept="image/*"
-                  onChange={handleProfilePicChange}
-                  type="file"
-                  style={{ display: "none" }}
-                />*/}
-
+                Upload Profile Image
               </Button>
             </label>
             <Button

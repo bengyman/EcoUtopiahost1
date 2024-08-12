@@ -32,16 +32,10 @@ module.exports = (sequelize, DataTypes) => {
 
     Instructor.associate = (models) => {
         Instructor.belongsTo(models.User, { foreignKey: 'user_id' });
-    };
-
-    Instructor.associate = (models) => {
         Instructor.hasOne(models.Settings, { foreignKey: 'instructorid' });
-    }
-
-    Instructor.associate = (models) => {
         Instructor.hasMany(models.Course, { foreignKey: 'instructorid' });
+        Instructor.hasMany(models.Post, { foreignKey: 'instructor_id' }); // New association with Post
     };
 
     return Instructor;
 };
-

@@ -607,24 +607,28 @@ router.post('/profile-picture', uploadfile.single('profilePic'), async (req, res
     }
 });
 
-// Route to delete a profile picture
-router.delete('/profile-picture', async (req, res) => {
-    const userId = req.body.userId; // Make sure the user is authenticated
+// Route to upload or update a background image
+router.post('/background-image', uploadfile.single('backgroundImage'), async (req, res) => {
+    const userId = req.body.userId; // Ensure the user is authenticated
     try {
-        const user = await User.findByPk(userId);
-        if (user && user.profilePic) {
-            // Remove file from filesystem
-            const filePath = `./uploads/${user.profilePic}`;
-            if (fs.existsSync(filePath)) {  
-                fs.unlinkSync(filePath);
-            }
+        const resident = await Resident.findOne({ where: { user_id: userId } });
+        const staff = await Staff.findOne({ where: { user_id: userId } });
+        const instructor = await Instructor.findOne({ where: { user_id: userId } });
 
-            // Update database
-            user.profilePic = null;
-            await user.save();
-            res.send({ message: 'Profile picture removed successfully' });
+        if (resident) {
+            resident.background_pic = req.file.location;
+            await resident.save();
+            res.send({ message: 'Resident background image updated successfully', fileName: req.file.location });
+        } else if (staff) {
+            staff.background_pic = req.file.location;
+            await staff.save();
+            res.send({ message: 'Staff background image updated successfully', fileName: req.file.location });
+        } else if (instructor) {
+            instructor.background_pic = req.file.location;
+            await instructor.save();
+            res.send({ message: 'Instructor background image updated successfully', fileName: req.file.location });
         } else {
-            res.status(404).send({ message: 'Profile picture not found or already removed' });
+            res.status(404).send({ message: 'User not found' });
         }
     } catch (error) {
         res.status(500).send({ message: 'Server error', error: error.message });

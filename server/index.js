@@ -106,12 +106,6 @@ app.use("/payment", paymentRoute);
 app.use("/posts", postsRoute);
 app.use("/redeemreward", redeemrewardRoute);
 
-// Schedule the job to run every 15 minutes
-cron.schedule('*/15 * * * *', async () => {
-    console.log('Running the point record status update job...');
-    await updatePointRecordStatus();
-});
-
 db.sequelize.sync({ alter: true }).then(async () => {
     await seedAdmin(); // Seed the admin user
     let port = process.env.APP_PORT;
