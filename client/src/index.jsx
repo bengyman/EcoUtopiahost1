@@ -38,6 +38,7 @@ import EditPost from './pages/Forum/EditPost.jsx';
 import PostDetails from './pages/Forum/PostDetails.jsx';
 import AdminPostsTable from './pages/Forum/PostsTable.jsx';
 import ImagePage from './pages/Forum/ImagePage.jsx';
+import CommentTable from './pages/Forum/CommentTable.jsx';
 //orders
 import Orders from './pages/Orders/Orders.jsx';
 import OrderDetails from './pages/Orders/OrderDetails.jsx';
@@ -131,9 +132,13 @@ function Main() {
         <Route path="/admin/orders" element={<AdminOrders />} />
         <Route path="/success" element={<Success />} />
 
+        <Route path="/admin/comment" element={<CommentTable />} />
+
+
         <Route path="/rewards" element={<Rewards />} />
         <Route path="/reward/:rewardId" element={<RewardDetail />} />
         <Route path="/:residentId/reward" element={<ViewReward/>} />
+
       </Routes>
     </>
   )

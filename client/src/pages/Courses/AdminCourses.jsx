@@ -52,6 +52,7 @@ function AdminCourses() {
     }, []);
 
     const deleteCourse = async () => {
+      console.log(`Deleting course with ID: ${courseToDelete}`);
       try {
         await axios.delete(`http://localhost:3000/api/courses/deleteCourse/${courseToDelete}`);
         console.log(`Course with ID ${courseToDelete} deleted`);

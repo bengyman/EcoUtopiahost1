@@ -35,8 +35,8 @@ const s3Storage = multerS3({
 // function to sanitize files and send error for unsupported files
 function sanitizeFile(file, cb) {
     // Define the allowed extension
-    //const fileExts = ["jpg", "jpeg", "png", "gif", "mp4", "mov", "webm", "pdf", "doc", "docx", "ppt", "pptx", "xls", "xlsx"];
-    const fileExts = [".png", ".jpg", ".jpeg", ".gif", ".mp4"];
+     //const fileExts = ["jpg", "jpeg", "png", "gif", "mp4", "mov", "webm", "pdf", "doc", "docx", "ppt", "pptx", "xls", "xlsx"];
+     const fileExts = [".png", ".jpg", ".jpeg", ".gif", ".mp4"];
 
     // Check allowed extensions
     const isAllowedExt = fileExts.includes(
@@ -60,7 +60,6 @@ const uploadFile = multer({
     fileFilter: (req, file, callback) => {
         console.log("File received:", file);
         console.log("File name:", file.originalname);
-        console.log("S3 Image URL:", file.location);
         sanitizeFile(file, callback)
     },
     limits: {

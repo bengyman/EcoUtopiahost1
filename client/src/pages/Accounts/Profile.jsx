@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Button,
   Container,
@@ -33,6 +33,7 @@ function Profile() {
     role: "",
   });
   const [loading, setLoading] = useState(true);
+  const fileInputRef = useRef(null); // Create a ref for the file input
 
   useEffect(() => {
     let timer = setTimeout(() => {
@@ -231,17 +232,28 @@ function Profile() {
                 accept="image/*"
                 style={{ display: "none" }}
                 onChange={handleProfilePicChange}
+                ref={fileInputRef}
               />
-              <Button
-                color="blue"
-                variant="filled"
-                onClick={() =>
-                  document.getElementById("profilePicInput").click()
-                }
-                fullWidth
-                mt="md"
+              <Button 
+              color="blue" 
+              variant="filled"
+              onClick={() => fileInputRef.current.click()} // Trigger click on file input
               >
-                Upload Profile Image
+                Upload Image
+                <input
+                  hidden
+                  accept="image/*"
+                  type="file"
+                  name="profilePic"
+                  onChange={handleProfilePicChange}
+                />
+                {/*<FileInput
+                  accept="image/*"
+                  onChange={handleProfilePicChange}
+                  type="file"
+                  style={{ display: "none" }}
+                />*/}
+
               </Button>
             </label>
             <Button

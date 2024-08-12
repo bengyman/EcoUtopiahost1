@@ -11,7 +11,7 @@ require('./middleware/cron');
 const { TranslateClient, TranslateTextCommand } = require('@aws-sdk/client-translate');
 
 // Initialize the AWS Translate client
-const translateClient = new TranslateClient({ region: 'us-east-1' }); // Replace with your region
+const translateClient = new TranslateClient({ region: 'ap-southeast-1' }); // Replace with your region
 
 const app = express();
 app.use(express.json());

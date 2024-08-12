@@ -1,3 +1,5 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHeart, faComment, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons'; // Import the heart icon
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -17,6 +19,23 @@ import {
   TextInput,
 } from "@mantine/core";
 
+// Define tags and colors
+const tagOptions = [
+  { value: "Advice", label: "Advice" },
+  { value: "Discussion", label: "Discussion" },
+  { value: "Tips", label: "Tips" },
+  { value: "Question", label: "Question" },
+  { value: "Announcement", label: "Announcement" },
+];
+
+const tagColors = {
+  Advice: 'lightblue',
+  Discussion: 'lightgreen',
+  Tips: 'lightcoral',
+  Question: '',
+  Announcement: 'lightpink',
+};
+
 const Posts = () => {
   const { user } = useAuth(); // Get user from AuthContext
   const [posts, setPosts] = useState([]);
@@ -25,6 +44,8 @@ const Posts = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPostId, setSelectedPostId] = useState(null);
   const [search, setSearch] = useState("");
+  const [selectedTag, setSelectedTag] = useState(""); // State for selected tag
+  const [showIframe, setShowIframe] = useState(false); // State for iframe visibility
   const navigate = useNavigate();
 
   const fetchPosts = async () => {
@@ -38,7 +59,10 @@ const Posts = () => {
       const sortedPosts = response.data.sort(
         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
       );
-      setPosts(sortedPosts);
+      setPosts(sortedPosts.map(post => ({
+        ...post,
+        likedByUser: post.likedByUser || false // Ensure likedByUser is part of the post object
+      })));
       setLoading(false);
     } catch (error) {
       console.error("Error fetching posts:", error);
@@ -56,7 +80,7 @@ const Posts = () => {
     try {
       const token = sessionStorage.getItem("token");
       const response = await axios.post(
-        `http://localhost:3000/api/posts/${postId}/report`,
+        `/posts/${postId}/report`,
         {},
         {
           headers: {
@@ -86,6 +110,30 @@ const Posts = () => {
     }
   };
 
+  const handleLike = async (postId, likedByUser) => {
+    try {
+      const token = sessionStorage.getItem("token");
+      const response = likedByUser
+        ? await axios.post(`/posts/${postId}/unlike`, {}, { headers: { Authorization: `Bearer ${token}` } })
+        : await axios.post(`/posts/${postId}/like`, {}, { headers: { Authorization: `Bearer ${token}` } });
+
+      if (response.status === 200) {
+        // Update the post's like count and status
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post.post_id === postId
+              ? { ...post, likesCount: response.data.likes, likedByUser: !likedByUser }
+              : post
+          )
+        );
+      } else {
+        console.log(response.data); // Handle error responses
+      }
+    } catch (error) {
+      console.error("Error liking/unliking post:", error);
+    }
+  };
+
   if (loading) return <LoaderComponent />;
   if (error) return <Text align="center">Error: {error}</Text>;
 
@@ -94,8 +142,9 @@ const Posts = () => {
 
   const filteredPosts = posts.filter(
     (post) =>
-      post.title.toLowerCase().includes(search.toLowerCase()) ||
-      post.content.toLowerCase().includes(search.toLowerCase())
+      (post.title.toLowerCase().includes(search.toLowerCase()) ||
+      post.content.toLowerCase().includes(search.toLowerCase())) &&
+      (selectedTag ? post.tags?.includes(selectedTag) : true)
   );
 
   return (
@@ -104,9 +153,6 @@ const Posts = () => {
       <Text align="center" size="xl" weight={700} mt={20}>
         Posts
       </Text>
-      {/*<Button variant="light" style={{ marginLeft: 20 }}>
-        <Link to="/createPost">Create Post</Link>
-      </Button>*/}
       <Anchor component={Link} to="/createPost" style={{ marginLeft: 20 }}>
         <Button variant="light">Create Post</Button>
       </Anchor>
@@ -117,6 +163,19 @@ const Posts = () => {
           onChange={(e) => setSearch(e.target.value)}
           style={{ margin: "20px 0" }}
         />
+        <Group spacing="xs" mb="md">
+          {tagOptions.map((tag) => (
+            <Button
+              key={tag.value}
+              variant={selectedTag === tag.value ? 'filled' : 'outline'}
+              color={tagColors[tag.value]}
+              style={{ borderRadius: '20px' }}
+              onClick={() => setSelectedTag(selectedTag === tag.value ? "" : tag.value)}
+            >
+              {tag.label}
+            </Button>
+          ))}
+        </Group>
         <Stack className="posts-container" spacing="md">
           {filteredPosts.length === 0 ? (
             <Text align="center">No posts found</Text>
@@ -127,40 +186,42 @@ const Posts = () => {
                 shadow="sm"
                 mb={20}
                 onClick={() => navigate(`/posts/${post.post_id}`)}
-                style={{ cursor: "pointer" }}
+                style={{ cursor: "pointer", position: "relative" }}
               >
-                <Group position="apart">
+                <Group position="right" style={{ position: "absolute", top: 10, right: 10 }}>
                   {post.resident_id === user?.resident?.resident_id && (
-                    <Group position="left">
+                    <>
                       <Button
                         variant="outline"
                         color="red"
+                        style={{ border: "none" }}
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedPostId(post.post_id);
                           setIsModalOpen(true);
                         }}
                       >
-                        Delete
+                        <FontAwesomeIcon icon={faTrash} />
                       </Button>
                       <Link to={`/edit/${post.post_id}`}>
                         <Button
                           variant="outline"
+                          style={{ border: "none" }}
                           onClick={(e) => e.stopPropagation()}
                         >
-                          Edit
+                          <FontAwesomeIcon icon={faPencil} />
                         </Button>
                       </Link>
-                    </Group>
+                    </>
                   )}
-                  <Group position="right">
-                    <Text size="sm" color="dimmed">
-                      {post.residentName ? post.residentName : "Anonymous"}
-                    </Text>
-                    <Text size="sm">
-                      {new Date(post.createdAt).toLocaleString()}
-                    </Text>
-                  </Group>
+                </Group>
+                <Group position="right" style={{ marginTop: 30 }}>
+                  <Text size="sm" color="dimmed">
+                    {post.residentName ? post.residentName : "Anonymous"}
+                  </Text>
+                  <Text size="sm">
+                    {new Date(post.createdAt).toLocaleString()}
+                  </Text>
                 </Group>
                 <Text weight={500} size="lg" mt="md">
                   {post.title}
@@ -174,17 +235,27 @@ const Posts = () => {
                       <Image
                         w={400}
                         h={400}
-                        src={`${post.imageUrl}`}
+                        src={post.imageUrl}
                       />
                     )}
                     {isVideo(post.imageUrl) && (
-                      <video width="400" controls>
-                        <source
-                          src={`${post.imageUrl}`}
-                          type="video/mp4"
-                        />
-                        Your browser does not support the video tag.
-                      </video>
+                      <div
+                        style={{
+                          position: 'relative',
+                          width: '400px',
+                          height: 'auto',
+                          cursor: 'pointer'
+                        }}
+                        onClick={(e) => e.stopPropagation()} // Prevent click from navigating
+                      >
+                        <video width="400" controls style={{ display: 'block', width: '100%', height: 'auto' }}>
+                          <source
+                            src={post.imageUrl}
+                            type="video/mp4"
+                          />
+                          Your browser does not support the video tag.
+                        </video>
+                      </div>
                     )}
                   </>
                 )}
@@ -198,6 +269,19 @@ const Posts = () => {
                     }}
                   >
                     Report ({post.reports})
+                  </Button>
+                  <Button
+                    variant="light"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleLike(post.post_id, post.likedByUser);
+                    }}
+                  >
+                    <FontAwesomeIcon
+                      icon={faHeart}
+                      style={{ marginRight: '5px', color: post.likedByUser ? 'red' : 'black' }}
+                    />
+                    Like ({post.likesCount || 0})
                   </Button>
                 </Group>
               </Card>
@@ -219,6 +303,44 @@ const Posts = () => {
           </Button>
         </Group>
       </Modal>
+
+      {/* Button to toggle iframe visibility */}
+      <Button
+        style={{
+          position: 'fixed',
+          bottom: 20,
+          right: 20,
+          borderRadius: '50%',
+          padding: '10px',
+          backgroundColor: '#007bff',
+          color: '#fff',
+        }}
+        onClick={() => setShowIframe(!showIframe)}
+      >
+        <FontAwesomeIcon icon={faComment} />
+      </Button>
+
+      {/* Iframe */}
+      {showIframe && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: 70, // Adjust based on button size
+            right: 20,
+            width: '300px',
+            height: '400px',
+            zIndex: 1000,
+          }}
+        >
+          <iframe
+            src="https://www.chatbase.co/chatbot-iframe/I5Un_oP8_JzmsccTSViso"
+            width="100%"
+            height="100%"
+            style={{ border: 'none' }}
+            frameBorder="0"
+          ></iframe>
+        </div>
+      )}
     </>
   );
 };

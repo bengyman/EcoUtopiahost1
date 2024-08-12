@@ -39,7 +39,7 @@ function EditCourse() {
         course_price: '',
         course_instructor: '',
         course_type: '',
-        course_date: '',
+        course_date: new Date(),
         course_start_time: '',
         course_end_time: '',
         course_capacity: '',
@@ -97,7 +97,7 @@ function EditCourse() {
 
             const response = await axios.put(`/courses/update-course/${courseId}`, formDataToSend, {
                 headers: {
-                    'Content-Type': 'multipart/form-data'
+                    "Content-Type": "multipart/form-data",
                 }
             });
             console.log('Response:', response.data);
@@ -154,6 +154,7 @@ function EditCourse() {
             <Container size="xl">
                 <Text c={'red'} align="center" size="xl" style={{ marginTop: 20 }}>
                     {error.message} 
+                    {errorMessage}
                 </Text>
             </Container>
         )
@@ -264,12 +265,24 @@ function EditCourse() {
                     <FileInput
                         label="Course Image"
                         name="course_image_url"
-                        placeholder="Choose course image"
+                        placeholder="Select course image"
                         accept="image/*"
-                        required
+                        onChange={(file) =>
+                            setFormData({ ...formData, course_image_url: file })
+                        }
+                        style={{ marginBottom: rem(1) }}
                         error={formErrors.course_image_url}
-                        onChange={(file => setFormData({ ...formData, course_image_url: file }))}
-                     />
+                        styles={(theme) => ({
+                            input: {
+                            borderColor: formErrors.course_image_url
+                                ? theme.colors.red[7]
+                                : undefined,
+                            color: formErrors.course_image_url
+                                ? theme.colors.red[7]
+                                : undefined,
+                            },
+                        })}
+                    />
                     <Box style={{ marginTop: 20 }} />
                     <Group position="right" style={{ marginTop: 20 }}>
                         <Button

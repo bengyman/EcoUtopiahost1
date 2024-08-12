@@ -74,6 +74,7 @@ module.exports = (sequelize) => {
     Post.associate = function (models) {
         Post.belongsTo(models.Resident, { foreignKey: 'resident_id' });
         Post.hasMany(models.Comment, { foreignKey: 'post_id', onDelete: 'CASCADE' });
+        Post.belongsToMany(models.User, { through: 'PostLikes', as: 'likedByUsers', foreignKey: 'postId' });
     };
 
     return Post;

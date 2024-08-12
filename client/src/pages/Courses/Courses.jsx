@@ -70,7 +70,7 @@ function Courses() {
 
   if (loading) return <LoadingOverlay visible />;
   if (error) return <Text align="center">Error: {error.message}</Text>;
-  if (filteredCourses.length === 0) return <Text align="center">No courses found</Text>;
+  //if (filteredCourses.length === 0) return <Text align="center">No courses found</Text>;
 
   return (
     <Container size="xl" style={{ marginTop: 20 }}>
@@ -144,6 +144,9 @@ function Courses() {
             Course Catalog
           </Text>
           <Grid>
+            {filteredCourses.length === 0 && (
+              <Text align="center">No courses found</Text>
+            )}
         {filteredCourses.map((course) => (
           <Grid.Col key={course.course_id} span={4}>
             <Card
@@ -176,8 +179,8 @@ function Courses() {
               <Text weight={500} size="md" style={{ marginTop: 10, marginBottom: 5 }}>
                 {course.course_name}
               </Text>
-              <Text size="sm" color="dimmed">
-                {dayjs(course.start_date).format("DD MMM YYYY")} |{" "}
+              <Text size="sm" c="dimmed">
+                {dayjs(course.course_date).format("DD MMM YYYY")} |{" "}
                 {formatMySQLTimeString(course.course_start_time)} -{" "}
                 {formatMySQLTimeString(course.course_end_time)}
               </Text>

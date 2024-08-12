@@ -1,6 +1,6 @@
 const express = require("express");
 const yup = require("yup");
-const { Course, Sequelize } = require("../models");
+const { Course, Orders, Sequelize } = require("../models");
 const uploadFile = require('../middleware/uploadfile');
 const router = express.Router();
 
@@ -137,7 +137,8 @@ router.get("/getCourse/:id", async (req, res) => {
 
 router.put("/update-course/:id", uploadFile.single('course_image_url'), async (req, res) => {
   try {
-    console.log(`Request file: ${req.file}`);
+    console.log(`Request file: ${JSON.stringify(req.file)}`);
+    console.log(`Location: ${req.file.location}`);
     console.log(`Request body: ${req.body}`);
     console.log(`Request params: ${req.params}`);
     const course = await Course.findByPk(req.params.id);
@@ -173,12 +174,30 @@ router.put("/update-course/:id", uploadFile.single('course_image_url'), async (r
       course_start_time,
       course_end_time,
       course_capacity,
-      course_image_url: data.image,
+      course_image_url: data.image
     });
 
     console.log(`image url: ${data.image}`);
+
+    const courseUpdated = await Course.update({
+      course_name,
+      course_description,
+      course_instructor,
+      course_price,
+      course_type,
+      course_date,
+      course_start_time,
+      course_end_time,
+      course_capacity,
+      course_image_url: data.image,
+    }, {
+      where: {
+        id: req.params.id
+      }
+    });
+    res.status(200).json(courseUpdated);
   
-    await course.update({
+    /*await course.update({
       course_name,
       course_description,
       course_instructor,
@@ -191,7 +210,7 @@ router.put("/update-course/:id", uploadFile.single('course_image_url'), async (r
       course_image_url: data.image,
     });
 
-    res.status(200).json(course);
+    res.status(200).json(course);*/
   }
   catch (error) {
     if (error instanceof Sequelize.ValidationError) {
@@ -207,6 +226,7 @@ router.delete("/deleteCourse/:id", async (req, res) => {
     if (!course) {
       return res.status(404).json({ error: "Course not found" });
     }
+    await Orders.destroy({ where: { course_id: req.params.id } });
     await course.destroy();
     res.json({ message: "Course deleted successfully" });
   } catch (error) {

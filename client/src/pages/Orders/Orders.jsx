@@ -30,7 +30,11 @@ function Orders() {
             Authorization: `Bearer ${sessionStorage.getItem('token')}`
           }
         });
-        setOrdersList(response.data);
+
+        // Sort orders by order_id in descending order
+        const sortedOrders = response.data.sort((a, b) => b.order_id - a.order_id);
+
+        setOrdersList(sortedOrders);
       } catch (error) {
         console.error('Error fetching orders:', error);
       }
@@ -57,7 +61,7 @@ function Orders() {
         }
       });
       // Update the orders list to reflect the pending refund order
-      setOrdersList((prevOrdersList) => 
+      setOrdersList((prevOrdersList) =>
         prevOrdersList.map((order) =>
           order.order_id === currentOrderId ? { ...order, order_status: 'Pending' } : order
         )
