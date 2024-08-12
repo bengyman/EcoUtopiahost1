@@ -18,7 +18,7 @@ function AccountActivation() {
       await axios.post('/user/activate-account', { email, code });
       setError('');
       setMessage('Account activated successfully');
-      setTimeout(() => navigate('/login'), 2000); // Redirect to login after 2 seconds
+      setTimeout(() => navigate('/'), 2000); // Redirect to Homepage after 2 seconds
     } catch (error) {
       setError('Invalid or expired activation code');
     }

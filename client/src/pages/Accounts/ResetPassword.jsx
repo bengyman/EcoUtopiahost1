@@ -9,22 +9,23 @@ function ResetPassword() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
-  const { email, code, token } = location.state || {};
+  const resetToken = new URLSearchParams(location.search).get('token');  // Extract token from URL
 
   const handleSubmit = async () => {
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-
+  
     try {
-      await axios.put(`/user/password-reset/${code}`, { email, password, token });
+      await axios.post('/user/password-reset-link', { resetToken, password });
       setError('');
       navigate('/password-reset-success');
     } catch (error) {
       setError('Failed to reset password');
     }
   };
+  
 
   return (
     <Container size="xs">
