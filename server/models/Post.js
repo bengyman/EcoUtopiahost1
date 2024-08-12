@@ -1,3 +1,4 @@
+// models/Post.js
 const { Sequelize, DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
@@ -38,6 +39,10 @@ module.exports = (sequelize) => {
             type: DataTypes.INTEGER,
             allowNull: true,
         },
+        instructor_id: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
         residentName: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -73,6 +78,7 @@ module.exports = (sequelize) => {
 
     Post.associate = function (models) {
         Post.belongsTo(models.Resident, { foreignKey: 'resident_id' });
+        Post.belongsTo(models.Instructor, { foreignKey: 'instructor_id' }); // New association with Instructor
         Post.hasMany(models.Comment, { foreignKey: 'post_id', onDelete: 'CASCADE' });
         Post.belongsToMany(models.User, { through: 'PostLikes', as: 'likedByUsers', foreignKey: 'postId' });
     };
