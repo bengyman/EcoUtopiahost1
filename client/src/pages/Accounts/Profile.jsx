@@ -200,7 +200,7 @@ function Profile() {
               style={{
                 position: "absolute",
                 bottom: "-8rem",
-                left: "50%",
+                left: "29rem",
                 transform: "translateX(-50%)",
                 zIndex: 1,
               }}
