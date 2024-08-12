@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFacebook, faTwitter, faLinkedin, faWhatsapp, faTelegram } from '@fortawesome/free-brands-svg-icons';
-import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faPencil, faTrash, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import { FacebookShareButton, TwitterShareButton, LinkedinShareButton, WhatsappShareButton, TelegramShareButton } from 'react-share';
 import { Button, Textarea, Select } from '@mantine/core';
 
@@ -207,7 +207,7 @@ const PostDetails = () => {
         </div>
 
         <div style={{ marginBottom: '10px', fontSize: '1.1em' }}>
-          <strong>Creator: {post.name}</strong>
+        <strong>Creator: {post.name} {post.resident_id == null && <FontAwesomeIcon icon={faCheckCircle} style={{ color: 'blue', marginLeft: '5px' }} />}</strong>
         </div>
         <h1 style={{ marginBottom: '5px' }}>{post.title}</h1>
         {post.tags && <p style={{ fontStyle: 'italic', marginBottom: '10px' }}>Tags: {post.tags}</p>}

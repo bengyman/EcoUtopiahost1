@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import {
   Button,
   Container,
-  Paper,
   Text,
   Title,
   Avatar,
@@ -10,7 +9,6 @@ import {
   Grid,
   TextInput,
   Card,
-  Image,
 } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
@@ -33,7 +31,8 @@ function Profile() {
     role: "",
   });
   const [loading, setLoading] = useState(true);
-  const fileInputRef = useRef(null); // Create a ref for the file input
+  const profilePicInputRef = useRef(null);
+  const backgroundImageInputRef = useRef(null);
 
   useEffect(() => {
     let timer = setTimeout(() => {
@@ -77,7 +76,7 @@ function Profile() {
             lastName: resident.name.split(" ")[1] || "",
             mobileNumber: resident.mobile_num || "",
             profilePic: resident.profile_pic || "",
-            backgroundImage: resident.background_image || "",
+            backgroundImage: resident.background_pic || "",
             role: "RESIDENT",
           });
         } else if (userData.role === "STAFF" && staff) {
@@ -87,7 +86,7 @@ function Profile() {
             lastName: staff.name.split(" ")[1] || "",
             mobileNumber: staff.mobilenum || "",
             profilePic: staff.profile_pic || "",
-            backgroundImage: staff.background_image || "",
+            backgroundImage: staff.background_pic || "",
             role: "STAFF",
           });
         } else if (userData.role === "INSTRUCTOR" && instructor) {
@@ -97,7 +96,7 @@ function Profile() {
             lastName: instructor.name.split(" ")[1] || "",
             mobileNumber: instructor.mobilenum || "",
             profilePic: instructor.profile_pic || "",
-            backgroundImage: instructor.background_image || "",
+            backgroundImage: instructor.background_pic || "",
             role: "INSTRUCTOR",
           });
         } else {
@@ -107,7 +106,7 @@ function Profile() {
             lastName: userData.lastName || "",
             mobileNumber: userData.mobileNumber || "",
             profilePic: userData.profile_pic || "",
-            backgroundImage: userData.background_image || "",
+            backgroundImage: userData.background_pic || "",
             role: userData.role || "",
           });
         }
@@ -132,13 +131,10 @@ function Profile() {
     formData.append("userId", paramId);
 
     try {
-      const response = await axios.post("/user/profile-picture", formData, {
+      await axios.post("/user/profile-picture", formData, {
         headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
       });
-      setProfileData((prevData) => ({
-        ...prevData,
-        profilePic: response.data.fileName,
-      }));
+      window.location.reload(); // Reload the page after the upload
     } catch (error) {
       console.error("Error uploading profile picture:", error);
     }
@@ -153,13 +149,10 @@ function Profile() {
     formData.append("userId", paramId);
 
     try {
-      const response = await axios.post("/user/background-image", formData, {
+      await axios.post("/user/background-image", formData, {
         headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
       });
-      setProfileData((prevData) => ({
-        ...prevData,
-        backgroundImage: response.data.fileName,
-      }));
+      window.location.reload(); // Reload the page after the upload
     } catch (error) {
       console.error("Error uploading background image:", error);
     }
@@ -173,107 +166,116 @@ function Profile() {
     <Container size="md" my={40}>
       <Card shadow="sm" padding="lg" radius="md" withBorder>
         <Card.Section>
-          {profileData.backgroundImage ? (
-            <Image
-              src={`${import.meta.env.VITE_FILE_BASE_URL}${profileData.backgroundImage}`}
-              alt="Background"
-              height={350}
-              style={{ objectFit: "cover", width: "100%" }}
-            />
-          ) : (
+          <Box style={{ position: "relative", width: "100%", height: "50vh" }}>
+            {profileData.backgroundImage ? (
+              <img
+                src={profileData.backgroundImage}
+                alt="Background"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  zIndex: 0,
+                }}
+              />
+            ) : (
+              <img
+                src={"https://ecoutopia-bucket.s3.ap-southeast-1.amazonaws.com/eco-placeholder-image-cropped.jpg"}
+                alt="Background"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  zIndex: 0,
+                }}
+              />
+            )}
             <Box
-              sx={{
-                width: "100%",
-                height: "350px",
-                backgroundColor: "lightgray",
-                borderRadius: "8px",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
+              style={{
+                position: "absolute",
+                bottom: "-8rem",
+                left: "29rem",
+                transform: "translateX(-50%)",
+                zIndex: 1,
               }}
             >
-                <IconPhoto width="100%" height="350px" color="gray"/>
-              </Box>
-            )}
+              {profileData.profilePic ? (
+                <img
+                  src={profileData.profilePic}
+                  alt="Profile"
+                  style={{
+                    width: "250px", // Adjust as needed
+                    height: "250px", // Ensure it matches width for a perfect circle
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    cursor: "pointer",
+                    border: "3px solid white",
+                    marginRight: "38rem",
+                  }}
+                />
+              ) : (
+                <img
+                  src={"https://ecoutopia-bucket.s3.ap-southeast-1.amazonaws.com/eco-Pfpimage.jpg"}
+                  alt="Profile"
+                  style={{
+                    width: "250px", // Adjust as needed
+                    height: "250px", // Ensure it matches width for a perfect circle
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    cursor: "pointer",
+                    marginRight: "38rem",
+                  }}
+                />
+              )}
+            </Box>
+          </Box>
         </Card.Section>
-
         <Grid align="center" mt="md">
           <Grid.Col span={4} style={{ textAlign: "center" }}>
             <label htmlFor="profilePicInput">
-              <Avatar
-                src={
-                  profileData.profilePic
-                    ? `${import.meta.env.VITE_FILE_BASE_URL}${profileData.profilePic}`
-                    : ""
-                }
-                size={270}
-                radius={180}
-                style={{ cursor: "pointer", marginBottom: "1rem" }}
-              >
-                {!profileData.profilePic && (
-                  <Box
-                    sx={{
-                      width: "100px",
-                      height: "100px",
-                      backgroundColor: "lightgray",
-                      borderRadius: "50%",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <IconPhoto size={50} color="gray"/>
-                  </Box>
-                )}
-              </Avatar>
               <input
                 id="profilePicInput"
                 type="file"
                 accept="image/*"
                 style={{ display: "none" }}
                 onChange={handleProfilePicChange}
-                ref={fileInputRef}
+                ref={profilePicInputRef}
               />
-              <Button 
-              color="blue" 
-              variant="filled"
-              onClick={() => fileInputRef.current.click()} // Trigger click on file input
+              <Button
+                color="blue"
+                variant="filled"
+                onClick={() => profilePicInputRef.current.click()}
+                fullWidth
+                mt="md"
               >
-                Upload Image
-                <input
-                  hidden
-                  accept="image/*"
-                  type="file"
-                  name="profilePic"
-                  onChange={handleProfilePicChange}
-                />
-                {/*<FileInput
-                  accept="image/*"
-                  onChange={handleProfilePicChange}
-                  type="file"
-                  style={{ display: "none" }}
-                />*/}
-
+                Upload Profile Image
               </Button>
             </label>
-            <Button
-              color="gray"
-              variant="filled"
-              onClick={() =>
-                document.getElementById("backgroundImageInput").click()
-              }
-              fullWidth
-              mt="md"
-            >
-              Upload Background Image
-            </Button>
-            <input
-              id="backgroundImageInput"
-              type="file"
-              accept="image/*"
-              style={{ display: "none" }}
-              onChange={handleBackgroundImageChange}
-            />
+            <label htmlFor="backgroundImageInput">
+              <Button
+                color="gray"
+                variant="filled"
+                onClick={() => backgroundImageInputRef.current.click()}
+                fullWidth
+                mt="md"
+              >
+                Upload Background Image
+              </Button>
+              <input
+                id="backgroundImageInput"
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={handleBackgroundImageChange}
+                ref={backgroundImageInputRef}
+              />
+            </label>
             <Button
               variant="outline"
               fullWidth

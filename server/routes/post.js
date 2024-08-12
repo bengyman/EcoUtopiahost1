@@ -94,7 +94,7 @@ router.get('/posts', authenticateToken, async (req, res) => {
       include: [
         {
           model: Resident,
-          attributes: ['name']
+          attributes: ['profile_pic'],  // Ensure profile_pic is included
         },
         {
           model: User,
@@ -104,16 +104,23 @@ router.get('/posts', authenticateToken, async (req, res) => {
         },
         {
           model: Instructor,
-          attributes: ['name']
         }
       ]
     });
 
-    const formattedPosts = posts.map(post => ({
-      ...post.toJSON(),
-      likedByUser: post.likedByUsers.some(user => user.user_id === userId),
-      likesCount: post.likedByUsers.length
-    }));
+    const formattedPosts = posts.map(post => {
+      // Access the profile picture from the associated Resident model
+      const residentProfilePic = post.Resident ? post.Resident.profile_pic : null;
+      const instructorProfilePic = post.Instructor ? post.Instructor.profile_pic : null;
+
+      return {
+        ...post.toJSON(),
+        likedByUser: post.likedByUsers.some(user => user.user_id === userId),
+        likesCount: post.likedByUsers.length,
+        resident_profile_pic: residentProfilePic,  // Add profile_pic to the formatted post
+        instructor_profile_pic: instructorProfilePic
+      };
+    });
 
     res.status(200).json(formattedPosts);
   } catch (error) {
@@ -121,6 +128,7 @@ router.get('/posts', authenticateToken, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 // Route to get instructors by IDs
 router.get('/instructors', async (req, res) => {
@@ -206,13 +214,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Post not found' });
     }
 
-    // Delete the associated image file
-    if (post.imageUrl) {
-      // Ensure the path matches where the images are stored
-      const filePath = path.join(__dirname, '../public/', post.imageUrl)
-      console.log(`Attempting to delete file at ${filePath}`);
-      deleteFile(filePath);
-    }
+    
 
     // Delete the post from the database
     await Post.destroy({
