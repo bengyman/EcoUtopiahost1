@@ -51,6 +51,8 @@ import Success from './pages/Orders/Success.jsx';
 import Rewards from './pages/Rewards/Reward.jsx';
 import RewardDetail from './pages/Rewards/RewardDetail.jsx';
 import ViewReward from './pages/Rewards/ViewReward.jsx';
+import AddReward from './pages/Rewards/AddReward.jsx';
+import EditReward from './pages/Rewards/EditReward.jsx';
 // instructor
 import InstructorCourse from './pages/Instructor/InstructorCourse.jsx';
 
@@ -141,10 +143,11 @@ function Main() {
 
         <Route path="/admin/comment" element={<CommentTable />} />
 
-
         <Route path="/rewards" element={<Rewards />} />
         <Route path="/reward/:rewardId" element={<RewardDetail />} />
         <Route path="/:residentId/reward" element={<ViewReward/>} />
+        <Route path="/addreward" element={<AddReward />} />
+        <Route path="/editreward/:id" element={<EditReward />} />
 
         <Route path="/instructor/courses/:instructorId" element={<InstructorCourse />} />
 
