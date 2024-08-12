@@ -98,7 +98,7 @@ router.get('/publishedCourses', async (req, res) => {
     const courses = await Course.findAll({
       include: [{
         model: Instructor,
-        attributes: ['name'],  // Include the instructor's name
+        attributes: ['name', 'profile_pic'],   // Include the instructor's name
       }],
       where: {
         course_status: 'published'
@@ -129,7 +129,7 @@ router.get("/getCourse/:id", async (req, res) => {
     const course = await Course.findByPk(req.params.id, {
       include: [{
         model: Instructor,
-        attributes: ['name'],  // Include the instructor's name
+        attributes: ['name', 'profile_pic']  // Include the instructor's name
       }],
     });
 
