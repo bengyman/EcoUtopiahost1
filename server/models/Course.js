@@ -14,15 +14,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING(500),
             allowNull: true
         },
-        course_instructor: {
-            type: DataTypes.STRING(100),
-            allowNull: false
-        },
         course_price: {
             type: DataTypes.DECIMAL(10, 2),
             allowNull: false
         },
-        // Course type can be either 'Online' or 'In-Person'
         course_type: {
             type: DataTypes.STRING(10),
             allowNull: false
@@ -48,24 +43,18 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             defaultValue: 'draft'
         },
-        // Foreign key
         instructorid: {
             type: DataTypes.INTEGER,
             allowNull: false
         }
-
     }, {
         tableName: 'courses',
     });
 
     Course.associate = (models) => {
         Course.hasMany(models.Orders, { foreignKey: 'course_id', onDelete: 'CASCADE' });
-    };
-
-    Course.associate = (models) => {
         Course.belongsTo(models.Instructor, { foreignKey: 'instructorid', onDelete: 'CASCADE' });
     };
 
-
     return Course;
-}
+};
