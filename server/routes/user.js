@@ -496,117 +496,77 @@ router.put('/change-password/:id', authenticateToken, async (req, res) => {
     }
 });
 
-// Reset password request
+// Password reset request
 router.post('/password-reset', async (req, res) => {
     try {
-        console.log("Request received to /password-reset with email:", req.body.email);
-
         const user = await User.findOne({ where: { email: req.body.email } });
         if (!user) {
-            console.log("User not found for email:", req.body.email);
             return res.status(404).json({ error: 'User not found' });
         }
 
-        const resetCode = crypto.randomBytes(20).toString('hex');
-        const resetToken = jwt.sign({ email: user.email, resetCode }, process.env.JWT_SECRET, { expiresIn: '30m' });
+        // Generate reset token with user's email and expiration
+        const resetToken = jwt.sign(
+            { email: user.email },
+            process.env.JWT_SECRET,
+            { expiresIn: '30m' } // Token expires in 30 minutes
+        );
 
-        user.password_reset_expiry = new Date(Date.now() + 1800000); // 30 minutes expiry
-        await user.save();
+        // Create password reset link using CLIENT_URL from .env
+        const resetLink = `${process.env.CLIENT_URL}/reset-password?token=${resetToken}`;
 
-        console.log("Password reset token generated and saved for user:", user.email);
-
-        // Set up Nodemailer with permanent Ethereal account credentials
+        // Set up Nodemailer with Ethereal
         const transporter = nodemailer.createTransport({
             host: 'smtp.ethereal.email',
             port: 587,
-            secure: false, // true for 465, false for other ports
             auth: {
-                user: process.env.ETHEREAL_USER, // your Ethereal user
-                pass: process.env.ETHEREAL_PASS  // your Ethereal password
+                user: process.env.ETHEREAL_USER,
+                pass: process.env.ETHEREAL_PASS
             }
         });
 
-        // Send email
+        // Send email with only the reset link
         const mailOptions = {
             from: '"EcoUtopia" <no-reply@ecoutopia.com>',
             to: user.email,
             subject: 'Password Reset',
-            text: `Your password reset code is: ${resetCode}\nReset token: ${resetToken}`
+            text: `You requested a password reset. Click the link below to reset your password:\n\n${resetLink}\n\nIf you did not request a password reset, please ignore this email.`
         };
 
         transporter.sendMail(mailOptions, (err, info) => {
             if (err) {
-                console.log('Error occurred. ' + err.message);
                 return res.status(500).json({ error: 'Failed to send email' });
             }
-
-            console.log('Message sent: %s', info.messageId);
-            console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-
-            res.status(200).json({ message: 'Password reset code sent', previewUrl: nodemailer.getTestMessageUrl(info) });
+            res.status(200).json({ message: 'Password reset link sent' });
         });
     } catch (error) {
-        console.error('Error in /password-reset route:', error.message);
         res.status(500).json({ error: error.message });
     }
 });
 
-// Verify reset code
-router.post('/validate-reset-code', async (req, res) => {
+router.post('/password-reset-link', async (req, res) => {
+    const { resetToken, password } = req.body;  // Extract token and password from the request body
+  
     try {
-        const { email, code, token } = req.body;
-
-        try {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            if (decoded.email !== email || decoded.resetCode !== code) {
-                return res.status(400).json({ error: 'Invalid reset code or token' });
-            }
-        } catch (err) {
-            return res.status(400).json({ error: 'Invalid or expired reset token' });
-        }
-
-        const user = await User.findOne({ where: { email, password_reset_expiry: { [Op.gt]: new Date() } } });
+        // Verify the token
+        const decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
+  
+        // Find the user by the decoded email
+        const user = await User.findOne({ where: { email: decoded.email } });
         if (!user) {
-            return res.status(400).json({ error: 'Invalid or expired reset code' });
+            return res.status(404).json({ error: 'User not found' });
         }
-
-        res.status(200).json({ message: 'Reset code and token are valid' });
-    } catch (error) {
-        console.error('Error in /validate-reset-code route:', error.message);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Reset password
-router.put('/password-reset/:code', async (req, res) => {
-    try {
-        const { email, password, token } = req.body;
-
-        try {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            if (decoded.email !== email || decoded.resetCode !== req.params.code) {
-                return res.status(400).json({ error: 'Invalid reset code or token' });
-            }
-        } catch (err) {
-            return res.status(400).json({ error: 'Invalid or expired reset token' });
-        }
-
-        const user = await User.findOne({ where: { email, password_reset_expiry: { [Op.gt]: new Date() } } });
-        if (!user) {
-            return res.status(400).json({ error: 'Invalid or expired reset code' });
-        }
-
+  
+        // Hash the new password and save it to the database
         const hashedPassword = await bcrypt.hash(password, 10);
         user.password = hashedPassword;
-        user.password_reset_code = null;
-        user.password_reset_expiry = null;
         await user.save();
-
+  
         res.status(200).json({ message: 'Password reset successfully' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+    } catch (err) {
+        console.error('Error verifying token or resetting password:', err);
+        return res.status(401).json({ error: 'Invalid or expired reset token' });
     }
-});
+  });
 
 // Route to upload or update a profile picture
 router.post('/profile-picture', uploadfile.single('profilePic'), async (req, res) => {
