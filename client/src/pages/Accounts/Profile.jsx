@@ -9,7 +9,6 @@ import {
   Grid,
   TextInput,
   Card,
-  Image,
 } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
@@ -168,17 +167,21 @@ function Profile() {
       <Card shadow="sm" padding="lg" radius="md" withBorder>
         <Card.Section>
           {profileData.backgroundImage ? (
-            <Image
+            <img
               src={profileData.backgroundImage}
               alt="Background"
-              height={350}
-              style={{ objectFit: "cover", width: "100%" }}
+              style={{
+                width: "100%",
+                height: "auto",
+                maxHeight: "50vh", // Adjust max height relative to viewport height
+                objectFit: "cover",
+              }}
             />
           ) : (
             <Box
               sx={{
                 width: "100%",
-                height: "350px",
+                height: "50vh",
                 backgroundColor: "lightgray",
                 borderRadius: "8px",
                 display: "flex",
@@ -186,7 +189,7 @@ function Profile() {
                 alignItems: "center",
               }}
             >
-              <IconPhoto width="100%" height="350px" color="gray" />
+              <IconPhoto width="100%" height="100%" color="gray" />
             </Box>
           )}
         </Card.Section>
@@ -194,17 +197,29 @@ function Profile() {
         <Grid align="center" mt="md">
           <Grid.Col span={4} style={{ textAlign: "center" }}>
             <label htmlFor="profilePicInput">
-              <Avatar
-                src={profileData.profilePic || ""}
-                size={270}
-                radius={180}
-                style={{ cursor: "pointer", marginBottom: "1rem" }}
-              >
-                {!profileData.profilePic && (
+              {profileData.profilePic ? (
+                <img
+                  src={profileData.profilePic}
+                  alt="Profile"
+                  style={{
+                    width: "100%",
+                    maxWidth: "15vw", // Adjust max width relative to viewport width
+                    maxHeight: "15vw", // Ensure the profile pic maintains aspect ratio
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    cursor: "pointer",
+                  }}
+                />
+              ) : (
+                <Avatar
+                  size="20vw"
+                  radius="50%"
+                  style={{ cursor: "pointer", marginBottom: "1rem" }}
+                >
                   <Box
                     sx={{
-                      width: "100px",
-                      height: "100px",
+                      width: "100%",
+                      height: "100%",
                       backgroundColor: "lightgray",
                       borderRadius: "50%",
                       display: "flex",
@@ -212,10 +227,10 @@ function Profile() {
                       alignItems: "center",
                     }}
                   >
-                    <IconPhoto size={50} color="gray" />
+                    <IconPhoto size="50%" color="gray" />
                   </Box>
-                )}
-              </Avatar>
+                </Avatar>
+              )}
               <input
                 id="profilePicInput"
                 type="file"
