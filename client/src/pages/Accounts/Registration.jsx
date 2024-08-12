@@ -45,7 +45,7 @@ function Registration() {
       try {
         const recaptchaToken = await executeRecaptcha('register');
         await register({ ...values, recaptchaToken });
-        navigate('/');
+        navigate('/account-activation');
       } catch (error) {
         setError('Registration failed');
         console.error('Registration failed:', error);

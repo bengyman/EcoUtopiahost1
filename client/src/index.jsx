@@ -20,7 +20,6 @@ import PublicProfile from './pages/Accounts/PublicProfile.jsx';
 import EditProfile from './pages/Accounts/EditProfile.jsx';
 import ChangePassword from './pages/Accounts/ChangePassword.jsx';
 import ResetPasswordEnterEmail from './pages/Accounts/ResetPasswordEnterEmail.jsx';
-import ResetPasswordEnterCode from './pages/Accounts/ResetPasswordEnterCode.jsx';
 import ResetPassword from './pages/Accounts/ResetPassword.jsx';
 import PasswordResetSuccess from './pages/Accounts/ResetPasswordSuccess.jsx';
 import AccountManagement from './pages/Accounts/AccountManagement.jsx';
@@ -114,7 +113,6 @@ function Main() {
         <Route path="/edit-profile/:id" element={<EditProfile />} />
         <Route path="/change-password/:id" element={<ChangePassword />} />
         <Route path="/reset-password-email" element={<ResetPasswordEnterEmail />} />
-        <Route path="/reset-password-code" element={<ResetPasswordEnterCode />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
         <Route path="/account-management" element={<AccountManagement />} />

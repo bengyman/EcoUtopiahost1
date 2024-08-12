@@ -79,38 +79,71 @@ router.post('/oauth-login', async (req, res) => {
 router.post('/register', verifyRecaptcha, async (req, res) => {
     const transaction = await User.sequelize.transaction();
     try {
-      await userSchema.validate(req.body);
-      const { email, password, role, firstName, lastName, contactNumber } = req.body;
-  
-      const existingUser = await User.findOne({ where: { email } });
-      if (existingUser) {
-        return res.status(400).json({ error: 'Email already exists' });
-      }
-  
-      const hashedPassword = await bcrypt.hash(password, 10);
-  
-      const newUser = await User.create({
-        email,
-        password: hashedPassword,
-        role
-      }, { transaction });
+        await userSchema.validate(req.body);
+        const { email, password, role, firstName, lastName, contactNumber } = req.body;
 
-      const newUserDetails = await Resident.create({
-        name: `${firstName} ${lastName}`,
-        mobile_num: contactNumber,
-        user_id: newUser.user_id
-      }, { transaction });
-  
-      await transaction.commit();
-  
-      const token = generateToken(newUser, { resident: newUserDetails });
-      res.status(201).json({ user: newUser, token, resident: newUserDetails });
+        const existingUser = await User.findOne({ where: { email } });
+        if (existingUser) {
+            return res.status(400).json({ error: 'Email already exists' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const newUser = await User.create({
+            email,
+            password: hashedPassword,
+            role
+        }, { transaction });
+
+        const newUserDetails = await Resident.create({
+            name: `${firstName} ${lastName}`,
+            mobile_num: contactNumber,
+            user_id: newUser.user_id
+        }, { transaction });
+
+        // Generate activation code
+        const activationCode = crypto.randomBytes(20).toString('hex');
+        newUser.activation_code = activationCode;
+        newUser.activation_code_expiry = new Date(Date.now() + 1800000); // 30 minutes expiry
+        await newUser.save({ transaction });
+
+        // Set up Nodemailer
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.ethereal.email',
+            port: 587,
+            auth: {
+                user: process.env.ETHEREAL_USER,
+                pass: process.env.ETHEREAL_PASS
+            }
+        });
+
+        // Send activation email
+        const mailOptions = {
+            from: '"EcoUtopia" <no-reply@ecoutopia.com>',
+            to: newUser.email,
+            subject: 'Account Activation',
+            text: `Your activation code is: ${activationCode}`
+        };
+
+        transporter.sendMail(mailOptions, (err, info) => {
+            if (err) {
+                console.error('Error sending email:', err);
+                return res.status(500).json({ error: 'Failed to send activation email' });
+            }
+            console.log('Activation email sent:', info.response);
+        });
+
+        await transaction.commit();
+
+        const token = generateToken(newUser, { resident: newUserDetails });
+        res.status(201).json({ user: newUser, token, resident: newUserDetails });
     } catch (error) {
-      await transaction.rollback();
-      console.error('Registration error:', error);
-      res.status(500).json({ error: error.message });
+        await transaction.rollback();
+        console.error('Registration error:', error);
+        res.status(500).json({ error: error.message });
     }
 });
+
 
 // Create a new user and either resident, staff, or instructor with input validation (This is for AccountManagement)
 router.post('/createaccount', authenticateToken, async (req, res) => {
@@ -357,20 +390,6 @@ router.put('/softdelete/:id', authenticateToken, authorizeRoles('STAFF'), async 
             return res.status(404).json({ error: 'User not found' });
         }
         const updatedUser = await user.update({ is_deleted: true });
-        res.status(200).json(updatedUser);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Update account activation status (accessible by STAFF only)
-router.put('/activate/:id', authenticateToken, authorizeRoles('STAFF'), async (req, res) => {
-    try {
-        const user = await User.findByPk(req.params.id);
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-        const updatedUser = await user.update({ is_activated: req.body.is_activated });
         res.status(200).json(updatedUser);
     } catch (error) {
         res.status(500).json({ error: error.message });
