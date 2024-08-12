@@ -32,7 +32,7 @@ function AdminCourses() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [courseToDelete, setCourseToDelete] = useState(null);
-    const [instructors, setInstructors] = useState([]);
+    //const [instructor, setInstructor] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
@@ -49,21 +49,21 @@ function AdminCourses() {
         }
       };
 
-      const fetchInstructors = async () => {
+      /*const fetchSingleInstructor = async (instructorId) => {
         try {
           const response = await axios.get(
-            "http://localhost:3000/api/instructor/getInstructors"
+            `http://localhost:3000/api/courses/getCourse/${instructorId}`
           );
-          setInstructors(response.data);
+          setInstructor(response.data);
           setLoading(false);
         } catch (error) {
           setError(error);
           setLoading(false);
         }
-      };
+      };*/
 
       fetchCourses();
-      fetchInstructors();
+      //fetchSingleInstructor();
       document.title = "Admin - EcoUtopia";
     }, []);
 
@@ -105,6 +105,7 @@ function AdminCourses() {
     );
 
     const rows = filteredCourses.map((course) => (
+      console.log(course),
         <Table.Tr key={course.course_id}>
           <Table.Td>
             <Group gap="sm">
@@ -116,7 +117,7 @@ function AdminCourses() {
             </Group>
           </Table.Td>
           <Table.Td>
-            <Text fz="sm">{course.course_instructor}</Text>
+            <Text fz="sm">{course.Instructor.name}</Text>
           </Table.Td>
           <Table.Td>
             <Text fz="sm">{dayjs(course.createdAt).format('DD/MM/YYYY')}</Text>
@@ -168,11 +169,7 @@ function AdminCourses() {
           </Table.Td>
         </Table.Tr>
       ));
-      let test = instructors.map((instructor) => (
-        console.log(instructor.name)
-      ));
   return (
-    console.log(test),
     <Container size="xl">
         <Box padding="xl" style={{marginTop: '30px'}} />
         <Title>Manage Courses</Title>
