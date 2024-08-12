@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFacebook, faTwitter, faLinkedin, faWhatsapp, faTelegram } from '@fortawesome/free-brands-svg-icons';
-import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FacebookShareButton, TwitterShareButton, LinkedinShareButton, WhatsappShareButton, TelegramShareButton } from 'react-share';
-import { Button, Textarea, Select } from '@mantine/core';
+import { Container, Paper, Text, Title, Image, AspectRatio, Select, Group, Button, Textarea, Divider, Loader, Center, Avatar } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 
 const PostDetails = () => {
   const { id } = useParams();
@@ -19,8 +19,7 @@ const PostDetails = () => {
   const [loading, setLoading] = useState(true);
   const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [translatedContent, setTranslatedContent] = useState('');
-  const maxCommentLength = 100;
-  const maxEditingCommentLength = 100;
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -66,6 +65,7 @@ const PostDetails = () => {
       formData.append("content", newComment);
       formData.append("resident_id", user?.resident?.resident_id);
       formData.append("residentName", user?.resident?.name);
+      formData.append("residentAvatar", user?.resident?.profile_pic);
       formData.append("post_id", id);
 
       const response = await axios.post(`http://localhost:3001/posts/${id}/comments`, formData, {
@@ -94,32 +94,6 @@ const PostDetails = () => {
     setEditingContent(content);
   };
 
-  const handleDeleteComment = async (commentId) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this comment?");
-
-    if (confirmDelete) {
-      try {
-        const token = sessionStorage.getItem('token');
-        const response = await axios.delete(`http://localhost:3001/posts/comments/${commentId}`, {
-          headers: {
-            "Authorization": `Bearer ${token}`
-          }
-        });
-
-        console.log('Comment deletion response:', response.data);
-
-        if (response.status === 200) {
-          setComments(prevComments => prevComments.filter(comment => comment.id !== commentId));
-        } else {
-          console.error('Unexpected response status:', response.status);
-        }
-      } catch (error) {
-        console.error('Error deleting comment:', error.response?.data || error.message);
-        alert("Failed to delete comment: " + (error.response?.data.message || error.message));
-      }
-    }
-  };
-
   const updateComment = async (event) => {
     event.preventDefault();
     try {
@@ -143,7 +117,6 @@ const PostDetails = () => {
         ));
         setEditingCommentId(null);
         setEditingContent('');
-        window.location.reload();  // Reload the page after editing a comment
       } else {
         console.error('Unexpected response structure:', response.data);
       }
@@ -153,11 +126,10 @@ const PostDetails = () => {
     }
   };
 
-  const handleLanguageChange = (event) => {
-    const selectedLang = event;
-    setSelectedLanguage(selectedLang);
+  const handleLanguageChange = (value) => {
+    setSelectedLanguage(value);
     if (post) {
-      translateContent(post.content, selectedLang);
+      translateContent(post.content, value);
     }
   };
 
@@ -167,11 +139,19 @@ const PostDetails = () => {
   };
 
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <Center style={{ height: '100vh' }}>
+        <Loader />
+      </Center>
+    );
   }
 
   if (!post) {
-    return <p>Post not found.</p>;
+    return (
+      <Container>
+        <Text align="center">Post not found.</Text>
+      </Container>
+    );
   }
 
   const isImageUrl = (url) => {
@@ -184,14 +164,18 @@ const PostDetails = () => {
   const customMessage = "Check out this amazing post I found!%0A";
 
   return (
-    <div>
-      <div style={{ textAlign: 'center', padding: '20px' }}>
-        <div style={{ marginBottom: '20px' }}>
-          <label htmlFor="language">Select Language:</label>
+    console.log('Post:', post),
+    <Container size="sm">
+      <Paper withBorder shadow="md" p="md" mt="md">
+        <Group position="apart" mb="md">
+          <Group>
+            <Avatar src={post.residentAvatar} alt={post.residentName} radius="xl" />
+            <div>
+              <Text size="sm" color="dimmed">{post.residentName}</Text>
+              <Text size="xs" color="dimmed">{formatDate(post.createdAt)}</Text>
+            </div>
+          </Group>
           <Select
-            id="language"
-            value={selectedLanguage}
-            onChange={handleLanguageChange}
             data={[
               { value: 'en', label: 'English' },
               { value: 'es', label: 'Español' },
@@ -203,140 +187,119 @@ const PostDetails = () => {
               { value: 'ms', label: 'Bahasa Melayu' },
               { value: 'hi', label: 'हिन्दी' },
             ]}
+            value={selectedLanguage}
+            onChange={handleLanguageChange}
+            style={{ maxWidth: 150 }}
+            size="sm"
           />
-        </div>
-
-        <div style={{ marginBottom: '10px', fontSize: '1.1em' }}>
-          <strong>Creator: {post.residentName}</strong>
-        </div>
-        <h1 style={{ marginBottom: '5px' }}>{post.title}</h1>
-        {post.tags && <p style={{ fontStyle: 'italic', marginBottom: '10px' }}>Tags: {post.tags}</p>}
+        </Group>
+        <Title order={1} align="center" mb="sm">{post.title}</Title>
+        {post.tags && <Text align="center" size="sm" italic mb="md">Tags: {post.tags}</Text>}
         {post.imageUrl && (
           isImageUrl(post.imageUrl) ? (
-            <img src={`${post.imageUrl}`} alt={post.title} style={{ width: '400px', height: '400px', objectFit: 'cover', marginBottom: '10px' }} />
+            <Image
+              src={`${post.imageUrl}`}
+              alt={post.title}
+              radius="md"
+              mb="md"
+              height={isMobile ? 200 : 400}
+              fit="cover"
+            />
           ) : (
-            <video
-              controls
-              style={{ width: '400px', height: '400px', objectFit: 'cover', marginBottom: '10px' }}
-              onEnded={(e) => { e.target.currentTime = 0; e.target.play(); }}
-            >
-              <source src={`${post.imageUrl}`} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
+            <AspectRatio ratio={16 / 9} mb="md">
+              <video controls>
+                <source src={post.imageUrl} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </AspectRatio>
           )
         )}
-        <p>{translatedContent}</p>
-
-        <div className="share-buttons" style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '20px', marginBottom: '20px' }}>
-          <FacebookShareButton url={postUrl} quote={postTitle} className="share-button">
+        <Text align="justify" size="md" mb="md">{selectedLanguage === 'en' ? post.content : translatedContent}</Text>
+        <Divider my="md" />
+        <Title order={2} align="center" mb="sm">Share this post:</Title>
+        <Group position="center" spacing="md" mb="md">
+          <FacebookShareButton url={postUrl} quote={postContent} className="share-button">
             <FontAwesomeIcon icon={faFacebook} size="2x" />
           </FacebookShareButton>
           <TwitterShareButton url={postUrl} title={postContent} className="share-button">
             <FontAwesomeIcon icon={faTwitter} size="2x" />
           </TwitterShareButton>
-          <LinkedinShareButton url={postUrl} summary={postContent} className="share-button">
+          <LinkedinShareButton url={postUrl} title={postContent} summary={postContent} source={postUrl} className="share-button">
             <FontAwesomeIcon icon={faLinkedin} size="2x" />
           </LinkedinShareButton>
-          <WhatsappShareButton url={postUrl} title={customMessage} separator="%0A" className="share-button">
+          <WhatsappShareButton url={postUrl} title={customMessage} separator=":: " className="share-button">
             <FontAwesomeIcon icon={faWhatsapp} size="2x" />
           </WhatsappShareButton>
           <TelegramShareButton url={postUrl} title={customMessage} className="share-button">
             <FontAwesomeIcon icon={faTelegram} size="2x" />
           </TelegramShareButton>
-        </div>
-      </div>
-
-      <div>
-        <h2>Comments:</h2>
-        <form onSubmit={handleCreateComment} style={{ position: 'relative' }}>
-          <Textarea
-            value={newComment}
-            onChange={(event) => setNewComment(event.target.value)}
-            placeholder="Write your comment here..."
-            maxLength={maxCommentLength} // Enforces max length
-            style={{
-              width: '100%',
-              height: '150px',
-              marginBottom: '1px',
-              borderRadius: '10px',
-              padding: '10px',
-              boxSizing: 'border-box'
-            }} // Increased height and added box-sizing
-          />
-          <div style={{
-            position: 'absolute',
-            bottom: '10px',
-            right: '10px',
-            color: 'gray',
-            fontSize: '0.9em'
-          }}>
-            {`${maxCommentLength - newComment.length} characters remaining`}
-          </div>
-          <Button
-            type="submit"
-            color="teal"
-            style={{
-              position: 'absolute',
-              bottom: '10px',
-              left: '10px' // Moved button to the left
-            }}
-          >
-            Add Comment
-          </Button>
-        </form>
-        {comments.map((comment) => (
-          <div key={comment.id} style={{ border: '1px solid #ddd', padding: '10px', marginBottom: '10px', position: 'relative', textAlign: 'left', borderRadius: '8px', boxSizing: 'border-box' }}>
-            <div style={{ marginBottom: '5px', fontSize: '0.9em', color: '#555' }}>By: {comment.Resident.name}</div>
-            <div style={{ marginBottom: '5px', fontSize: '0.8em', color: '#888' }}>Date created: {formatDate(comment.createdAt)}</div>
-            {editingCommentId === comment.id ? (
-              <form onSubmit={updateComment}>
-                <Textarea
-                  value={editingContent}
-                  onChange={(event) => setEditingContent(event.target.value)}
-                  required
-                  minLength={5}
-                  maxLength={maxCommentLength} // Added maxEditingCommentLength prop
-                  style={{ width: '100%', height: '150px', marginBottom: '10px', borderRadius: '8px', padding: '10px', boxSizing: 'border-box' }} // Increased height and added box-sizing
-                />
-                <div style={{ textAlign: 'right', fontSize: '12px', color: maxEditingCommentLength - editingContent.length <= 0 ? 'red' : 'inherit' }}>
-                  {maxEditingCommentLength - editingContent.length} characters remaining
-                </div>
-
-                <Button type="submit" color="teal" style={{ marginRight: '10px' }}>
-                  Save
-                </Button>
-                <Button onClick={() => setEditingCommentId(null)} color="red">
-                  Cancel
-                </Button>
-              </form>
-            ) : (
-              <>
-                <p>{comment.content}</p>
-                {user?.role === 'staff' || comment.resident_id === user?.resident?.resident_id ? (
-                  <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
+        </Group>
+        <Divider my="md" />
+        <Title order={2} mb="sm">Comments:</Title>
+        {comments.length > 0 ? (
+          comments.map(comment => (
+            <Paper key={comment.id} withBorder shadow="sm" p="sm" mb="md">
+              {editingCommentId === comment.id ? (
+                <form onSubmit={updateComment}>
+                  <Textarea
+                    value={editingContent}
+                    onChange={(e) => setEditingContent(e.target.value)}
+                    rows="4"
+                    autosize
+                    minRows={3}
+                    maxRows={6}
+                    mb="sm"
+                  />
+                  <Button type="submit" size="xs" fullWidth>
+                    Save
+                  </Button>
+                </form>
+              ) : (
+                <>
+                  <Text mb="sm">{comment.content}</Text>
+                  <Group position="apart">
+                    <Group spacing="xs">
+                      <Avatar src={comment.Resident.profile_pic} alt={comment.Resident.name} radius="xl" size="sm" />
+                      <Text size="sm" c="dimmed">{comment.Resident.name}</Text>
+                    </Group>
+                    <Text size="xs" c="dimmed">{formatDate(comment.createdAt)}</Text>
+                  </Group>
+                  {user && user.resident && comment.resident_id === user.resident.resident_id && (
                     <Button
                       onClick={() => handleUpdateComment(comment.id, comment.content)}
+                      variant="outline"
                       color="blue"
-                      variant="subtle"
-                      style={{ marginRight: '5px' }}
+                      size="xs"
+                      mt="xs"
                     >
-                      <FontAwesomeIcon icon={faPencil} />
+                      Edit
                     </Button>
-                    <Button
-                      onClick={() => handleDeleteComment(comment.id)}
-                      color="red"
-                      variant="subtle"
-                    >
-                      <FontAwesomeIcon icon={faTrash} />
-                    </Button>
-                  </div>
-                ) : null}
-              </>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
+                  )}
+                </>
+              )}
+            </Paper>
+          ))
+        ) : (
+          <Text align="center">No comments yet.</Text>
+        )}
+        <Divider my="md" />
+        <form onSubmit={handleCreateComment}>
+          <Textarea
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            placeholder="Add a comment..."
+            rows="4"
+            autosize
+            minRows={3}
+            maxRows={6}
+            mb="sm"
+          />
+          <Button type="submit" fullWidth>
+            Post Comment
+          </Button>
+        </form>
+      </Paper>
+    </Container>
   );
 };
 

@@ -65,9 +65,24 @@ function AdminCourses() {
       }
     };
 
+    const publishCourse = async (courseId) => {
+      try {
+        await axios.patch(`/courses/publishCourse/${courseId}`);
+        console.log(`Course with ID ${courseId} published`);
+        setCourses(courses.map((course) => {
+          if (course.course_id === courseId) {
+            return { ...course, course_status: 'published' };
+          }
+          return course;
+        }));
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
     if (loading) return <LoadingOverlay visible />;
     if (error) return <Text align="center">Error: {error.message}</Text>;
-    if (courses.length === 0) return <Text align="center">No courses found</Text>
+    //if (courses.length === 0) return <Text align="center">No courses found</Text>
 
     const filteredCourses = courses.filter((course) =>
       course.course_name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -112,10 +127,12 @@ function AdminCourses() {
                   </ActionIcon>
                 </Menu.Target>
                 <Menu.Dropdown>
-                  <Menu.Item
+                <Menu.Item
                     leftSection={
                       <IconStackPush style={{ width: rem(16), height: rem(16) }} stroke={1.5} />
                     }
+                    onClick={() => publishCourse(course.course_id)}
+                    disabled={course.course_status === 'published'}
                   >
                     Publish course
                   </Menu.Item>

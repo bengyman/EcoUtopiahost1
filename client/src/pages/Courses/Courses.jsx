@@ -1,5 +1,5 @@
 import axios from "axios";
-import dayjs from "dayjs";
+//import dayjs from "dayjs";
 import Navbar from "../../components/Navbar";
 import { useState, useEffect } from "react";
 import {
@@ -32,19 +32,19 @@ function Courses() {
   const [priceRange, setPriceRange] = useState([0, 50]);
   const [selectedFree, setSelectedFree] = useState(false);
 
-  function formatMySQLTimeString(mysqlTimeString) {
+  /*function formatMySQLTimeString(mysqlTimeString) {
     const [hours, minutes] = mysqlTimeString.split(':');
     const ampm = parseInt(hours, 10) >= 12 ? 'PM' : 'AM';
     let hours12 = parseInt(hours, 10) % 12;
     hours12 = hours12 ? hours12 : 12;
     return `${hours12}:${minutes} ${ampm}`;
-  }
+  }*/
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3000/api/courses/getCourses"
+          "http://localhost:3000/api/courses/publishedCourses"
         );
         setCourses(response.data);
         setLoading(false);
@@ -89,13 +89,13 @@ function Courses() {
             value={selectedType}
             onChange={setSelectedType}
           />
-          <Select
+          {/*<Select
             label="Instructor"
             placeholder="Select instructor"
             data={[...new Set(courses.map((course) => course.course_instructor))]}
             value={selectedInstructor}
             onChange={setSelectedInstructor}
-          />
+          />*.*/}
           <Checkbox
             label="Show only free courses"
             style={{ marginTop: 20 }}
@@ -179,11 +179,11 @@ function Courses() {
               <Text weight={500} size="md" style={{ marginTop: 10, marginBottom: 5 }}>
                 {course.course_name}
               </Text>
-              <Text size="sm" c="dimmed">
+              {/*<Text size="sm" c="dimmed">
                 {dayjs(course.course_date).format("DD MMM YYYY")} |{" "}
                 {formatMySQLTimeString(course.course_start_time)} -{" "}
                 {formatMySQLTimeString(course.course_end_time)}
-              </Text>
+              </Text>*/}
               <Flex align="center" style={{ marginTop: 10 }}>
                 <Avatar size="sm" />
                 <Text size="sm" ml="sm">

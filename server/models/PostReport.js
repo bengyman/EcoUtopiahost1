@@ -1,3 +1,4 @@
+
 module.exports = (sequelize, DataTypes) => {
     const PostReports = sequelize.define('PostReports', {
         id: {

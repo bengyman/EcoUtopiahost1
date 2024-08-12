@@ -1,3 +1,4 @@
+
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { AppShell, Flex, Anchor, Button, Text, Image, Menu, Avatar } from "@mantine/core";
@@ -49,7 +50,7 @@ function Navbar() {
           });
           setStaffDetails(response.data);
           setProfilePicUrl(response.data.staff.profile_pic);
-          console.log('Staff data:', response.data);
+          //console.log('Staff data:', response.data);
         } catch (error) {
           console.error('Error fetching staff data:', error);
         }
@@ -57,6 +58,27 @@ function Navbar() {
     };
     fetchStaffData();
   }, [user]);
+
+  useEffect(() => {
+    const fetchInstructorData = async () => {
+      if (user && user.role === 'INSTRUCTOR') {
+        try {
+          const response = await axios.get(`/user/${user.user_id}`, {
+            headers: {
+              Authorization: `Bearer ${sessionStorage.getItem('token')}`
+            }
+          });
+          setStaffDetails(response.data);
+          setProfilePicUrl(response.data.instructor.profile_pic);
+          console.log('Instructor data:', response.data);
+        } catch (error) {
+          console.error('Error fetching instructor data:', error);
+        }
+      }
+    };
+    fetchInstructorData();
+  }, [user]);
+    
 
   const handleLogout = () => {
     logout();
@@ -69,7 +91,7 @@ function Navbar() {
 
   return (
     <AppShell header={{ height: 50 }} navbar={{ width: 200, breakpoint: "xl" }}>
-      <AppShell.Header style={{ height: 50, backgroundColor: isStaff ? "#00A0D2" : "#0F9D58" }}>
+      <AppShell.Header style={{ height: 50, backgroundColor: isStaff ? "#00A0D2" : isInstructor ? "#23cf9b" : "#0F9D58" }}>
         <Flex align="center" justify="space-between" style={{ height: "100%" }}>
           <Flex align="center">
             <Anchor href="/" style={{ textDecoration: "none" }}>
@@ -131,7 +153,6 @@ function Navbar() {
                 </Text>
               </Anchor>
             )}
-
             {isInstructor && (
               <Anchor href="/instructor/courses" style={{ textDecoration: "none" }}>
                 <Text tt="uppercase" fw={'500'} c="black" style={{ marginLeft: 10, marginRight: 10 }}>
@@ -139,17 +160,10 @@ function Navbar() {
                 </Text>
               </Anchor>
             )}
-            {isStaff && (
-              <Anchor href="/rewards" style={{ textDecoration: "none" }}>
+            {isInstructor && (
+              <Anchor href="/posts" style={{ textDecoration: "none" }}>
                 <Text tt="uppercase" fw={'500'} c="black" style={{ marginLeft: 10, marginRight: 10 }}>
-                  Rewards
-                </Text>
-              </Anchor>
-            )}
-            {isResident && (
-              <Anchor href="/rewards" style={{ textDecoration: "none" }}>
-                <Text tt="uppercase" fw={'500'} c="black" style={{ marginLeft: 10, marginRight: 10 }}>
-                  Rewards
+                  Instructor Posts
                 </Text>
               </Anchor>
             )}
@@ -172,11 +186,11 @@ function Navbar() {
             {user && (
               <Menu shadow="md" width={200}>
                 <Menu.Target>
-                  <Avatar
-                    variant="filled"
-                    radius="xl"
+                  <Avatar 
+                    variant="filled" 
+                    radius="xl" 
                     src={profilePicUrl}
-                    style={{ marginRight: '2rem' }}
+                    style={{ marginRight: '2rem' }} 
                   />
                 </Menu.Target>
                 <Menu.Dropdown>
@@ -186,7 +200,7 @@ function Navbar() {
                   <Menu.Item icon={<IconUser size={14} />} onClick={() => navigate(`/publicprofile/${user.user_id}`)}>
                     Public Profile
                   </Menu.Item>
-                  <Menu.Item icon={<IconGift size={14} />} onClick={() => navigate(`/${user.resident?.resident_id}/reward`)}>
+                  <Menu.Item icon={<IconGift size={14} />} onClick={() => navigate(`/${user.resident.resident_id}/reward`)}>
                     View Rewards
                   </Menu.Item>
                   <Menu.Item icon={<IconLogout size={14} />} onClick={handleLogout}>

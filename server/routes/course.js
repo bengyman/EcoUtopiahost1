@@ -93,7 +93,6 @@ router.post("/create-course", uploadFile.single('course_image_url'), async (req,
   }
 });
 
-
 router.get('/publishedCourses', async (req, res) => {
   try {
     const courses = await Course.findAll({

@@ -14,11 +14,11 @@ import {
   Tabs,
   Rating,
   Box,
-  Space,
+  Notification,
 } from '@mantine/core';
+import { IconAlertCircle } from '@tabler/icons-react';
 import { useState, useEffect } from "react";
 import { useParams } from 'react-router-dom';
-import { loadStripe } from '@stripe/stripe-js';
 import { useStripe } from '@stripe/react-stripe-js';
 
 function ViewCourse() {
@@ -26,6 +26,7 @@ function ViewCourse() {
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showNotification, setShowNotification] = useState(false);
   const stripe = useStripe();
 
   useEffect(() => {
@@ -62,9 +63,15 @@ function ViewCourse() {
 
       if (error) {
         console.error('Stripe checkout error:', error);
+        setError(error);
+        setShowNotification(true);
+        setTimeout(() => setShowNotification(false), 3000);
       }
     } catch (error) {
       console.error('There was an error creating the checkout session!', error);
+      setError(error);
+      setShowNotification(true);
+      setTimeout(() => setShowNotification(false), 3000);
     }
   };
 
@@ -76,17 +83,9 @@ function ViewCourse() {
     );
   }
 
-  if (error) {
-    return (
-      <Container size="xl">
-        <Text c="red" align="center" size="xl" style={{ marginTop: 20 }}>
-          {error.message}
-        </Text>
-      </Container>
-    );
-  }
 
-  if (!course) return <p>Loading...</p>;
+
+  if (!course) return <Text align="center">Course not found</Text>;
 
   return (
     <Container size="xl" style={{ marginTop: 30 }}>
@@ -169,6 +168,34 @@ function ViewCourse() {
           </Tabs.Panel>
         </Tabs>
       </Paper>
+      {showNotification && (
+        <Notification
+          title="Error"
+          color="red"
+          icon={<IconAlertCircle size={24} />}
+          onClose={() => setShowNotification(false)}
+          styles={(theme) => ({
+            root: {
+              backgroundColor: theme.colors.red[0],
+              borderColor: theme.colors.red[6],
+            },
+            title: {
+              color: theme.colors.red[7],
+            },
+            description: {
+              color: theme.colors.red[7],
+            },
+            closeButton: {
+              color: theme.colors.red[7],
+              '&:hover': {
+                backgroundColor: theme.colors.red[1],
+              },
+            },
+          })}
+        >
+        {error.message}
+        </Notification>
+      )}
     </Container>
   );
 }
