@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import {
   Button,
   Container,
-  Paper,
   Text,
   Title,
   Avatar,
@@ -33,7 +32,8 @@ function Profile() {
     role: "",
   });
   const [loading, setLoading] = useState(true);
-  const fileInputRef = useRef(null);
+  const profilePicInputRef = useRef(null);
+  const backgroundImageInputRef = useRef(null);
 
   useEffect(() => {
     let timer = setTimeout(() => {
@@ -77,7 +77,7 @@ function Profile() {
             lastName: resident.name.split(" ")[1] || "",
             mobileNumber: resident.mobile_num || "",
             profilePic: resident.profile_pic || "",
-            backgroundImage: resident.background_pic || "", // Make sure it's background_pic
+            backgroundImage: resident.background_pic || "",
             role: "RESIDENT",
           });
         } else if (userData.role === "STAFF" && staff) {
@@ -87,7 +87,7 @@ function Profile() {
             lastName: staff.name.split(" ")[1] || "",
             mobileNumber: staff.mobilenum || "",
             profilePic: staff.profile_pic || "",
-            backgroundImage: staff.background_pic || "", // Make sure it's background_pic
+            backgroundImage: staff.background_pic || "",
             role: "STAFF",
           });
         } else if (userData.role === "INSTRUCTOR" && instructor) {
@@ -97,7 +97,7 @@ function Profile() {
             lastName: instructor.name.split(" ")[1] || "",
             mobileNumber: instructor.mobilenum || "",
             profilePic: instructor.profile_pic || "",
-            backgroundImage: instructor.background_pic || "", // Make sure it's background_pic
+            backgroundImage: instructor.background_pic || "",
             role: "INSTRUCTOR",
           });
         } else {
@@ -107,7 +107,7 @@ function Profile() {
             lastName: userData.lastName || "",
             mobileNumber: userData.mobileNumber || "",
             profilePic: userData.profile_pic || "",
-            backgroundImage: userData.background_pic || "", // Make sure it's background_pic
+            backgroundImage: userData.background_pic || "",
             role: userData.role || "",
           });
         }
@@ -132,13 +132,10 @@ function Profile() {
     formData.append("userId", paramId);
 
     try {
-      const response = await axios.post("/user/profile-picture", formData, {
+      await axios.post("/user/profile-picture", formData, {
         headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
       });
-      setProfileData((prevData) => ({
-        ...prevData,
-        profilePic: response.data.fileUrl,
-      }));
+      window.location.reload(); // Reload the page after the upload
     } catch (error) {
       console.error("Error uploading profile picture:", error);
     }
@@ -153,19 +150,14 @@ function Profile() {
     formData.append("userId", paramId);
 
     try {
-      const response = await axios.post("/user/background-image", formData, {
+      await axios.post("/user/background-image", formData, {
         headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
       });
-      setProfileData((prevData) => ({
-        ...prevData,
-        backgroundImage: response.data.fileUrl,
-      }));
+      window.location.reload(); // Reload the page after the upload
     } catch (error) {
       console.error("Error uploading background image:", error);
     }
   };
-
-  console.log("Background Image URL:", profileData.backgroundImage); // Log the URL to debug
 
   if (!paramId || loading) {
     return <LoaderComponent />;
@@ -230,34 +222,37 @@ function Profile() {
                 accept="image/*"
                 style={{ display: "none" }}
                 onChange={handleProfilePicChange}
-                ref={fileInputRef}
+                ref={profilePicInputRef}
               />
               <Button
                 color="blue"
                 variant="filled"
-                onClick={() => fileInputRef.current.click()} // Trigger click on file input
+                onClick={() => profilePicInputRef.current.click()}
+                fullWidth
+                mt="md"
               >
                 Upload Profile Image
               </Button>
             </label>
-            <Button
-              color="gray"
-              variant="filled"
-              onClick={() =>
-                document.getElementById("backgroundImageInput").click()
-              }
-              fullWidth
-              mt="md"
-            >
-              Upload Background Image
-            </Button>
-            <input
-              id="backgroundImageInput"
-              type="file"
-              accept="image/*"
-              style={{ display: "none" }}
-              onChange={handleBackgroundImageChange}
-            />
+            <label htmlFor="backgroundImageInput">
+              <Button
+                color="gray"
+                variant="filled"
+                onClick={() => backgroundImageInputRef.current.click()}
+                fullWidth
+                mt="md"
+              >
+                Upload Background Image
+              </Button>
+              <input
+                id="backgroundImageInput"
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={handleBackgroundImageChange}
+                ref={backgroundImageInputRef}
+              />
+            </label>
             <Button
               variant="outline"
               fullWidth
