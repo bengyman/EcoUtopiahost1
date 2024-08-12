@@ -56,6 +56,7 @@ import AddReward from './pages/Rewards/AddReward.jsx';
 import EditReward from './pages/Rewards/EditReward.jsx';
 // instructor
 import InstructorCourse from './pages/Instructor/InstructorCourse.jsx';
+import CheckAttendance from './pages/Instructor/CheckAttendance.jsx';
 
 
 import {
@@ -153,7 +154,7 @@ function Main() {
         <Route path="/editreward/:id" element={<EditReward />} />
 
         <Route path="/instructor/courses/:instructorId" element={<InstructorCourse />} />
-
+        <Route path="/instructor/check-attendance/:courseId" element={<CheckAttendance />} />
       </Routes>
     </>
   )

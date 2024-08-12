@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const bodyParser = require('body-parser');
-const { Orders, Resident, RedeemReward } = require('../models');
+const { Orders, Resident, RedeemReward, Course } = require('../models');
 const { authenticateToken } = require('../middleware/auth');
 require('dotenv').config();
 
@@ -71,6 +71,14 @@ router.post('/process-order', async (req, res) => {
               order_date: new Date(),
               order_status: 'Upcoming',
               payment_intent: session.payment_intent, // Store the payment_intent
+          });
+
+          // Enroll the resident in the course
+          await Attendance.create({
+              course_id,
+              resident_id,
+              attendance_date: new Date(),
+              attendance_status: 'enrolled',
           });
 
           // Update the RedeemReward entry to set reward_used to true
