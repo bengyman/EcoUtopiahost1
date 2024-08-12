@@ -57,7 +57,7 @@ function Navbar() {
     };
     fetchStaffData();
   }, [user]);
-    
+
 
   const handleLogout = () => {
     logout();
@@ -140,6 +140,7 @@ function Navbar() {
                   Instructor Courses
                 </Text>
               </Anchor>
+            )}
             {isStaff && (
               <Anchor href="/rewards" style={{ textDecoration: "none" }}>
                 <Text tt="uppercase" fw={'500'} c="black" style={{ marginLeft: 10, marginRight: 10 }}>
@@ -173,11 +174,11 @@ function Navbar() {
             {user && !isProfilePage && (
               <Menu shadow="md" width={200}>
                 <Menu.Target>
-                  <Avatar 
-                    variant="filled" 
-                    radius="xl" 
+                  <Avatar
+                    variant="filled"
+                    radius="xl"
                     src={profilePicUrl}
-                    style={{ marginRight: '2rem' }} 
+                    style={{ marginRight: '2rem' }}
                   />
                 </Menu.Target>
                 <Menu.Dropdown>
