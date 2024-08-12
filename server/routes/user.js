@@ -101,11 +101,15 @@ router.post('/register', verifyRecaptcha, async (req, res) => {
             user_id: newUser.user_id
         }, { transaction });
 
-        // Generate activation code
-        const activationCode = crypto.randomBytes(20).toString('hex');
-        newUser.activation_code = activationCode;
-        newUser.activation_code_expiry = new Date(Date.now() + 1800000); // 30 minutes expiry
-        await newUser.save({ transaction });
+        // Generate activation token
+        const activationToken = jwt.sign(
+            { email: newUser.email },
+            process.env.JWT_SECRET,
+            { expiresIn: '30m' } // Token expires in 30 minutes
+        );
+
+        // Create activation link
+        const activationLink = `${process.env.CLIENT_URL}/activate-account-link?token=${activationToken}`;
 
         // Set up Nodemailer
         const transporter = nodemailer.createTransport({
@@ -117,12 +121,12 @@ router.post('/register', verifyRecaptcha, async (req, res) => {
             }
         });
 
-        // Send activation email
+        // Send activation email with link
         const mailOptions = {
             from: '"EcoUtopia" <no-reply@ecoutopia.com>',
             to: newUser.email,
             subject: 'Account Activation',
-            text: `Your activation code is: ${activationCode}`
+            text: `Please click the following link to activate your account:\n\n${activationLink}\n\nIf you did not request this, please ignore this email.`
         };
 
         transporter.sendMail(mailOptions, (err, info) => {
@@ -143,6 +147,7 @@ router.post('/register', verifyRecaptcha, async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
 
 
 // Create a new user and either resident, staff, or instructor with input validation (This is for AccountManagement)
@@ -414,17 +419,21 @@ router.put('/softrestore/:id', authenticateToken, authorizeRoles('STAFF'), async
 router.post('/activate', authenticateToken, async (req, res) => {
     try {
         const { email } = req.body;
-        console.log('Received email for activation:', email); // Debugging line to check email value
 
         const user = await User.findOne({ where: { email } });
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        const activationCode = crypto.randomBytes(20).toString('hex');
-        user.activation_code = activationCode;
-        user.activation_code_expiry = new Date(Date.now() + 1800000); // 30 minutes expiry
-        await user.save();
+        // Generate activation token
+        const activationToken = jwt.sign(
+            { email: user.email },
+            process.env.JWT_SECRET,
+            { expiresIn: '30m' } // Token expires in 30 minutes
+        );
+
+        // Create activation link
+        const activationLink = `${process.env.CLIENT_URL}/activate-account-link?token=${activationToken}`;
 
         // Set up Nodemailer
         const transporter = nodemailer.createTransport({
@@ -436,12 +445,12 @@ router.post('/activate', authenticateToken, async (req, res) => {
             }
         });
 
-        // Send email
+        // Send activation email with link
         const mailOptions = {
             from: '"EcoUtopia" <no-reply@ecoutopia.com>',
             to: user.email,
             subject: 'Account Activation',
-            text: `Your activation code is: ${activationCode}`
+            text: `Please click the following link to activate your account:\n\n${activationLink}\n\nIf you did not request this, please ignore this email.`
         };
 
         transporter.sendMail(mailOptions, (err, info) => {
@@ -450,7 +459,7 @@ router.post('/activate', authenticateToken, async (req, res) => {
                 return res.status(500).json({ error: 'Failed to send activation email' });
             }
             console.log('Activation email sent:', info.response);
-            res.status(200).json({ message: 'Activation code sent' });
+            res.status(200).json({ message: 'Activation link sent' });
         });
 
     } catch (error) {
@@ -485,6 +494,34 @@ router.post('/activate-account', authenticateToken, async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+// Automatically activate account via the activation link
+router.post('/activate-account-link', async (req, res) => {
+    const { token } = req.query;
+
+    try {
+        // Verify the activation token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        // Find the user by the decoded email
+        const user = await User.findOne({ where: { email: decoded.email } });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Activate the user's account
+        user.is_activated = true;
+        user.activation_code = null;
+        user.activation_code_expiry = null;
+        await user.save();
+
+        res.status(200).json({ message: 'Account activated successfully' });
+    } catch (error) {
+        console.error('Error activating account:', error);
+        return res.status(401).json({ error: 'Invalid or expired activation link' });
+    }
+});
+
 
 // Change password
 router.put('/change-password/:id', authenticateToken, async (req, res) => {

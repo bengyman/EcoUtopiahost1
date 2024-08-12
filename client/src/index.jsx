@@ -24,6 +24,7 @@ import ResetPassword from './pages/Accounts/ResetPassword.jsx';
 import PasswordResetSuccess from './pages/Accounts/ResetPasswordSuccess.jsx';
 import AccountManagement from './pages/Accounts/AccountManagement.jsx';
 import AccountActivation from './pages/Accounts/AccountActivation.jsx';
+import ActivateAccountLink from './pages/Accounts/ActivateAccountLink.jsx'
 import FollowersList from './pages/Accounts/FollowersList.jsx';
 import FollowingList from './pages/Accounts/FollowingList.jsx';
 
@@ -117,6 +118,7 @@ function Main() {
         <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
         <Route path="/account-management" element={<AccountManagement />} />
         <Route path="/account-activation" element={<AccountActivation />} />
+        <Route path="/activate-account-link" element={<ActivateAccountLink />} />
         <Route path="/followers/:paramId" element={<FollowersList />} />
         <Route path="/following/:paramId" element={<FollowingList />} />
 
@@ -144,7 +146,7 @@ function Main() {
         <Route path="/reward/:rewardId" element={<RewardDetail />} />
         <Route path="/:residentId/reward" element={<ViewReward/>} />
 
-        <Route path="/instructor/courses" element={<InstructorCourse />} />
+        <Route path="/instructor/courses/:instructorId" element={<InstructorCourse />} />
 
       </Routes>
     </>
