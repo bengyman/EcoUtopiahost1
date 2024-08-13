@@ -8,7 +8,7 @@ const WORD_LENGTH = 5;
 const LOCKOUT_KEY = 'wordleLockout';
 const POINTS_KEY = 'userPoints';
 const LEADERBOARD_KEY = 'leaderboard';
-const VALID_WORD_REGEX = /^[a-zA-Z]{5}$/; // Regex for validating a 5-letter word
+const VALID_WORD_REGEX = /^[a-zA-Z]{5}$/;
 
 const getRandomWord = () => {
   const shuffledWords = WORDS.sort(() => Math.random() - 0.5);
@@ -24,7 +24,7 @@ const WordleGrid = ({ guesses }) => {
           key={rowIndex}
           position="center"
           style={{
-            marginBottom: '10px', // Add margin to separate rows
+            marginBottom: '10px',
           }}
         >
           {Array.from({ length: WORD_LENGTH }).map((_, letterIndex) => (
@@ -33,19 +33,16 @@ const WordleGrid = ({ guesses }) => {
               style={{
                 width: '50px',
                 height: '50px',
-                borderRadius: '10px',
-                border: `2px solid ${theme.colors.gray[3]}`,
+                borderRadius: '5px',
+                border: '2px solid #ccc',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginRight: '5px', // Separate the letters horizontally
-                backgroundColor: guess[letterIndex]?.color || theme.colors.gray[0], // Assuming guess contains color info
+                marginRight: '5px',
+                backgroundColor: guess[letterIndex]?.color || theme.colors.gray[0],
                 fontSize: '20px',
                 fontWeight: 'bold',
                 color: theme.colors.dark[9],
-                boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.2)', // Add shadow for depth
-                transition: 'background-color 0.3s ease', // Smooth transition
-                cursor: 'default',
               }}
             >
               {guess[letterIndex]?.char || ''}
@@ -97,13 +94,13 @@ function EcoWordleGame() {
 
   const handleInputChange = (e) => {
     const value = e.target.value;
-    if (VALID_WORD_REGEX.test(value)) { // Ensure the input is a valid 5-letter word
+    if (value.length <= WORD_LENGTH) {
       setCurrentGuess(value.toLowerCase());
     }
   };
 
   const handleSubmitGuess = () => {
-    if (VALID_WORD_REGEX.test(currentGuess) && WORDS.includes(currentGuess)) { // Validate the guess
+    if (VALID_WORD_REGEX.test(currentGuess) && WORDS.includes(currentGuess)) {
       const updatedGuesses = [...guesses];
       const guessArray = Array.from(currentGuess).map((char, index) => ({
         char,
@@ -115,7 +112,7 @@ function EcoWordleGame() {
       if (currentGuess === word) {
         setWin(true);
         setGameOver(true);
-        const newPoints = points + 20; // Updated points for a correct guess
+        const newPoints = hintUsed ? points + 19 : points + 20;
         setPoints(newPoints);
         localStorage.setItem(POINTS_KEY, newPoints);
         updateLeaderboard(newPoints);
@@ -157,8 +154,9 @@ function EcoWordleGame() {
         }
       }
       setHintUsed(true);
-      setPoints((prev) => prev - 1);
-      localStorage.setItem(POINTS_KEY, points - 1);
+      const newPoints = points - 1;
+      setPoints(newPoints);
+      localStorage.setItem(POINTS_KEY, newPoints);
     }
   };
 
@@ -170,7 +168,7 @@ function EcoWordleGame() {
   };
 
   return (
-    <Container style={{ backgroundColor: theme.colors.gray[0], padding: '40px', borderRadius: '10px', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)' }}>
+    <Container>
       <Text align="center" size="xl" weight={700} style={{ margin: '20px 0', color: theme.colors.green[9] }}>
         EcoWordle Game
       </Text>
@@ -189,13 +187,13 @@ function EcoWordleGame() {
             variant="filled"
           />
           <Center>
-            <Button onClick={handleSubmitGuess} disabled={currentGuess.length !== WORD_LENGTH} style={{ marginTop: '10px', marginRight: '10px', backgroundColor: theme.colors.blue[6], color: 'white', border: 'none', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.2)', transition: 'background-color 0.3s ease' }}>
+            <Button onClick={handleSubmitGuess} disabled={currentGuess.length !== WORD_LENGTH} style={{ marginTop: '10px', marginRight: '10px' }}>
               Submit Guess
             </Button>
-            <Button onClick={handleHint} color="yellow" disabled={hintUsed || points <= 0} style={{ marginTop: '10px', marginRight: '10px', backgroundColor: theme.colors.yellow[5], color: 'black', border: 'none', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.2)', transition: 'background-color 0.3s ease' }}>
+            <Button onClick={handleHint} color="yellow" disabled={hintUsed || points <= 0} style={{ marginTop: '10px', marginRight: '10px' }}>
               Use Hint (-1 Point)
             </Button>
-            <Button onClick={handleLeaveGame} color="red" style={{ marginTop: '10px', backgroundColor: theme.colors.red[6], color: 'white', border: 'none', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.2)', transition: 'background-color 0.3s ease' }}>
+            <Button onClick={handleLeaveGame} color="red" style={{ marginTop: '10px' }}>
               Leave Game
             </Button>
           </Center>
@@ -203,14 +201,14 @@ function EcoWordleGame() {
       )}
       {gameOver && (
         <Paper padding="md" style={{ textAlign: 'center', marginTop: '20px', borderRadius: '10px', backgroundColor: theme.colors.green[1] }}>
-          {win ? <Text size="lg" weight={700} color={theme.colors.green[9]}>Congratulations! You guessed the word and earned 20 points!</Text> : <Text size="lg" weight={700} color={theme.colors.red[7]}>Game Over! The word was: {word}</Text>}
-          <Button onClick={handleRestart} style={{ marginTop: '10px', backgroundColor: theme.colors.green[6], color: 'white', border: 'none', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.2)', transition: 'background-color 0.3s ease' }}>Play Again</Button>
+          {win ? <Text size="lg" weight={700} color={theme.colors.green[9]}>Congratulations! You guessed the word and earned {hintUsed ? 19 : 20} points!</Text> : <Text size="lg" weight={700} color={theme.colors.red[7]}>Game Over! The word was: {word}</Text>}
+          <Button onClick={handleRestart} style={{ marginTop: '10px' }}>Play Again</Button>
         </Paper>
       )}
-      <Modal opened={showLeaveModal} onClose={() => setShowLeaveModal(false)} title="Leave Game" centered>
-        <Text>Are you sure you want to leave the game? You will be locked out for 4 hours.</Text>
-        <Group position="right" style={{ marginTop: '20px' }}>
-          <Button onClick={confirmLeaveGame} color="red" style={{ backgroundColor: theme.colors.red[6], color: 'white' }}>Leave</Button>
+      <Modal opened={showLeaveModal} onClose={() => setShowLeaveModal(false)} title="Confirm Exit" centered>
+        <Text>Are you sure you want to leave? The game will be locked for 4 hours.</Text>
+        <Group position="center" style={{ marginTop: '20px' }}>
+          <Button onClick={confirmLeaveGame} color="red">Yes, Leave</Button>
           <Button onClick={() => setShowLeaveModal(false)}>Cancel</Button>
         </Group>
       </Modal>
