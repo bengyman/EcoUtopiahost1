@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFacebook, faTwitter, faLinkedin, faWhatsapp, faTelegram } from '@fortawesome/free-brands-svg-icons';
 import { FacebookShareButton, TwitterShareButton, LinkedinShareButton, WhatsappShareButton, TelegramShareButton } from 'react-share';
+import { faPencil, faTrash, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import { Container, Paper, Text, Title, Image, AspectRatio, Select, Group, Button, Textarea, Divider, Loader, Center, Avatar } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 
@@ -19,6 +20,8 @@ const PostDetails = () => {
   const [loading, setLoading] = useState(true);
   const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [translatedContent, setTranslatedContent] = useState('');
+  const [sortedComments, setSortedComments] = useState([]);
+
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   useEffect(() => {
@@ -26,6 +29,8 @@ const PostDetails = () => {
       try {
         const response = await axios.get(`http://localhost:3001/posts/${id}`);
         console.log('Response from server:', response.data);
+
+        
 
         if (response.data) {
           setPost(response.data);
@@ -43,6 +48,14 @@ const PostDetails = () => {
 
     fetchPost();
   }, [id, selectedLanguage]);
+
+  useEffect(() => {
+    // Sort comments by newest first
+    const sorted = [...comments].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    setSortedComments(sorted);
+  }, [comments]);
+
+  
 
   const translateContent = async (content, targetLanguage) => {
     try {
@@ -86,6 +99,32 @@ const PostDetails = () => {
     } catch (error) {
       console.error('Error creating comment:', error.response?.data || error.message);
       alert("Failed to create comment: " + (error.response?.data.message || error.message));
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this comment?");
+
+    if (confirmDelete) {
+      try {
+        const token = sessionStorage.getItem('token');
+        const response = await axios.delete(`http://localhost:3001/posts/comments/${commentId}`, {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+
+        console.log('Comment deletion response:', response.data);
+
+        if (response.status === 200) {
+          setComments(prevComments => prevComments.filter(comment => comment.id !== commentId));
+        } else {
+          console.error('Unexpected response status:', response.status);
+        }
+      } catch (error) {
+        console.error('Error deleting comment:', error.response?.data || error.message);
+        alert("Failed to delete comment: " + (error.response?.data.message || error.message));
+      }
     }
   };
 
@@ -164,14 +203,23 @@ const PostDetails = () => {
   const customMessage = "Check out this amazing post I found!%0A";
 
   return (
-    console.log('Post:', post),
     <Container size="sm">
       <Paper withBorder shadow="md" p="md" mt="md">
         <Group position="apart" mb="md">
           <Group>
-            <Avatar src={post.residentAvatar} alt={post.residentName} radius="xl" />
+          {post.Resident ? (
+              <Avatar src={post.Resident.profile_pic} alt="Resident Profile picture" radius="xl" size={50} />
+            ) : post.Instructor ? (
+              <Avatar src={post.Instructor.profile_pic} alt="Instructor Profile picture" radius="xl" size={50} />
+            ) : null}
             <div>
-              <Text size="sm" color="dimmed">{post.residentName}</Text>
+              <Text size="sm" color="dimmed">{post.name}</Text>
+              <Group align="center">
+                <Text weight={500}>
+                  {post.Resident ? post.Resident.name : post.Instructor ? post.Instructor.name : 'Unknown'}
+                </Text>
+                {post.Instructor && <FontAwesomeIcon icon={faCheckCircle} color="blue" />}
+              </Group>
               <Text size="xs" color="dimmed">{formatDate(post.createdAt)}</Text>
             </div>
           </Group>
@@ -235,10 +283,57 @@ const PostDetails = () => {
           </TelegramShareButton>
         </Group>
         <Divider my="md" />
+        <form onSubmit={handleCreateComment}>
+          <Textarea
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            placeholder="Add a comment..."
+            rows="4"
+            autosize
+            minRows={3}
+            maxRows={6}
+            mb="sm"
+          />
+          <Button type="submit" fullWidth>
+            Post Comment
+          </Button>
+        </form>
+        
         <Title order={2} mb="sm">Comments:</Title>
-        {comments.length > 0 ? (
-          comments.map(comment => (
-            <Paper key={comment.id} withBorder shadow="sm" p="sm" mb="md">
+        {sortedComments.length > 0 ? (
+          sortedComments.map((comment) => (
+            <Paper key={comment.id} withBorder shadow="sm" p="sm" mb="md" style={{ position: 'relative' }}>
+              <Group position="apart" mb="sm">
+                <Group spacing="xs">
+                  <Avatar src={comment.Resident.profile_pic} alt={comment.Resident.name} radius="xl" size="sm" />
+                  <Text size="sm" color="dimmed">{comment.Resident.name}</Text>
+                </Group>
+                <Group spacing="xs">
+                  {user && user.resident && comment.resident_id === user.resident.resident_id && (
+                    <>
+                      <Button
+                        onClick={() => handleUpdateComment(comment.id, comment.content)}
+                        variant="subtle"
+                        color="blue"
+                        size="xs"
+                        style={{ position: 'absolute', top: '10px', right: '40px', padding: 0, minWidth: 'auto', height: 'auto' }}
+                      >
+                        <FontAwesomeIcon icon={faPencil} size="lg" />
+                      </Button>
+                      <Button
+                        onClick={() => handleDeleteComment(comment.id)}
+                        variant="subtle"
+                        color="red"
+                        size="xs"
+                        style={{ position: 'absolute', top: '10px', right: '5px', padding: 0, minWidth: 'auto', height: 'auto' }}
+                      >
+                        <FontAwesomeIcon icon={faTrash} size="lg" />
+                      </Button>
+                    </>
+                  )}
+                  <Text size="xs" color="dimmed">{formatDate(comment.createdAt)}</Text>
+                </Group>
+              </Group>
               {editingCommentId === comment.id ? (
                 <form onSubmit={updateComment}>
                   <Textarea
@@ -255,27 +350,7 @@ const PostDetails = () => {
                   </Button>
                 </form>
               ) : (
-                <>
-                  <Text mb="sm">{comment.content}</Text>
-                  <Group position="apart">
-                    <Group spacing="xs">
-                      <Avatar src={comment.Resident.profile_pic} alt={comment.Resident.name} radius="xl" size="sm" />
-                      <Text size="sm" c="dimmed">{comment.Resident.name}</Text>
-                    </Group>
-                    <Text size="xs" c="dimmed">{formatDate(comment.createdAt)}</Text>
-                  </Group>
-                  {user && user.resident && comment.resident_id === user.resident.resident_id && (
-                    <Button
-                      onClick={() => handleUpdateComment(comment.id, comment.content)}
-                      variant="outline"
-                      color="blue"
-                      size="xs"
-                      mt="xs"
-                    >
-                      Edit
-                    </Button>
-                  )}
-                </>
+                <Text mb="sm">{comment.content}</Text>
               )}
             </Paper>
           ))
@@ -283,24 +358,11 @@ const PostDetails = () => {
           <Text align="center">No comments yet.</Text>
         )}
         <Divider my="md" />
-        <form onSubmit={handleCreateComment}>
-          <Textarea
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Add a comment..."
-            rows="4"
-            autosize
-            minRows={3}
-            maxRows={6}
-            mb="sm"
-          />
-          <Button type="submit" fullWidth>
-            Post Comment
-          </Button>
-        </form>
       </Paper>
     </Container>
   );
-};
+}
+
+
 
 export default PostDetails;
