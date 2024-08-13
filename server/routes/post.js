@@ -166,7 +166,6 @@ router.get('/:id', authenticateToken, async (req, res) => {
         },
         {
           model: Resident, // Include resident details for the post
-          attributes: ['profile_pic', 'name'] // Ensure the profile_pic is included
         },
         {
           model: Instructor, // If applicable, include instructor details

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFacebook, faTwitter, faLinkedin, faWhatsapp, faTelegram } from '@fortawesome/free-brands-svg-icons';
@@ -30,7 +30,7 @@ const PostDetails = () => {
         const response = await axios.get(`http://localhost:3001/posts/${id}`);
         console.log('Response from server:', response.data);
 
-        
+
 
         if (response.data) {
           setPost(response.data);
@@ -55,7 +55,7 @@ const PostDetails = () => {
     setSortedComments(sorted);
   }, [comments]);
 
-  
+
 
   const translateContent = async (content, targetLanguage) => {
     try {
@@ -207,10 +207,14 @@ const PostDetails = () => {
       <Paper withBorder shadow="md" p="md" mt="md">
         <Group position="apart" mb="md">
           <Group>
-          {post.Resident ? (
-              <Avatar src={post.Resident.profile_pic} alt="Resident Profile picture" radius="xl" size={50} />
+            {post.Resident ? (
+              <Link to={`/publicprofile/${post.Resident.user_id}`}> {/* Link to public profile */}
+                <Avatar src={post.Resident.profile_pic} alt="Resident Profile picture" radius="xl" size={50} />
+              </Link>
             ) : post.Instructor ? (
-              <Avatar src={post.Instructor.profile_pic} alt="Instructor Profile picture" radius="xl" size={50} />
+              <Link to={`/publicprofile/${post.Instructor.user_id}`}> {/* Link to public profile */}
+                <Avatar src={post.Instructor.profile_pic} alt="Instructor Profile picture" radius="xl" size={50} />
+              </Link>
             ) : null}
             <div>
               <Text size="sm" color="dimmed">{post.name}</Text>
@@ -298,7 +302,7 @@ const PostDetails = () => {
             Post Comment
           </Button>
         </form>
-        
+
         <Title order={2} mb="sm">Comments:</Title>
         {sortedComments.length > 0 ? (
           sortedComments.map((comment) => (
