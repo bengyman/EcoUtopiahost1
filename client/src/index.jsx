@@ -54,6 +54,7 @@ import RewardDetail from './pages/Rewards/RewardDetail.jsx';
 import ViewReward from './pages/Rewards/ViewReward.jsx';
 import AddReward from './pages/Rewards/AddReward.jsx';
 import EditReward from './pages/Rewards/EditReward.jsx';
+import EcoWordleGame from './components/EcoWordleGame.jsx';
 // instructor
 import InstructorCourse from './pages/Instructor/InstructorCourse.jsx';
 import CheckAttendance from './pages/Instructor/CheckAttendance.jsx';
@@ -154,6 +155,7 @@ function Main() {
         <Route path="/:residentId/reward" element={<ViewReward/>} />
         <Route path="/addreward" element={<AddReward />} />
         <Route path="/editreward/:id" element={<EditReward />} />
+        <Route path="/ecowordlegame" element={<EcoWordleGame />} />
 
         <Route path="/instructor/courses/:instructorId" element={<InstructorCourse />} />
         <Route path="/instructor/check-attendance/:courseId" element={<CheckAttendance />} />

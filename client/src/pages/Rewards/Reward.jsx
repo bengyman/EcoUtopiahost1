@@ -175,6 +175,15 @@ const Rewards = () => {
               </Grid.Col>
             ))}
           </Grid>
+
+          <Button 
+            color="blue" 
+            style={{ position: 'absolute', top: 20, right: 20 }} 
+            onClick={() => navigate('/ecowordlegame')}
+          >
+            Play EcoWordle Game
+          </Button>
+
         </>
       )}
     </Container>
