@@ -93,6 +93,7 @@ function CheckAttendance() {
           <Table.Tr>
             <Table.Th>Student Name</Table.Th>
             <Table.Th>Mark as Present</Table.Th>
+            <Table.Th>Attendance Status</Table.Th>
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
@@ -105,6 +106,7 @@ function CheckAttendance() {
                   onChange={(e) => handleAttendanceChange(student.student_id, e.target.checked)}
                 />
               </Table.Td>
+              <Table.Td>{attendance[student.student_id]}</Table.Td>
             </Table.Tr>
           ))}
         </Table.Tbody>

@@ -156,6 +156,7 @@ const PostDetails = () => {
         ));
         setEditingCommentId(null);
         setEditingContent('');
+        window.location.reload();
       } else {
         console.error('Unexpected response structure:', response.data);
       }
