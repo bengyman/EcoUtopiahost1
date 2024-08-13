@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Button,
   Container,
@@ -58,15 +58,18 @@ function CreatePost() {
 
       const residentId = user?.resident?.resident_id;
       const residentName = user?.resident?.name;
+      const instructorId = user?.instructor?.instructorid; // Get instructor ID if available
+      const instructorName = user?.instructor?.name; // Get instructor's name
 
-      console.log("Resident ID:", residentId);
-      console.log("Resident Name:", residentName);
+      if (!residentId && !instructorId) throw new Error("No resident or instructor ID found");
 
-      if (!residentId) throw new Error("No resident ID found");
-      if (!residentName) throw new Error("No resident name found");
-
-      formData.append("resident_id", residentId);
-      formData.append("residentName", residentName);
+      if (residentId) {
+        formData.append("resident_id", residentId);
+        formData.append("residentName", residentName); // Include resident's name
+      } else if (instructorId) {
+        formData.append("instructor_id", instructorId);
+        formData.append("name", instructorName); // Include instructor's name
+      }
 
       console.log("FormData entries:");
       formData.forEach((value, key) => {
@@ -90,6 +93,19 @@ function CreatePost() {
 
   if (loading) {
     return <LoaderComponent />;
+  }
+
+  // Determine tag options based on user role
+  const tagOptions = [
+    { value: "Advice", label: "Advice" },
+    { value: "Discussion", label: "Discussion" },
+    { value: "Tips", label: "Tips" },
+    { value: "Question", label: "Question" },
+  ];
+
+  // Only instructors can use the "Announcement" tag
+  if (user?.instructor) {
+    tagOptions.push({ value: "Announcement", label: "Announcement" });
   }
 
   return (
@@ -142,13 +158,7 @@ function CreatePost() {
               label="Tag"
               value={tags}
               onChange={setTags}
-              data={[
-                { value: "Advice", label: "Advice" },
-                { value: "Discussion", label: "Discussion" },
-                { value: "Tips", label: "Tips" },
-                { value: "Question", label: "Question" },
-                { value: "Announcement", label: "Announcement" },
-              ]}
+              data={tagOptions} // Use the determined tag options
               mb="md"
               error={tagsError ? "Required" : null}
               styles={(theme) => ({
