@@ -85,11 +85,11 @@ function App() {
                 Sustainable Products
               </Text>
               <Text align="center" size="lg" style={{ marginTop: "1rem" }}>
-                Discover our range of eco-friendly products designed to help you
-                live a more sustainable life.
+                Discover our range of rewards designed to gift you
+                and have a positive impact on the environment.
               </Text>
               <Group position="center" mt="lg">
-                <Anchor href="/products" style={{ textDecoration: "none" }}>
+                <Anchor href="/rewards" style={{ textDecoration: "none" }}>
                   <Button color="green" radius="xl">
                     Shop Now
                   </Button>
