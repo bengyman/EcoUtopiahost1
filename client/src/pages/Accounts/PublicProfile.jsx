@@ -28,6 +28,7 @@ function PublicProfile() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showMessage, setShowMessage] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -35,8 +36,6 @@ function PublicProfile() {
         const profileResponse = await axios.get(`/user/public-profile/${paramId}`);
         const followersResponse = await axios.get(`/follow/followers/${paramId}`);
         const followingResponse = await axios.get(`/follow/following/${paramId}`);
-
-        console.log('Followers Response:', followersResponse.data);
 
         if (!profileResponse.data.name) {
           throw new Error("User not found");
@@ -70,7 +69,12 @@ function PublicProfile() {
 
   const handleFollow = async () => {
     if (!user) {
-      navigate("/login");
+      setShowMessage(true); // Show the message for not logged-in users
+
+      setTimeout(() => {
+        navigate("/login"); // Redirect to login after 3 seconds
+      }, 2000);
+
       return;
     }
   
@@ -109,7 +113,6 @@ function PublicProfile() {
       console.error("Error details:", error.response ? error.response.data : error.message);
     }
   };
-    
 
   if (loading) {
     return <LoaderComponent />;
@@ -172,7 +175,45 @@ function PublicProfile() {
               {profileData.isFollowing ? "Unfollow" : "Follow"}
             </Button>
           )}
+
+          {/* For not logged in users */}
+          {!user && (
+            <Button
+              style={{
+                fontSize: "1.2rem",
+                height: "60px",
+                width: "200px",
+                position: "absolute",
+                bottom: "-80px",  // Positioned just below the background image
+                right: "20px",  // Positioned to the bottom right corner
+                zIndex: 2,  // Ensure the button is above other elements
+              }}
+              variant="filled"
+              color="blue"
+              onClick={handleFollow}
+            >
+              Follow
+            </Button>
+          )}
+
+          {/* Display the message below the background image */}
+          {showMessage && (
+            <Text
+              align="center"
+              color="red"
+              mt="md"
+              style={{
+                position: "absolute",
+                bottom: "-120px", // Positioned below the Follow button
+                left: 0,
+                right: 0,
+              }}
+            >
+              You need to log in to follow users. Redirecting to login...
+            </Text>
+          )}
         </Box>
+
         <Box mt="-150px" ml="20px" style={{ position: "relative" }}>
           <Avatar
             src={
