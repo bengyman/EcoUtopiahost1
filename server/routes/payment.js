@@ -45,70 +45,78 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
 });
 
 router.post('/process-order', async (req, res) => {
-  const { sessionId } = req.body;
-  try {
+    const { sessionId } = req.body;
+    try {
       const session = await stripe.checkout.sessions.retrieve(sessionId);
       if (session.payment_status === 'paid') {
-          const { resident_id, course_id, voucherCode } = session.metadata;
-
-          // Check if the order already exists
-          const existingOrder = await Orders.findOne({
-              where: {
-                  course_id,
-                  resident_id,
-                  payment_intent: session.payment_intent,
-              },
+        const { resident_id, course_id, voucherCode } = session.metadata;
+  
+        const existingOrder = await Orders.findOne({
+          where: {
+            course_id,
+            resident_id,
+            payment_intent: session.payment_intent,
+          },
+        });
+  
+        if (existingOrder) {
+          return res.status(200).json({ message: 'Order already exists' });
+        }
+  
+        await Orders.create({
+          course_id,
+          resident_id,
+          order_date: new Date(),
+          order_status: 'Upcoming',
+          payment_intent: session.payment_intent,
+        });
+  
+        await Attendance.create({
+          course_id,
+          resident_id,
+          attendance_date: new Date(),
+          attendance_status: 'enrolled',
+        });
+  
+        const amountPaid = session.amount_total / 100; // Convert amount from cents to dollars
+        const ecoPointsEarned = Math.floor(amountPaid * 10); // 10x the price paid, rounded down
+  
+        const resident = await Resident.findOne({ where: { resident_id } });
+        if (resident) {
+          await resident.update({
+            ecoPoints: resident.ecoPoints + ecoPointsEarned
           });
-
-          if (existingOrder) {
-              return res.status(200).json({ message: 'Order already exists' });
-          }
-
-          // Create a new order
-          await Orders.create({
-              course_id,
+        }
+  
+        // Return the new ecoPoints value
+        res.status(200).json({ ecoPoints: resident.ecoPoints });
+  
+        // Update RedeemReward entry if voucherCode is used
+        if (voucherCode) {
+          const redeemReward = await RedeemReward.findOne({
+            where: {
               resident_id,
-              order_date: new Date(),
-              order_status: 'Upcoming',
-              payment_intent: session.payment_intent, // Store the payment_intent
+              reward_used: false,
+              voucher_code: voucherCode,
+            },
           });
-
-          // Enroll the resident in the course
-          await Attendance.create({
-              course_id,
-              resident_id,
-              attendance_date: new Date(),
-              attendance_status: 'enrolled',
-          });
-
-          // Update the RedeemReward entry to set reward_used to true
-          if (voucherCode) {
-              const redeemReward = await RedeemReward.findOne({
-                  where: {
-                      resident_id: resident_id,
-                      reward_used: false, // Ensure the reward wasn't already used
-                      voucher_code: voucherCode, // Match by voucherCode
-                  },
-              });
-
-              if (redeemReward) {
-                  await redeemReward.update({
-                      reward_used: true,
-                      reward_used_at: new Date(),
-                  });
-              }
+  
+          if (redeemReward) {
+            await redeemReward.update({
+              reward_used: true,
+              reward_used_at: new Date(),
+            });
           }
-
-          res.sendStatus(200);
+        }
       } else {
-          res.status(400).json({ error: 'Payment not completed' });
+        res.status(400).json({ error: 'Payment not completed' });
       }
-  } catch (error) {
+    } catch (error) {
       console.error('Error processing order:', error);
       res.status(500).json({ error: 'Failed to process order' });
-  }
+    }
 });
-
+  
 
   
 module.exports = router;

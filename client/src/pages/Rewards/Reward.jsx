@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Paper, Notification, Container, Group, Title, Switch, Grid, Card, Badge, Text, Image } from '@mantine/core';
-import { Check, X } from 'tabler-icons-react';
 import axios from 'axios';
 import LoaderComponent from "../../components/Loader.jsx";
 import { useAuth } from '../../context/AuthContext';
@@ -130,7 +129,13 @@ const Rewards = () => {
 
       {user.role === 'RESIDENT' && (
         <>
-          <Title align="center" style={{ marginTop: 20 }}>Catalog of Rewards</Title>
+          <Group position="apart" style={{ marginTop: 20 }}>
+            <Title align="center">Catalog of Rewards</Title>
+            <Badge size="lg" color="green">
+              EcoPoints: {user.resident.ecoPoints}
+            </Badge>
+          </Group>
+
           <Grid gutter="md" mt={30}>
             {rewards.map((reward) => (
               <Grid.Col key={reward.reward_id} span={4}>
