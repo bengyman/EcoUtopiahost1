@@ -21,20 +21,17 @@ function ViewOrders() {
                 }
             }).then((res) => {
                 setOrder(res.data);
-            });
+                setIsLoading(false); // Set loading to false when data is loaded
+            }).catch(() => setIsLoading(false)); // Handle potential errors
         }
     }, [orderId]);
 
-    useEffect(() => {
-        let timer = setTimeout(() => {
-            setIsLoading(false);
-        }, 300); // Display loader for at least 0.3 seconds
-
-        return () => clearTimeout(timer);
-    }, []);
+    if (isLoading) {
+        return <LoaderComponent />;
+    }
 
     if (!order) {
-        return <LoaderComponent />;
+        return <Text>No order found.</Text>;
     }
 
     return (
@@ -66,22 +63,16 @@ function ViewOrders() {
                     <strong>Order Date:</strong> {dayjs(order.order_date).format(global.datetimeFormat)}
                 </Text>
                 <Text size="lg" weight={500} align="left">
-                    <strong>Order Amount:</strong> ${order.Course.course_price}
-                </Text>
-                <Text size="lg" weight={500} align="left">
-                    <strong>Instructor:</strong> {order.Course.course_instructor}
+                    <strong>Instructor:</strong> {order.Course.Instructor.name}
                 </Text>
                 <Text size="lg" weight={500} align="left">
                     <strong>Course Description:</strong> {order.Course.course_description}
                 </Text>
                 <Text size="lg" weight={500} align="left">
-                    <strong>Course Date:</strong> {dayjs(order.Course.course_date).format(global.dateFormat)}
+                    <strong>Start Time:</strong> {dayjs(order.Course.course_start_date).format(global.datetimeFormat)}
                 </Text>
                 <Text size="lg" weight={500} align="left">
-                    <strong>Start Time:</strong> {order.Course.course_start_time}
-                </Text>
-                <Text size="lg" weight={500} align="left">
-                    <strong>End Time:</strong> {order.Course.course_end_time}
+                    <strong>End Time:</strong> {dayjs(order.Course.course_end_date).format(global.datetimeFormat)}
                 </Text>
             </Card>
         </Container>

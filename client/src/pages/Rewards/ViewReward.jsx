@@ -16,7 +16,8 @@ const ViewReward = () => {
   const fetchRedeemedRewards = async () => {
     try {
       const response = await axios.get(`/redeemreward/${user.resident.resident_id}`);
-      setRedeemedRewards(response.data);
+      const filteredRewards = response.data.filter(reward => !reward.reward_used); // Filter out used rewards
+      setRedeemedRewards(filteredRewards);
     } catch (error) {
       console.error('Error fetching redeemed rewards:', error);
     } finally {
@@ -26,6 +27,18 @@ const ViewReward = () => {
 
   if (loading) {
     return <LoaderComponent />;
+  }
+
+  if (redeemedRewards.length === 0) {
+    return (
+      <Container size="xl" style={{ textAlign: 'center', marginTop: 50 }}>
+        <Title align="center" style={{ marginTop: 20, marginBottom: 50 }}>My Redeemed Rewards</Title>
+        <Text size="xl" weight={500}>You have not redeemed any rewards yet.</Text>
+        <Text size="md" color="dimmed" style={{ marginTop: 10 }}>
+          Start exploring rewards and redeem your first one!
+        </Text>
+      </Container>
+    );
   }
 
   return (

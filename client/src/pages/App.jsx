@@ -65,7 +65,7 @@ function App() {
               communities reduce their environmental impact.
             </Text>
             <Text align="center" size="lg" mt="sm">
-              Whether you're looking for sustainable products or want to learn
+              Whether you&apos;re looking for sustainable products or want to learn
               more about green practices, EcoUtopia is here to support your
               journey towards a more sustainable future.
             </Text>
@@ -85,11 +85,11 @@ function App() {
                 Sustainable Products
               </Text>
               <Text align="center" size="lg" style={{ marginTop: "1rem" }}>
-                Discover our range of eco-friendly products designed to help you
-                live a more sustainable life.
+                Discover our range of rewards designed to gift you
+                and have a positive impact on the environment.
               </Text>
               <Group position="center" mt="lg">
-                <Anchor href="/products" style={{ textDecoration: "none" }}>
+                <Anchor href="/rewards" style={{ textDecoration: "none" }}>
                   <Button color="green" radius="xl">
                     Shop Now
                   </Button>
@@ -120,14 +120,11 @@ function App() {
           <Divider my="sm" />
         </Box>
         <Navbar />
-        {/* CTA Buttons */}
-        <Group position="center" mt="xl" spacing="xl">
-          <Anchor href="/test" style={{ textDecoration: "none" }}>
-            <Button color="deepBlue" radius="xl">
-              Test
-            </Button>
-          </Anchor>
-        </Group>
+        <Box mt="xl">
+          <Text align="center" size="lg">
+            &copy; {new Date().getFullYear()} EcoUtopia. All rights reserved.
+          </Text>
+        </Box>
       </Container>
     </Container>
   )

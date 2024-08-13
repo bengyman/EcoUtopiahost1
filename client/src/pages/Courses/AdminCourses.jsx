@@ -32,6 +32,7 @@ function AdminCourses() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [courseToDelete, setCourseToDelete] = useState(null);
+    //const [instructor, setInstructor] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
@@ -47,7 +48,22 @@ function AdminCourses() {
           setLoading(false);
         }
       };
+
+      /*const fetchSingleInstructor = async (instructorId) => {
+        try {
+          const response = await axios.get(
+            `http://localhost:3000/api/courses/getCourse/${instructorId}`
+          );
+          setInstructor(response.data);
+          setLoading(false);
+        } catch (error) {
+          setError(error);
+          setLoading(false);
+        }
+      };*/
+
       fetchCourses();
+      //fetchSingleInstructor();
       document.title = "Admin - EcoUtopia";
     }, []);
 
@@ -65,15 +81,31 @@ function AdminCourses() {
       }
     };
 
+    const publishCourse = async (courseId) => {
+      try {
+        await axios.patch(`/courses/publishCourse/${courseId}`);
+        console.log(`Course with ID ${courseId} published`);
+        setCourses(courses.map((course) => {
+          if (course.course_id === courseId) {
+            return { ...course, course_status: 'published' };
+          }
+          return course;
+        }));
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
     if (loading) return <LoadingOverlay visible />;
     if (error) return <Text align="center">Error: {error.message}</Text>;
-    if (courses.length === 0) return <Text align="center">No courses found</Text>
+    //if (courses.length === 0) return <Text align="center">No courses found</Text>
 
     const filteredCourses = courses.filter((course) =>
       course.course_name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     const rows = filteredCourses.map((course) => (
+      console.log(course),
         <Table.Tr key={course.course_id}>
           <Table.Td>
             <Group gap="sm">
@@ -85,7 +117,7 @@ function AdminCourses() {
             </Group>
           </Table.Td>
           <Table.Td>
-            <Text fz="sm">{course.course_instructor}</Text>
+            <Text fz="sm">{course.Instructor.name}</Text>
           </Table.Td>
           <Table.Td>
             <Text fz="sm">{dayjs(course.createdAt).format('DD/MM/YYYY')}</Text>
@@ -112,10 +144,12 @@ function AdminCourses() {
                   </ActionIcon>
                 </Menu.Target>
                 <Menu.Dropdown>
-                  <Menu.Item
+                <Menu.Item
                     leftSection={
                       <IconStackPush style={{ width: rem(16), height: rem(16) }} stroke={1.5} />
                     }
+                    onClick={() => publishCourse(course.course_id)}
+                    disabled={course.course_status === 'published'}
                   >
                     Publish course
                   </Menu.Item>
@@ -183,7 +217,7 @@ function AdminCourses() {
                 <Table.Th>Actions</Table.Th>
                 <Table.Th />
             </Table.Tr>
-            </Table.Thead>
+          </Table.Thead>
             <Table.Tbody>{rows}</Table.Tbody>
         </Table>
         </Table.ScrollContainer>

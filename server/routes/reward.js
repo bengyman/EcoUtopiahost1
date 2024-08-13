@@ -11,6 +11,8 @@ const rewardSchema = yup.object().shape({
     reward_points: yup.number().required("Reward points are required").min(0, "Reward points must be at least 0"),
     reward_expiry_date: yup.date().required("Reward expiry date is required").typeError("Invalid date format. Please use YYYY-MM-DD."),
     reward_image: yup.string().url("Invalid URL format").nullable(),
+    reward_value: yup.number().required("Reward value is required").min(0, "Reward value must be at least 0"),
+    reward_type: yup.string().oneOf(['Discount_Voucher', 'Cash_Voucher', 'Others'], 'Invalid reward type').required("Reward type is required"),
 });
 
 // Create a reward
@@ -21,6 +23,8 @@ router.post("/", uploadFile.single('reward_image'), async (req, res) => {
             reward_description,
             reward_points,
             reward_expiry_date,
+            reward_value,
+            reward_type,
         } = req.body;
 
         const reward_image = req.file ? req.file.location : null;
@@ -30,7 +34,9 @@ router.post("/", uploadFile.single('reward_image'), async (req, res) => {
             reward_description,
             reward_points,
             reward_expiry_date,
-            reward_image
+            reward_image,
+            reward_value,
+            reward_type,
         });
 
         const reward = await Rewards.create({
@@ -39,6 +45,8 @@ router.post("/", uploadFile.single('reward_image'), async (req, res) => {
             reward_points,
             reward_expiry_date,
             reward_image,
+            reward_value,
+            reward_type,
         });
 
         res.status(201).json(reward);
@@ -86,6 +94,8 @@ router.put("/:id", uploadFile.single('reward_image'), async (req, res) => {
             reward_description,
             reward_points,
             reward_expiry_date,
+            reward_value,
+            reward_type,
         } = req.body;
 
         const reward_image = req.file ? req.file.location : reward.reward_image;
@@ -95,7 +105,9 @@ router.put("/:id", uploadFile.single('reward_image'), async (req, res) => {
             reward_description,
             reward_points,
             reward_expiry_date,
-            reward_image
+            reward_image,
+            reward_value,
+            reward_type,
         });
 
         await reward.update({
@@ -104,6 +116,8 @@ router.put("/:id", uploadFile.single('reward_image'), async (req, res) => {
             reward_points,
             reward_expiry_date,
             reward_image,
+            reward_value,
+            reward_type,
         });
 
         res.status(200).json(reward);

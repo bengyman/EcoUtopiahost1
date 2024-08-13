@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Orders, Course, Resident } = require('../models');
+const { Orders, Course, Resident, Instructor } = require('../models');
 const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY); // Make sure to set your Stripe secret key in your environment variables
@@ -71,10 +71,14 @@ router.get("/:id", async (req, res) => {
       include: [
         {
           model: Course,
+          include: {
+            model: Instructor, // Ensure the Instructor model is included
+            attributes: ['name'] // Fetch only the name attribute
+          }
         },
         {
           model: Resident,
-          attributes: ['name']  // Fetch only the name of the resident
+          attributes: ['name']
         }
       ]
     });
@@ -123,7 +127,7 @@ router.put("/refund/:id", authenticateToken, authorizeRoles('RESIDENT'), async (
 router.put("/approveRefund/:id", authenticateToken, authorizeRoles('STAFF'), async (req, res) => {
   let id = req.params.id;
   let order = await Orders.findByPk(id);
-  
+
   if (order && order.order_status === 'Pending') {
     try {
       // Fetch the Stripe PaymentIntent ID from your database

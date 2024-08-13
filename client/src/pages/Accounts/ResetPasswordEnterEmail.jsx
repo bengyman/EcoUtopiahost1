@@ -12,11 +12,10 @@ function ResetPasswordEnterEmail() {
   const handleSubmit = async () => {
     try {
       await axios.post('/user/password-reset', { email });
-      setSuccess('Reset code sent to your email');
+      setSuccess('Password reset link sent to your email');
       setError('');
-      navigate('/reset-password-code', { state: { email } });
     } catch (error) {
-      setError('Failed to send reset code');
+      setError('Failed to send reset link');
       setSuccess('');
     }
   };
@@ -34,7 +33,7 @@ function ResetPasswordEnterEmail() {
       {error && <Alert color="red">{error}</Alert>}
       {success && <Alert color="green">{success}</Alert>}
       <Button fullWidth mt="md" onClick={handleSubmit}>
-        Send Reset Code
+        Send Reset Link
       </Button>
     </Container>
   );

@@ -52,6 +52,9 @@ const paymentRoute = require('./routes/payment');
 const postsRoute = require('./routes/post');
 const rewardRoute = require('./routes/reward');
 const redeemrewardRoute = require('./routes/redeemreward');
+const instructorRoute = require('./routes/instructor');
+const followRoute = require('./routes/follow')
+const discountRoute = require('./routes/discount')
 
 // Translation logic
 const translateText = async (text, targetLanguage) => {
@@ -105,12 +108,9 @@ app.use("/orders", ordersRoute);
 app.use("/payment", paymentRoute);
 app.use("/posts", postsRoute);
 app.use("/redeemreward", redeemrewardRoute);
-
-// Schedule the job to run every 15 minutes
-cron.schedule('*/15 * * * *', async () => {
-    console.log('Running the point record status update job...');
-    await updatePointRecordStatus();
-});
+app.use('/instructor', instructorRoute);
+app.use('/follow', followRoute);
+app.use('/discount', discountRoute);
 
 db.sequelize.sync({ alter: true }).then(async () => {
     await seedAdmin(); // Seed the admin user

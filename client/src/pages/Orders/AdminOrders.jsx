@@ -15,7 +15,7 @@ function AdminOrders() {
   const [filter, setFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortField, setSortField] = useState('order_id'); // Sort field state
+  const [sortField, setSortField] = useState('order_date'); // Sort field state
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -138,7 +138,6 @@ function AdminOrders() {
       <td style={{ border: '1px solid #e0e0e0', padding: '8px', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{order.Course.course_name}</td>
       <td style={{ border: '1px solid #e0e0e0', padding: '8px', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{order.order_status}</td>
       <td style={{ border: '1px solid #e0e0e0', padding: '8px', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{dayjs(order.order_date).format('YYYY-MM-DD HH:mm:ss')}</td>
-      <td style={{ border: '1px solid #e0e0e0', padding: '8px', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{order.Course.course_price}</td>
       {filter === 'Pending' && (
         <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>
           <Button color="green" onClick={() => handleApproveClick(order.order_id)}>Approve Refund</Button>
@@ -187,7 +186,6 @@ function AdminOrders() {
             <th>Course Title</th>
             <th>Status</th>
             <th>Order Date</th>
-            <th>Course Price</th>
             {filter === 'Pending' && <th>Actions</th>}
           </tr>
         </thead>

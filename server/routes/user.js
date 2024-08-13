@@ -79,38 +79,76 @@ router.post('/oauth-login', async (req, res) => {
 router.post('/register', verifyRecaptcha, async (req, res) => {
     const transaction = await User.sequelize.transaction();
     try {
-      await userSchema.validate(req.body);
-      const { email, password, role, firstName, lastName, contactNumber } = req.body;
-  
-      const existingUser = await User.findOne({ where: { email } });
-      if (existingUser) {
-        return res.status(400).json({ error: 'Email already exists' });
-      }
-  
-      const hashedPassword = await bcrypt.hash(password, 10);
-  
-      const newUser = await User.create({
-        email,
-        password: hashedPassword,
-        role
-      }, { transaction });
+        await userSchema.validate(req.body);
+        const { email, password, role, firstName, lastName, contactNumber } = req.body;
 
-      const newUserDetails = await Resident.create({
-        name: `${firstName} ${lastName}`,
-        mobile_num: contactNumber,
-        user_id: newUser.user_id
-      }, { transaction });
-  
-      await transaction.commit();
-  
-      const token = generateToken(newUser, { resident: newUserDetails });
-      res.status(201).json({ user: newUser, token, resident: newUserDetails });
+        const existingUser = await User.findOne({ where: { email } });
+        if (existingUser) {
+            return res.status(400).json({ error: 'Email already exists' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const newUser = await User.create({
+            email,
+            password: hashedPassword,
+            role
+        }, { transaction });
+
+        const newUserDetails = await Resident.create({
+            name: `${firstName} ${lastName}`,
+            mobile_num: contactNumber,
+            user_id: newUser.user_id
+        }, { transaction });
+
+        // Generate activation token
+        const activationToken = jwt.sign(
+            { email: newUser.email },
+            process.env.JWT_SECRET,
+            { expiresIn: '30m' } // Token expires in 30 minutes
+        );
+
+        // Create activation link
+        const activationLink = `${process.env.CLIENT_URL}/activate-account-link?token=${activationToken}`;
+
+        // Set up Nodemailer
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.ethereal.email',
+            port: 587,
+            auth: {
+                user: process.env.ETHEREAL_USER,
+                pass: process.env.ETHEREAL_PASS
+            }
+        });
+
+        // Send activation email with link
+        const mailOptions = {
+            from: '"EcoUtopia" <no-reply@ecoutopia.com>',
+            to: newUser.email,
+            subject: 'Account Activation',
+            text: `Please click the following link to activate your account:\n\n${activationLink}\n\nIf you did not request this, please ignore this email.`
+        };
+
+        transporter.sendMail(mailOptions, (err, info) => {
+            if (err) {
+                console.error('Error sending email:', err);
+                return res.status(500).json({ error: 'Failed to send activation email' });
+            }
+            console.log('Activation email sent:', info.response);
+        });
+
+        await transaction.commit();
+
+        const token = generateToken(newUser, { resident: newUserDetails });
+        res.status(201).json({ user: newUser, token, resident: newUserDetails });
     } catch (error) {
-      await transaction.rollback();
-      console.error('Registration error:', error);
-      res.status(500).json({ error: error.message });
+        await transaction.rollback();
+        console.error('Registration error:', error);
+        res.status(500).json({ error: error.message });
     }
 });
+
+
 
 // Create a new user and either resident, staff, or instructor with input validation (This is for AccountManagement)
 router.post('/createaccount', authenticateToken, async (req, res) => {
@@ -313,6 +351,42 @@ router.put('/:id', authenticateToken, authorizeRoles('RESIDENT', 'STAFF', 'INSTR
     }
 });
 
+// Public profile route (no authentication required)
+router.get('/public-profile/:profileId', async (req, res) => {
+    try {
+      const { profileId } = req.params;
+  
+      // Logic to fetch the user's profile data from Resident, Instructor, or Staff
+      const user = await User.findByPk(profileId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+  
+      let profile;
+      if (user.role === 'RESIDENT') {
+        profile = await Resident.findOne({ where: { user_id: user.user_id } });
+      } else if (user.role === 'INSTRUCTOR') {
+        profile = await Instructor.findOne({ where: { user_id: user.user_id } });
+      } else if (user.role === 'STAFF') {
+        profile = await Staff.findOne({ where: { user_id: user.user_id } });
+      }
+  
+      if (!profile) {
+        return res.status(404).json({ error: 'Profile not found' });
+      }
+  
+      res.status(200).json({
+        name: profile.name,
+        profilePic: profile.profile_pic,
+        backgroundImage: profile.background_pic,
+      });
+    } catch (error) {
+      console.error('Error fetching public profile:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+
 // Delete a user (soft delete, accessible by STAFF only)
 router.put('/softdelete/:id', authenticateToken, authorizeRoles('STAFF'), async (req, res) => {
     try {
@@ -321,20 +395,6 @@ router.put('/softdelete/:id', authenticateToken, authorizeRoles('STAFF'), async 
             return res.status(404).json({ error: 'User not found' });
         }
         const updatedUser = await user.update({ is_deleted: true });
-        res.status(200).json(updatedUser);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Update account activation status (accessible by STAFF only)
-router.put('/activate/:id', authenticateToken, authorizeRoles('STAFF'), async (req, res) => {
-    try {
-        const user = await User.findByPk(req.params.id);
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-        const updatedUser = await user.update({ is_activated: req.body.is_activated });
         res.status(200).json(updatedUser);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -359,17 +419,21 @@ router.put('/softrestore/:id', authenticateToken, authorizeRoles('STAFF'), async
 router.post('/activate', authenticateToken, async (req, res) => {
     try {
         const { email } = req.body;
-        console.log('Received email for activation:', email); // Debugging line to check email value
 
         const user = await User.findOne({ where: { email } });
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        const activationCode = crypto.randomBytes(20).toString('hex');
-        user.activation_code = activationCode;
-        user.activation_code_expiry = new Date(Date.now() + 1800000); // 30 minutes expiry
-        await user.save();
+        // Generate activation token
+        const activationToken = jwt.sign(
+            { email: user.email },
+            process.env.JWT_SECRET,
+            { expiresIn: '30m' } // Token expires in 30 minutes
+        );
+
+        // Create activation link
+        const activationLink = `${process.env.CLIENT_URL}/activate-account-link?token=${activationToken}`;
 
         // Set up Nodemailer
         const transporter = nodemailer.createTransport({
@@ -381,12 +445,12 @@ router.post('/activate', authenticateToken, async (req, res) => {
             }
         });
 
-        // Send email
+        // Send activation email with link
         const mailOptions = {
             from: '"EcoUtopia" <no-reply@ecoutopia.com>',
             to: user.email,
             subject: 'Account Activation',
-            text: `Your activation code is: ${activationCode}`
+            text: `Please click the following link to activate your account:\n\n${activationLink}\n\nIf you did not request this, please ignore this email.`
         };
 
         transporter.sendMail(mailOptions, (err, info) => {
@@ -395,7 +459,7 @@ router.post('/activate', authenticateToken, async (req, res) => {
                 return res.status(500).json({ error: 'Failed to send activation email' });
             }
             console.log('Activation email sent:', info.response);
-            res.status(200).json({ message: 'Activation code sent' });
+            res.status(200).json({ message: 'Activation link sent' });
         });
 
     } catch (error) {
@@ -431,6 +495,34 @@ router.post('/activate-account', authenticateToken, async (req, res) => {
     }
 });
 
+// Automatically activate account via the activation link
+router.post('/activate-account-link', async (req, res) => {
+    const { token } = req.query;
+
+    try {
+        // Verify the activation token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        // Find the user by the decoded email
+        const user = await User.findOne({ where: { email: decoded.email } });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Activate the user's account
+        user.is_activated = true;
+        user.activation_code = null;
+        user.activation_code_expiry = null;
+        await user.save();
+
+        res.status(200).json({ message: 'Account activated successfully' });
+    } catch (error) {
+        console.error('Error activating account:', error);
+        return res.status(401).json({ error: 'Invalid or expired activation link' });
+    }
+});
+
+
 // Change password
 router.put('/change-password/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
@@ -460,117 +552,77 @@ router.put('/change-password/:id', authenticateToken, async (req, res) => {
     }
 });
 
-// Reset password request
+// Password reset request
 router.post('/password-reset', async (req, res) => {
     try {
-        console.log("Request received to /password-reset with email:", req.body.email);
-
         const user = await User.findOne({ where: { email: req.body.email } });
         if (!user) {
-            console.log("User not found for email:", req.body.email);
             return res.status(404).json({ error: 'User not found' });
         }
 
-        const resetCode = crypto.randomBytes(20).toString('hex');
-        const resetToken = jwt.sign({ email: user.email, resetCode }, process.env.JWT_SECRET, { expiresIn: '30m' });
+        // Generate reset token with user's email and expiration
+        const resetToken = jwt.sign(
+            { email: user.email },
+            process.env.JWT_SECRET,
+            { expiresIn: '30m' } // Token expires in 30 minutes
+        );
 
-        user.password_reset_expiry = new Date(Date.now() + 1800000); // 30 minutes expiry
-        await user.save();
+        // Create password reset link using CLIENT_URL from .env
+        const resetLink = `${process.env.CLIENT_URL}/reset-password?token=${resetToken}`;
 
-        console.log("Password reset token generated and saved for user:", user.email);
-
-        // Set up Nodemailer with permanent Ethereal account credentials
+        // Set up Nodemailer with Ethereal
         const transporter = nodemailer.createTransport({
             host: 'smtp.ethereal.email',
             port: 587,
-            secure: false, // true for 465, false for other ports
             auth: {
-                user: process.env.ETHEREAL_USER, // your Ethereal user
-                pass: process.env.ETHEREAL_PASS  // your Ethereal password
+                user: process.env.ETHEREAL_USER,
+                pass: process.env.ETHEREAL_PASS
             }
         });
 
-        // Send email
+        // Send email with only the reset link
         const mailOptions = {
             from: '"EcoUtopia" <no-reply@ecoutopia.com>',
             to: user.email,
             subject: 'Password Reset',
-            text: `Your password reset code is: ${resetCode}\nReset token: ${resetToken}`
+            text: `You requested a password reset. Click the link below to reset your password:\n\n${resetLink}\n\nIf you did not request a password reset, please ignore this email.`
         };
 
         transporter.sendMail(mailOptions, (err, info) => {
             if (err) {
-                console.log('Error occurred. ' + err.message);
                 return res.status(500).json({ error: 'Failed to send email' });
             }
-
-            console.log('Message sent: %s', info.messageId);
-            console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-
-            res.status(200).json({ message: 'Password reset code sent', previewUrl: nodemailer.getTestMessageUrl(info) });
+            res.status(200).json({ message: 'Password reset link sent' });
         });
     } catch (error) {
-        console.error('Error in /password-reset route:', error.message);
         res.status(500).json({ error: error.message });
     }
 });
 
-// Verify reset code
-router.post('/validate-reset-code', async (req, res) => {
+router.post('/password-reset-link', async (req, res) => {
+    const { resetToken, password } = req.body;  // Extract token and password from the request body
+  
     try {
-        const { email, code, token } = req.body;
-
-        try {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            if (decoded.email !== email || decoded.resetCode !== code) {
-                return res.status(400).json({ error: 'Invalid reset code or token' });
-            }
-        } catch (err) {
-            return res.status(400).json({ error: 'Invalid or expired reset token' });
-        }
-
-        const user = await User.findOne({ where: { email, password_reset_expiry: { [Op.gt]: new Date() } } });
+        // Verify the token
+        const decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
+  
+        // Find the user by the decoded email
+        const user = await User.findOne({ where: { email: decoded.email } });
         if (!user) {
-            return res.status(400).json({ error: 'Invalid or expired reset code' });
+            return res.status(404).json({ error: 'User not found' });
         }
-
-        res.status(200).json({ message: 'Reset code and token are valid' });
-    } catch (error) {
-        console.error('Error in /validate-reset-code route:', error.message);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Reset password
-router.put('/password-reset/:code', async (req, res) => {
-    try {
-        const { email, password, token } = req.body;
-
-        try {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            if (decoded.email !== email || decoded.resetCode !== req.params.code) {
-                return res.status(400).json({ error: 'Invalid reset code or token' });
-            }
-        } catch (err) {
-            return res.status(400).json({ error: 'Invalid or expired reset token' });
-        }
-
-        const user = await User.findOne({ where: { email, password_reset_expiry: { [Op.gt]: new Date() } } });
-        if (!user) {
-            return res.status(400).json({ error: 'Invalid or expired reset code' });
-        }
-
+  
+        // Hash the new password and save it to the database
         const hashedPassword = await bcrypt.hash(password, 10);
         user.password = hashedPassword;
-        user.password_reset_code = null;
-        user.password_reset_expiry = null;
         await user.save();
-
+  
         res.status(200).json({ message: 'Password reset successfully' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+    } catch (err) {
+        console.error('Error verifying token or resetting password:', err);
+        return res.status(401).json({ error: 'Invalid or expired reset token' });
     }
-});
+  });
 
 // Route to upload or update a profile picture
 router.post('/profile-picture', uploadfile.single('profilePic'), async (req, res) => {
@@ -578,27 +630,23 @@ router.post('/profile-picture', uploadfile.single('profilePic'), async (req, res
     try {
         const resident = await Resident.findOne({ where: { user_id: userId } });
         const staff = await Staff.findOne({ where: { user_id: userId } });
+        const instructor = await Instructor.findOne({ where: { user_id: userId } });
 
         if (resident) {
-            // Delete old profile picture if exists
-            /*if (resident.profile_pic && fs.existsSync(`./public/uploads/${resident.profile_pic}`)) {
-                fs.unlinkSync(`./public/uploads/${resident.profile_pic}`);
-            }*/
-
-            // Update new profile picture filename in the database
+            // Update new profile picture URL in the database
             resident.profile_pic = req.file.location;
             await resident.save();
-            res.send({ message: 'Resident profile picture updated successfully', fileName: req.file.filename });
+            res.send({ message: 'Resident profile picture updated successfully', fileName: req.file.location });
         } else if (staff) {
-            // Delete old profile picture if exists
-            /*if (staff.profile_pic && fs.existsSync(`./public/uploads/${staff.profile_pic}`)) {
-                fs.unlinkSync(`./public/uploads/${staff.profile_pic}`);
-            }*/
-
-            // Update new profile picture filename in the database
+            // Update new profile picture URL in the database
             staff.profile_pic = req.file.location;
             await staff.save();
-            res.send({ message: 'Staff profile picture updated successfully', fileName: req.file.filename });
+            res.send({ message: 'Staff profile picture updated successfully', fileName: req.file.location });
+        } else if (instructor) {
+            // Update new profile picture URL in the database
+            instructor.profile_pic = req.file.location;
+            await instructor.save();
+            res.send({ message: 'Instructor profile picture updated successfully', fileName: req.file.location });
         } else {
             res.status(404).send({ message: 'User not found' });
         }
@@ -607,24 +655,29 @@ router.post('/profile-picture', uploadfile.single('profilePic'), async (req, res
     }
 });
 
-// Route to delete a profile picture
-router.delete('/profile-picture', async (req, res) => {
-    const userId = req.body.userId; // Make sure the user is authenticated
-    try {
-        const user = await User.findByPk(userId);
-        if (user && user.profilePic) {
-            // Remove file from filesystem
-            const filePath = `./uploads/${user.profilePic}`;
-            if (fs.existsSync(filePath)) {  
-                fs.unlinkSync(filePath);
-            }
 
-            // Update database
-            user.profilePic = null;
-            await user.save();
-            res.send({ message: 'Profile picture removed successfully' });
+// Route to upload or update a background image
+router.post('/background-image', uploadfile.single('backgroundImage'), async (req, res) => {
+    const userId = req.body.userId; // Ensure the user is authenticated
+    try {
+        const resident = await Resident.findOne({ where: { user_id: userId } });
+        const staff = await Staff.findOne({ where: { user_id: userId } });
+        const instructor = await Instructor.findOne({ where: { user_id: userId } });
+
+        if (resident) {
+            resident.background_pic = req.file.location;
+            await resident.save();
+            res.send({ message: 'Resident background image updated successfully', fileName: req.file.location });
+        } else if (staff) {
+            staff.background_pic = req.file.location;
+            await staff.save();
+            res.send({ message: 'Staff background image updated successfully', fileName: req.file.location });
+        } else if (instructor) {
+            instructor.background_pic = req.file.location;
+            await instructor.save();
+            res.send({ message: 'Instructor background image updated successfully', fileName: req.file.location });
         } else {
-            res.status(404).send({ message: 'Profile picture not found or already removed' });
+            res.status(404).send({ message: 'User not found' });
         }
     } catch (error) {
         res.status(500).send({ message: 'Server error', error: error.message });
