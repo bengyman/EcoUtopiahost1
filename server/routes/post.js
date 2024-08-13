@@ -169,7 +169,6 @@ router.get('/:id', authenticateToken, async (req, res) => {
         },
         {
           model: Instructor, // If applicable, include instructor details
-          attributes: ['profile_pic', 'name'] // Ensure the profile_pic is included
         }
       ]
     });
@@ -258,8 +257,8 @@ router.post('/:id/report', authenticateToken, async (req, res) => {
     await PostReports.create({ postId, userId });
 
     // Optionally, you can update the post's report count if you have such a field
-     post.reports += 1;
-     await post.save();
+    post.reports += 1;
+    await post.save();
 
     res.json({ message: 'Post reported successfully' });
   } catch (error) {
@@ -267,8 +266,6 @@ router.post('/:id/report', authenticateToken, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
-
 
 
 router.get('/:id/comments', authenticateToken, async (req, res) => {
