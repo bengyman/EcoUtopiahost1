@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHeart, faComment, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons'; // Import the heart icon
+import { faHeart, faComment, faPencil, faTrash, faCheckCircle } from '@fortawesome/free-solid-svg-icons'; // Import the heart icon
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -17,6 +17,7 @@ import {
   Container,
   Modal,
   TextInput,
+  Avatar
 } from "@mantine/core";
 
 // Define tags and colors
@@ -46,6 +47,7 @@ const Posts = () => {
   const [search, setSearch] = useState("");
   const [selectedTag, setSelectedTag] = useState(""); // State for selected tag
   const [showIframe, setShowIframe] = useState(false); // State for iframe visibility
+  const [profilePicUrl, setProfilePicUrl] = useState(null);
   const navigate = useNavigate();
 
   const fetchPosts = async () => {
@@ -64,6 +66,7 @@ const Posts = () => {
         likedByUser: post.likedByUser || false // Ensure likedByUser is part of the post object
       })));
       setLoading(false);
+
     } catch (error) {
       console.error("Error fetching posts:", error);
       setError("Failed to fetch posts");
@@ -143,7 +146,7 @@ const Posts = () => {
   const filteredPosts = posts.filter(
     (post) =>
       (post.title.toLowerCase().includes(search.toLowerCase()) ||
-      post.content.toLowerCase().includes(search.toLowerCase())) &&
+        post.content.toLowerCase().includes(search.toLowerCase())) &&
       (selectedTag ? post.tags?.includes(selectedTag) : true)
   );
 
@@ -189,7 +192,7 @@ const Posts = () => {
                 style={{ cursor: "pointer", position: "relative" }}
               >
                 <Group position="right" style={{ position: "absolute", top: 10, right: 10 }}>
-                  {post.resident_id === user?.resident?.resident_id && (
+                  {(post.resident_id === user?.resident?.resident_id || post.instructor_id === user?.instructor?.instructorid) && (
                     <>
                       <Button
                         variant="outline"
@@ -215,13 +218,28 @@ const Posts = () => {
                     </>
                   )}
                 </Group>
-                <Group position="right" style={{ marginTop: 30 }}>
-                  <Text size="sm" color="dimmed">
-                    {post.residentName ? post.residentName : "Anonymous"}
-                  </Text>
-                  <Text size="sm">
-                    {new Date(post.createdAt).toLocaleString()}
-                  </Text>
+                <Group position="left" spacing="md">
+                  {post.resident_profile_pic ? (
+                    <Avatar src={post.resident_profile_pic} alt="Resident Profile picture" radius="xl" />
+                  ) : post.instructor_profile_pic ? (
+                    <Avatar src={post.instructor_profile_pic} alt="Instructor Profile picture" radius="xl" />
+                  ) : (
+                    <Avatar radius="xl" />
+                  )}
+                  <div>
+                    <Text size="sm" color="dimmed">
+                      {post.name || "Anonymous"}
+                      {post.instructor_id != null && (
+                        <FontAwesomeIcon
+                          icon={faCheckCircle}
+                          style={{ color: 'blue', marginLeft: '5px' }}
+                        />
+                      )}
+                    </Text>
+                    <Text size="sm">
+                      {new Date(post.createdAt).toLocaleString()}
+                    </Text>
+                  </div>
                 </Group>
                 <Text weight={500} size="lg" mt="md">
                   {post.title}

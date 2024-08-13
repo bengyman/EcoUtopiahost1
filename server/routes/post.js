@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Post, Resident, Comment, User, PostLikes } = require('../models');
+const { Post, Resident, Comment, User, PostLikes, Instructor } = require('../models');
 const yup = require('yup');
 const fs = require('fs');
 const path = require('path'); // Import the path module
@@ -16,7 +16,7 @@ const postSchema = yup.object().shape({
   title: yup.string().required(),
   content: yup.string().required(),
   image: yup.mixed().nullable(),
-  resident_id: yup.number().required()
+  resident_id: yup.number()
 });
 
 const commentSchema = yup.object().shape({
@@ -41,6 +41,7 @@ router.post('/create-post', authenticateToken, uploadFile.single('image'), async
   const transaction = await Post.sequelize.transaction();
   try {
     const { title, content, resident_id, residentName, tags } = req.body;
+    const { role } = req.user; // Extract role from req.user
 
     let data = {};
 
@@ -48,21 +49,31 @@ router.post('/create-post', authenticateToken, uploadFile.single('image'), async
       data.image = req.file.location;
     }
 
-    /*if (image) {
-      image = image.replace(/\\/g, '/').replace('public/', '');
-    }*/
-
     // Validate the other fields
     await postSchema.validate({ title, content, resident_id, residentName, tags });
 
-    const newPost = await Post.create({
+    let newPostData = {
       title,
       content,
       imageUrl: data.image,
-      resident_id,
-      residentName,
       tags,
-    }, { transaction });
+    };
+
+    // Set the relevant fields based on the user's role
+    if (role === 'INSTRUCTOR') {
+      const instructor = req.user.instructor; // Extract instructor from req.user
+      if (instructor) {
+        newPostData.instructor_id = instructor.instructorid;
+        newPostData.name = instructor.name; // Set the instructor's name
+      } else {
+        throw new Error('Instructor not found');
+      }
+    } else if (role === 'RESIDENT') {
+      newPostData.resident_id = resident_id;
+      newPostData.name = residentName;
+    }
+
+    const newPost = await Post.create(newPostData, { transaction });
 
     await transaction.commit();
 
@@ -74,8 +85,7 @@ router.post('/create-post', authenticateToken, uploadFile.single('image'), async
   }
 });
 
-// Fetch all posts
-// routes/post.js
+// Route to get all posts
 router.get('/posts', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -84,27 +94,55 @@ router.get('/posts', authenticateToken, async (req, res) => {
       include: [
         {
           model: Resident,
-          attributes: ['name']
+          attributes: ['profile_pic'],  // Ensure profile_pic is included
         },
         {
           model: User,
           as: 'likedByUsers',
           attributes: ['user_id'],
           through: { attributes: [] }
+        },
+        {
+          model: Instructor,
         }
       ]
     });
 
-    const formattedPosts = posts.map(post => ({
-      ...post.toJSON(),
-      likedByUser: post.likedByUsers.some(user => user.user_id === userId),
-      likesCount: post.likedByUsers.length
-    }));
+    const formattedPosts = posts.map(post => {
+      // Access the profile picture from the associated Resident model
+      const residentProfilePic = post.Resident ? post.Resident.profile_pic : null;
+      const instructorProfilePic = post.Instructor ? post.Instructor.profile_pic : null;
+
+      return {
+        ...post.toJSON(),
+        likedByUser: post.likedByUsers.some(user => user.user_id === userId),
+        likesCount: post.likedByUsers.length,
+        resident_profile_pic: residentProfilePic,  // Add profile_pic to the formatted post
+        instructor_profile_pic: instructorProfilePic
+      };
+    });
 
     res.status(200).json(formattedPosts);
   } catch (error) {
     console.error('Error fetching posts:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+
+// Route to get instructors by IDs
+router.get('/instructors', async (req, res) => {
+  try {
+    const ids = req.query.ids.split(',').map(id => parseInt(id, 10)); // Convert to integers
+    const instructors = await Instructor.findAll({
+      where: {
+        instructorid: ids
+      }
+    });
+    res.json(instructors);
+  } catch (error) {
+    console.error("Error fetching instructors:", error);
+    res.status(500).send("Failed to fetch instructors");
   }
 });
 
@@ -176,13 +214,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Post not found' });
     }
 
-    // Delete the associated image file
-    if (post.imageUrl) {
-      // Ensure the path matches where the images are stored
-      const filePath = path.join(__dirname, '../public/', post.imageUrl)
-      console.log(`Attempting to delete file at ${filePath}`);
-      deleteFile(filePath);
-    }
+    
 
     // Delete the post from the database
     await Post.destroy({
