@@ -63,7 +63,6 @@ function Navbar() {
     fetchStaffData();
   }, [user]);
 
-
   useEffect(() => {
     const fetchInstructorData = async () => {
       if (user && user.role === 'INSTRUCTOR') {
@@ -204,9 +203,6 @@ function Navbar() {
                 </Text>
               </Anchor>
             )}
-            {isStaff && (
-              <Anchor href="/rewards" style={{ textDecoration: "none" }}>
-              )}
             {isInstructor && (
               <Anchor href="/posts" style={{ textDecoration: "none" }}>
                 <Text tt="uppercase" fw={'500'} c="black" style={{ marginLeft: 10, marginRight: 10 }}>
