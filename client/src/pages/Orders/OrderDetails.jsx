@@ -63,9 +63,6 @@ function ViewOrders() {
                     <strong>Order Date:</strong> {dayjs(order.order_date).format(global.datetimeFormat)}
                 </Text>
                 <Text size="lg" weight={500} align="left">
-                    <strong>Order Amount:</strong> ${order.Course.course_price}
-                </Text>
-                <Text size="lg" weight={500} align="left">
                     <strong>Instructor:</strong> {order.Course.Instructor.name}
                 </Text>
                 <Text size="lg" weight={500} align="left">
