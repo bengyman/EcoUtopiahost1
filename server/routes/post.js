@@ -148,10 +148,10 @@ router.get('/instructors', async (req, res) => {
 
 
 
-router.get('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
+router.get('/:id', authenticateToken, async (req, res) => {
+  const { id } = req.params;
 
+  try {
     const post = await Post.findOne({
       where: { post_id: id },
       include: [
@@ -159,22 +159,30 @@ router.get('/:id', async (req, res) => {
           model: Comment,
           include: [
             {
-              model: Resident,
-              attributes: ['name'] // Include the resident's name in the comment
+              model: Resident, // Include resident details for comments
+              attributes: ['profile_pic', 'name'] // Ensure the profile_pic is included
             }
           ]
+        },
+        {
+          model: Resident, // Include resident details for the post
+          attributes: ['profile_pic', 'name'] // Ensure the profile_pic is included
+        },
+        {
+          model: Instructor, // If applicable, include instructor details
+          attributes: ['profile_pic', 'name'] // Ensure the profile_pic is included
         }
       ]
     });
 
     if (!post) {
-      return res.status(404).json({ error: 'Post not found' });
+      return res.status(404).json({ message: 'Post not found.' });
     }
 
-    res.status(200).json(post);
+    res.json(post);
   } catch (error) {
     console.error('Error fetching post:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ message: 'An error occurred while fetching the post.' });
   }
 });
 
@@ -350,30 +358,6 @@ router.delete('/comments/:commentId', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/:id', authenticateToken, async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const post = await Post.findOne({
-      where: { post_id: id },
-      include: [
-        {
-          model: Comment,
-          include: [Resident] // Optional: Include resident details if needed
-        }
-      ]
-    });
-
-    if (!post) {
-      return res.status(404).json({ message: 'Post not found.' });
-    }
-
-    res.json(post);
-  } catch (error) {
-    console.error('Error fetching post:', error);
-    res.status(500).json({ message: 'An error occurred while fetching the post.' });
-  }
-});
 
 // routes/post.js
 router.post('/:postId/like', authenticateToken, async (req, res) => {
