@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Paper, Notification, Container, Group, Title, Switch, Grid, Card, Badge, Text, Image } from '@mantine/core';
+import { Check, X } from 'tabler-icons-react';
 import axios from 'axios';
 import LoaderComponent from "../../components/Loader.jsx";
 import { useAuth } from '../../context/AuthContext';
@@ -82,7 +83,6 @@ const Rewards = () => {
                   <th>Description</th>
                   <th>Points</th>
                   <th>Expiry Date</th>
-                  <th>Deleted</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -101,20 +101,7 @@ const Rewards = () => {
                     <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>{reward.reward_description}</td>
                     <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>{reward.reward_points}</td>
                     <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>{new Date(reward.reward_expiry_date).toLocaleDateString()}</td>
-                    <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>
-                      <Group position="center" align="center">
-                        <Switch
-                          checked={reward.is_deleted}
-                          onChange={() => handleToggleDelete(reward.reward_id, !reward.is_deleted)}
-                        />
-                        {reward.is_deleted ? (
-                          <Check color="green" size={16} />
-                        ) : (
-                          <X color="red" size={16} />
-                        )}
-                      </Group>
-                    </td>
-                    <td style={{ border: '1px solid #e0e0e0', padding: '8px' }}>
+                    <td style={{ border: '1px solid #e0e0e0', padding: '8px', alignItems: "center" }}>
                       <Group position="center" align="center">
                         <Button color="blue" onClick={() => navigate(`/editreward/${reward.reward_id}`)}>Edit</Button>
                       </Group>
@@ -129,13 +116,7 @@ const Rewards = () => {
 
       {user.role === 'RESIDENT' && (
         <>
-          <Group position="apart" style={{ marginTop: 20 }}>
-            <Title align="center">Catalog of Rewards</Title>
-            <Badge size="lg" color="green">
-              EcoPoints: {user.resident.ecoPoints}
-            </Badge>
-          </Group>
-
+          <Title align="center" style={{ marginTop: 20 }}>Catalog of Rewards</Title>
           <Grid gutter="md" mt={30}>
             {rewards.map((reward) => (
               <Grid.Col key={reward.reward_id} span={4}>
@@ -175,15 +156,6 @@ const Rewards = () => {
               </Grid.Col>
             ))}
           </Grid>
-
-          <Button 
-            color="blue" 
-            style={{ position: 'absolute', top: 20, right: 20 }} 
-            onClick={() => navigate('/ecowordlegame')}
-          >
-            Play EcoWordle Game
-          </Button>
-
         </>
       )}
     </Container>
