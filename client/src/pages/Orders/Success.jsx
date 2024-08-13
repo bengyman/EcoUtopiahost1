@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Center, Container, Loader, Text } from '@mantine/core';
+import { useAuth } from '../../context/AuthContext';
 
 const Success = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const { user, setUser } = useAuth(); // Destructure setUser
     const [hasProcessed, setHasProcessed] = useState(false);
     const sessionId = new URLSearchParams(location.search).get('session_id');
 
@@ -20,10 +22,27 @@ const Success = () => {
                 const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/payment/process-order`, { 
                     sessionId,
                 });
+
                 if (response.status === 200) {
                     console.log('Order processed successfully');
 
-                    // Here you might want to handle the voucherCode update as well
+                    // Update the ecoPoints in the user context
+                    const { updatedEcoPoints } = response.data;
+
+                    if (updatedEcoPoints !== undefined) {
+                        const updatedUser = {
+                            ...user,
+                            resident: {
+                                ...user.resident,
+                                ecoPoints: updatedEcoPoints,
+                            },
+                        };
+
+                        setUser(updatedUser); // Update the user state and session storage
+                        sessionStorage.setItem('user', JSON.stringify(updatedUser)); // Update the session storage
+                    }
+
+                    // Handle the voucher code update if applicable
                     const { voucherCode } = response.data;
                     if (voucherCode) {
                         await axios.post(`${import.meta.env.VITE_API_BASE_URL}/redeemreward/use`, { voucherCode });
@@ -42,7 +61,7 @@ const Success = () => {
         };
 
         processOrder();
-    }, [sessionId, navigate, hasProcessed]);
+    }, [sessionId, navigate, hasProcessed, user, setUser]);
 
     return (
         <Center style={{ height: '100vh' }}>

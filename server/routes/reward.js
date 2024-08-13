@@ -15,6 +15,12 @@ const rewardSchema = yup.object().shape({
     reward_type: yup.string().oneOf(['Discount_Voucher', 'Cash_Voucher', 'Others'], 'Invalid reward type').required("Reward type is required"),
 });
 
+// Validation schema for updating ecoPoints
+const updateEcoPointsSchema = yup.object().shape({
+    resident_id: yup.number().required("Resident ID is required"),
+    points: yup.number().required("Points are required").integer("Points must be an integer"),
+});
+
 // Create a reward
 router.post("/", uploadFile.single('reward_image'), async (req, res) => {
     try {
@@ -155,6 +161,34 @@ router.put('/softrestore/:id', async (req, res) => {
         const updatedRewards = await rewards.update({ is_deleted: false });
         res.status(200).json(updatedRewards);
     } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+// Update ecoPoints for a resident
+router.put("/update-ecoPoints", async (req, res) => {
+    try {
+        const { resident_id, points } = req.body;
+
+        // Validate the request body
+        await updateEcoPointsSchema.validate({ resident_id, points });
+
+        // Find the resident by ID
+        const resident = await Resident.findByPk(resident_id);
+        if (!resident) {
+            return res.status(404).json({ error: "Resident not found" });
+        }
+
+        // Update the ecoPoints
+        const updatedEcoPoints = resident.ecoPoints + points;
+        await resident.update({ ecoPoints: updatedEcoPoints });
+
+        // Return the updated ecoPoints
+        res.status(200).json({ ecoPoints: updatedEcoPoints });
+    } catch (error) {
+        if (error instanceof Sequelize.ValidationError) {
+            return res.status(400).json({ error: error.errors });
+        }
         res.status(400).json({ error: error.message });
     }
 });
