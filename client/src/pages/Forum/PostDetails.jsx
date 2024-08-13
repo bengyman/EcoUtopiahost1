@@ -283,6 +283,22 @@ const PostDetails = () => {
           </TelegramShareButton>
         </Group>
         <Divider my="md" />
+        <form onSubmit={handleCreateComment}>
+          <Textarea
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            placeholder="Add a comment..."
+            rows="4"
+            autosize
+            minRows={3}
+            maxRows={6}
+            mb="sm"
+          />
+          <Button type="submit" fullWidth>
+            Post Comment
+          </Button>
+        </form>
+        
         <Title order={2} mb="sm">Comments:</Title>
         {sortedComments.length > 0 ? (
           sortedComments.map((comment) => (
@@ -342,21 +358,6 @@ const PostDetails = () => {
           <Text align="center">No comments yet.</Text>
         )}
         <Divider my="md" />
-        <form onSubmit={handleCreateComment}>
-          <Textarea
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Add a comment..."
-            rows="4"
-            autosize
-            minRows={3}
-            maxRows={6}
-            mb="sm"
-          />
-          <Button type="submit" fullWidth>
-            Post Comment
-          </Button>
-        </form>
       </Paper>
     </Container>
   );
