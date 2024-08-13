@@ -45,6 +45,7 @@ app.post("/upload", (req, res) => {
 app.use('/uploads', express.static('uploads'));
 
 // Routes
+const attendanceRoute = require('./routes/attendance'); 
 const courseRoute = require('./routes/course');
 const userRoute = require('./routes/user');
 const ordersRoute = require('./routes/orders');
@@ -100,6 +101,7 @@ const handleTranslation = async (req, res) => {
 // Define the translate route
 app.post('/api/translate', handleTranslation);
 
+app.use("/attendance", attendanceRoute);
 app.use("/courses", courseRoute);
 app.use('/user', userRoute);
 app.use('/reward', rewardRoute);

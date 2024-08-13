@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Post, Resident, Comment, User, PostLikes } = require('../models');
+const { Post, Resident, Comment, User, PostLikes, Instructor, PostReports } = require('../models');
 const yup = require('yup');
 const fs = require('fs');
 const path = require('path'); // Import the path module
@@ -16,7 +16,7 @@ const postSchema = yup.object().shape({
   title: yup.string().required(),
   content: yup.string().required(),
   image: yup.mixed().nullable(),
-  resident_id: yup.number().required()
+  resident_id: yup.number()
 });
 
 const commentSchema = yup.object().shape({
@@ -41,6 +41,7 @@ router.post('/create-post', authenticateToken, uploadFile.single('image'), async
   const transaction = await Post.sequelize.transaction();
   try {
     const { title, content, resident_id, residentName, tags } = req.body;
+    const { role } = req.user; // Extract role from req.user
 
     let data = {};
 
@@ -48,21 +49,31 @@ router.post('/create-post', authenticateToken, uploadFile.single('image'), async
       data.image = req.file.location;
     }
 
-    /*if (image) {
-      image = image.replace(/\\/g, '/').replace('public/', '');
-    }*/
-
     // Validate the other fields
     await postSchema.validate({ title, content, resident_id, residentName, tags });
 
-    const newPost = await Post.create({
+    let newPostData = {
       title,
       content,
       imageUrl: data.image,
-      resident_id,
-      residentName,
       tags,
-    }, { transaction });
+    };
+
+    // Set the relevant fields based on the user's role
+    if (role === 'INSTRUCTOR') {
+      const instructor = req.user.instructor; // Extract instructor from req.user
+      if (instructor) {
+        newPostData.instructor_id = instructor.instructorid;
+        newPostData.name = instructor.name; // Set the instructor's name
+      } else {
+        throw new Error('Instructor not found');
+      }
+    } else if (role === 'RESIDENT') {
+      newPostData.resident_id = resident_id;
+      newPostData.name = residentName;
+    }
+
+    const newPost = await Post.create(newPostData, { transaction });
 
     await transaction.commit();
 
@@ -74,8 +85,7 @@ router.post('/create-post', authenticateToken, uploadFile.single('image'), async
   }
 });
 
-// Fetch all posts
-// routes/post.js
+// Route to get all posts
 router.get('/posts', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -84,22 +94,33 @@ router.get('/posts', authenticateToken, async (req, res) => {
       include: [
         {
           model: Resident,
-          attributes: ['name']
+          attributes: ['profile_pic'],  // Ensure profile_pic is included
         },
         {
           model: User,
           as: 'likedByUsers',
           attributes: ['user_id'],
           through: { attributes: [] }
+        },
+        {
+          model: Instructor,
         }
       ]
     });
 
-    const formattedPosts = posts.map(post => ({
-      ...post.toJSON(),
-      likedByUser: post.likedByUsers.some(user => user.user_id === userId),
-      likesCount: post.likedByUsers.length
-    }));
+    const formattedPosts = posts.map(post => {
+      // Access the profile picture from the associated Resident model
+      const residentProfilePic = post.Resident ? post.Resident.profile_pic : null;
+      const instructorProfilePic = post.Instructor ? post.Instructor.profile_pic : null;
+
+      return {
+        ...post.toJSON(),
+        likedByUser: post.likedByUsers.some(user => user.user_id === userId),
+        likesCount: post.likedByUsers.length,
+        resident_profile_pic: residentProfilePic,  // Add profile_pic to the formatted post
+        instructor_profile_pic: instructorProfilePic
+      };
+    });
 
     res.status(200).json(formattedPosts);
   } catch (error) {
@@ -109,11 +130,28 @@ router.get('/posts', authenticateToken, async (req, res) => {
 });
 
 
-
-router.get('/:id', async (req, res) => {
+// Route to get instructors by IDs
+router.get('/instructors', async (req, res) => {
   try {
-    const { id } = req.params;
+    const ids = req.query.ids.split(',').map(id => parseInt(id, 10)); // Convert to integers
+    const instructors = await Instructor.findAll({
+      where: {
+        instructorid: ids
+      }
+    });
+    res.json(instructors);
+  } catch (error) {
+    console.error("Error fetching instructors:", error);
+    res.status(500).send("Failed to fetch instructors");
+  }
+});
 
+
+
+router.get('/:id', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+
+  try {
     const post = await Post.findOne({
       where: { post_id: id },
       include: [
@@ -121,22 +159,30 @@ router.get('/:id', async (req, res) => {
           model: Comment,
           include: [
             {
-              model: Resident,
-              attributes: ['name'] // Include the resident's name in the comment
+              model: Resident, // Include resident details for comments
+              attributes: ['profile_pic', 'name'] // Ensure the profile_pic is included
             }
           ]
+        },
+        {
+          model: Resident, // Include resident details for the post
+          attributes: ['profile_pic', 'name'] // Ensure the profile_pic is included
+        },
+        {
+          model: Instructor, // If applicable, include instructor details
+          attributes: ['profile_pic', 'name'] // Ensure the profile_pic is included
         }
       ]
     });
 
     if (!post) {
-      return res.status(404).json({ error: 'Post not found' });
+      return res.status(404).json({ message: 'Post not found.' });
     }
 
-    res.status(200).json(post);
+    res.json(post);
   } catch (error) {
     console.error('Error fetching post:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ message: 'An error occurred while fetching the post.' });
   }
 });
 
@@ -176,13 +222,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Post not found' });
     }
 
-    // Delete the associated image file
-    if (post.imageUrl) {
-      // Ensure the path matches where the images are stored
-      const filePath = path.join(__dirname, '../public/', post.imageUrl)
-      console.log(`Attempting to delete file at ${filePath}`);
-      deleteFile(filePath);
-    }
+    
 
     // Delete the post from the database
     await Post.destroy({
@@ -202,12 +242,10 @@ router.post('/:id/report', authenticateToken, async (req, res) => {
     const userId = req.user.id;
     const postId = req.params.id;
 
-    if (!reportedPosts[postId]) {
-      reportedPosts[postId] = new Set();
-    }
-
     // Check if the user has already reported this post
-    if (reportedPosts[postId].has(userId)) {
+    const existingReport = await PostReports.findOne({ where: { postId, userId } });
+
+    if (existingReport) {
       return res.status(400).json({ error: 'You have already reported this post' });
     }
 
@@ -217,19 +255,20 @@ router.post('/:id/report', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Post not found' });
     }
 
-    // Add user to the set of users who reported this post
-    reportedPosts[postId].add(userId);
+    // Create a new report
+    await PostReports.create({ postId, userId });
 
-    // Increment the report count
-    post.reports += 1;
-    await post.save();
+    // Optionally, you can update the post's report count if you have such a field
+     post.reports += 1;
+     await post.save();
 
     res.json({ message: 'Post reported successfully' });
   } catch (error) {
     console.error('Error reporting post:', error);
-    res.status(500).json({ error: 'An error occurred while reporting the post' });
+    res.status(500).json({ error: error.message });
   }
 });
+
 
 
 
@@ -319,30 +358,6 @@ router.delete('/comments/:commentId', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/:id', authenticateToken, async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const post = await Post.findOne({
-      where: { post_id: id },
-      include: [
-        {
-          model: Comment,
-          include: [Resident] // Optional: Include resident details if needed
-        }
-      ]
-    });
-
-    if (!post) {
-      return res.status(404).json({ message: 'Post not found.' });
-    }
-
-    res.json(post);
-  } catch (error) {
-    console.error('Error fetching post:', error);
-    res.status(500).json({ message: 'An error occurred while fetching the post.' });
-  }
-});
 
 // routes/post.js
 router.post('/:postId/like', authenticateToken, async (req, res) => {
@@ -398,17 +413,21 @@ router.get('/admin/posts', authenticateToken, authorizeRoles('STAFF'), async (re
         {
           model: Resident,
           attributes: ['name']
+        },
+        {
+          model: Instructor,
+          attributes: ['name']
         }
       ],
-      attributes: ['post_id', 'title', 'content', 'tags', 'imageUrl', 'reports', 'resident_id', 'createdAt', 'updatedAt']
+      attributes: ['post_id', 'title', 'content', 'tags', 'imageUrl', 'reports', 'resident_id', 'instructor_id', 'createdAt', 'updatedAt', 'likesCount']
     });
 
-    const postsWithResidentName = posts.map(post => ({
+    const postsWithNames = posts.map(post => ({
       ...post.toJSON(),
-      residentName: post.Resident ? post.Resident.name : null
+      name: post.resident_id ? (post.Resident ? post.Resident.name : null) : (post.Instructor ? post.Instructor.name : null),
     }));
 
-    res.status(200).json(postsWithResidentName);
+    res.status(200).json(postsWithNames);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

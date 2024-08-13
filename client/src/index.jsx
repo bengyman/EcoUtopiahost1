@@ -116,6 +116,8 @@ function Main() {
         <Route path="/login" element={<Login />} />
         <Route path="/profile/:paramId" element={<Profile />} />
         <Route path="/publicprofile/:paramId" element={<PublicProfile />} />
+        <Route path="/publicprofile/:profileId" element={<PublicProfile />} />
+        <Route path="/publicprofile/:userId" element={<PublicProfile />} />
         <Route path="/edit-profile/:id" element={<EditProfile />} />
         <Route path="/change-password/:id" element={<ChangePassword />} />
         <Route path="/reset-password-email" element={<ResetPasswordEnterEmail />} />
@@ -124,8 +126,8 @@ function Main() {
         <Route path="/account-management" element={<AccountManagement />} />
         <Route path="/account-activation" element={<AccountActivation />} />
         <Route path="/activate-account-link" element={<ActivateAccountLink />} />
-        <Route path="/followers/:paramId" element={<FollowersList />} />
-        <Route path="/following/:paramId" element={<FollowingList />} />
+        <Route path="/followers/:profileId" element={<FollowersList />} />
+        <Route path="/following/:profileId" element={<FollowingList />} />
 
         <Route path="/courses" element={<Courses />} />
         <Route path="/course/:courseId" element={<ViewCourse />} />

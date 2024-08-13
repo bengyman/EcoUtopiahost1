@@ -28,6 +28,7 @@ function PublicProfile() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showMessage, setShowMessage] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -35,9 +36,6 @@ function PublicProfile() {
         const profileResponse = await axios.get(`/user/public-profile/${paramId}`);
         const followersResponse = await axios.get(`/follow/followers/${paramId}`);
         const followingResponse = await axios.get(`/follow/following/${paramId}`);
-        const isFollowing = user
-          ? followersResponse.data.some((f) => f.Follower.user_id === user.user_id)
-          : false;
 
         if (!profileResponse.data.name) {
           throw new Error("User not found");
@@ -47,8 +45,18 @@ function PublicProfile() {
           ...profileResponse.data,
           followers: followersResponse.data,
           following: followingResponse.data,
-          isFollowing: isFollowing,
         });
+
+        if (user) {
+          const followStatusResponse = await axios.get(`/follow/isFollowing/${paramId}`, {
+            params: { user_id: user.user_id },
+          });
+          setProfileData((prevData) => ({
+            ...prevData,
+            isFollowing: followStatusResponse.data.isFollowing,
+          }));
+        }
+
         setLoading(false);
       } catch (error) {
         console.error("Error fetching public profile:", error);
@@ -57,32 +65,52 @@ function PublicProfile() {
       }
     };
     fetchProfile();
-  }, [paramId, user, navigate]);
+  }, [paramId, user]);
 
   const handleFollow = async () => {
     if (!user) {
-      navigate("/login");
+      setShowMessage(true); // Show the message for not logged-in users
+
+      setTimeout(() => {
+        navigate("/login"); // Redirect to login after 3 seconds
+      }, 2000);
+
       return;
     }
+  
     try {
       if (profileData.isFollowing) {
+        // Unfollow
         await axios.delete(`/follow/unfollow/${paramId}`, {
           headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
+          data: { user_id: user.user_id },
         });
+  
+        // Re-fetch followers to update the count correctly
+        const updatedFollowersResponse = await axios.get(`/follow/followers/${paramId}`);
+        setProfileData((prevData) => ({
+          ...prevData,
+          isFollowing: false,
+          followers: updatedFollowersResponse.data,
+        }));
+  
       } else {
-        await axios.post(`/follow/follow/${paramId}`, {}, {
+        // Follow
+        await axios.post(`/follow/follow/${paramId}`, { user_id: user.user_id }, {
           headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
         });
+  
+        // Re-fetch followers to update the count correctly
+        const updatedFollowersResponse = await axios.get(`/follow/followers/${paramId}`);
+        setProfileData((prevData) => ({
+          ...prevData,
+          isFollowing: true,
+          followers: updatedFollowersResponse.data,
+        }));
       }
-      setProfileData((prevData) => ({
-        ...prevData,
-        isFollowing: !prevData.isFollowing,
-        followers: prevData.isFollowing
-          ? prevData.followers.filter((f) => f.Follower.user_id !== user.user_id)
-          : [...prevData.followers, { Follower: user }],
-      }));
     } catch (error) {
       console.error("Error following/unfollowing user:", error);
+      console.error("Error details:", error.response ? error.response.data : error.message);
     }
   };
 
@@ -109,7 +137,7 @@ function PublicProfile() {
         </div>
       </Container>
     );
-  }  
+  }
 
   return (
     <Container size="lg" my={40}>
@@ -121,12 +149,12 @@ function PublicProfile() {
                 ? profileData.backgroundImage
                 : "https://ecoutopia-bucket.s3.ap-southeast-1.amazonaws.com/eco-placeholder-image-cropped.jpg"
             })`,
-            height: "50vh",  
+            height: "50vh",
             backgroundSize: "cover",
             backgroundPosition: "center",
             borderRadius: "8px",
             position: "relative",
-            marginBottom: "20px",  
+            marginBottom: "20px",
           }}
         >
           {user && user.user_id !== parseInt(paramId) && (
@@ -147,7 +175,45 @@ function PublicProfile() {
               {profileData.isFollowing ? "Unfollow" : "Follow"}
             </Button>
           )}
+
+          {/* For not logged in users */}
+          {!user && (
+            <Button
+              style={{
+                fontSize: "1.2rem",
+                height: "60px",
+                width: "200px",
+                position: "absolute",
+                bottom: "-80px",  // Positioned just below the background image
+                right: "20px",  // Positioned to the bottom right corner
+                zIndex: 2,  // Ensure the button is above other elements
+              }}
+              variant="filled"
+              color="blue"
+              onClick={handleFollow}
+            >
+              Follow
+            </Button>
+          )}
+
+          {/* Display the message below the background image */}
+          {showMessage && (
+            <Text
+              align="center"
+              color="red"
+              mt="md"
+              style={{
+                position: "absolute",
+                bottom: "-120px", // Positioned below the Follow button
+                left: 0,
+                right: 0,
+              }}
+            >
+              You need to log in to follow users. Redirecting to login...
+            </Text>
+          )}
         </Box>
+
         <Box mt="-150px" ml="20px" style={{ position: "relative" }}>
           <Avatar
             src={

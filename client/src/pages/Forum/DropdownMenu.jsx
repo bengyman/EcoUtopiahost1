@@ -17,10 +17,8 @@ import {
   Container,
   Modal,
   TextInput,
-  Avatar,
-  Switch
+  Avatar
 } from "@mantine/core";
-import { set } from 'react-hook-form';
 
 // Define tags and colors
 const tagOptions = [
@@ -50,10 +48,6 @@ const Posts = () => {
   const [selectedTag, setSelectedTag] = useState(""); // State for selected tag
   const [showIframe, setShowIframe] = useState(false); // State for iframe visibility
   const [profilePicUrl, setProfilePicUrl] = useState(null);
-  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
-  const [autoPlay, setAutoPlay] = useState(false);
-  const [autoMute, setAutoMute] = useState(false);
   const navigate = useNavigate();
 
   const fetchPosts = async () => {
@@ -98,7 +92,6 @@ const Posts = () => {
         }
       );
       console.log(response.data);
-      setIsReportModalOpen(false);
     } catch (error) {
       console.error("Error reporting post:", error);
     }
@@ -273,7 +266,7 @@ const Posts = () => {
                         }}
                         onClick={(e) => e.stopPropagation()} // Prevent click from navigating
                       >
-                        <video width="400" controls  style={{ display: 'block', width: '100%', height: 'auto' }}>
+                        <video width="400" controls style={{ display: 'block', width: '100%', height: 'auto' }}>
                           <source
                             src={post.imageUrl}
                             type="video/mp4"
@@ -291,10 +284,9 @@ const Posts = () => {
                     onClick={(e) => {
                       e.stopPropagation();
                       handleReport(post.post_id);
-                      setIsReportModalOpen(true);
                     }}
                   >
-                    Report 
+                    Report ({post.reports})
                   </Button>
                   <Button
                     variant="light"
@@ -329,22 +321,6 @@ const Posts = () => {
           </Button>
         </Group>
       </Modal>
-
-      <Modal
-        opened={isReportModalOpen}
-        onClose={() => setIsReportModalOpen(false)}
-        title="Confirm Report"
-      >
-        <Text>Are you sure you want to report this post?</Text>
-        <Group position="right" mt="md">
-          <Button onClick={() => setIsReportModalOpen(false)}>Cancel</Button>
-          <Button color="blue" onClick={() => { handleReport(); setIsReportModalOpen(false); }}>
-            Report
-          </Button>
-        </Group>
-        </Modal>
-
-      
 
       {/* Button to toggle iframe visibility */}
       <Button

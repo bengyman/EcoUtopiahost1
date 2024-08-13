@@ -1,22 +1,39 @@
-import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Container, Table, Button, Checkbox, Group, Title, Box } from '@mantine/core';
 
 function CheckAttendance() {
   const [students, setStudents] = useState([]);
   const [attendance, setAttendance] = useState({});
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const { courseId } = useParams();
 
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const response = await axios.get(`/courses/${courseId}/students`, {
+        const response = await axios.get(`/attendance/getAttendance/${courseId}`, {
+          //params: { courseId },
           headers: {
             Authorization: `Bearer ${sessionStorage.getItem('token')}`,
           },
         });
-        setStudents(response.data);
+        console.log(response.data);
+        const attendanceData = response.data.map(record => ({
+          student_id: record.resident_id,
+          student_name: record.Resident.name,
+          attendance_status: record.attendance_status,
+        }));
+        const uniqueResident = filterUniqueResident(attendanceData);
+        console.log(`Attendance Data: ${attendanceData}`);
+        console.log(`Unique Resident: ${uniqueResident}`);
+        //setStudents(attendanceData);
+        setStudents(uniqueResident);
+        const initialAttendance = {};
+        attendanceData.forEach(record => {
+          initialAttendance[record.student_id] = record.attendance_status;
+        });
+        setAttendance(initialAttendance);
       } catch (error) {
         console.error("Error fetching students:", error);
       }
@@ -24,6 +41,19 @@ function CheckAttendance() {
 
     fetchStudents();
   }, [courseId]);
+
+  const filterUniqueResident = (residents) => {
+    const uniqueResident = [];
+    const residentIds = new Set();
+    
+    residents.forEach((resident) => {
+      if (!residentIds.has(resident.student_id)) {
+        uniqueResident.push(resident);
+        residentIds.add(resident.student_id);
+      }
+    });
+    return uniqueResident;
+  };
 
   const handleAttendanceChange = (studentId, isChecked) => {
     setAttendance({
@@ -37,10 +67,9 @@ function CheckAttendance() {
       const attendanceRecords = students.map(student => ({
         studentId: student.student_id,
         status: attendance[student.student_id] || 'absent', // default to absent if not marked
-        date: new Date().toISOString().split('T')[0], // current date
+        attendance_date: new Date().toISOString().split('T')[0], // current date
       }));
-
-      await axios.post('/attendance', {
+      await axios.post('/attendance/attendance', {
         courseId,
         attendanceRecords,
       }, {
@@ -48,7 +77,6 @@ function CheckAttendance() {
           Authorization: `Bearer ${sessionStorage.getItem('token')}`,
         },
       });
-
       alert('Attendance submitted successfully');
     } catch (error) {
       console.error("Error submitting attendance:", error);
@@ -64,7 +92,7 @@ function CheckAttendance() {
         <Table.Thead>
           <Table.Tr>
             <Table.Th>Student Name</Table.Th>
-            <Table.Th>Present</Table.Th>
+            <Table.Th>Mark as Present</Table.Th>
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
