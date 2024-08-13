@@ -15,7 +15,7 @@ function AdminOrders() {
   const [filter, setFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortField, setSortField] = useState('order_id'); // Sort field state
+  const [sortField, setSortField] = useState('order_date'); // Sort field state
   const itemsPerPage = 10;
 
   useEffect(() => {
