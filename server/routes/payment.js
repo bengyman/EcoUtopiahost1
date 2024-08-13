@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const bodyParser = require('body-parser');
-const { Orders, Resident, RedeemReward, Course } = require('../models');
+const { Orders, Resident, Attendance, RedeemReward, Course } = require('../models');
 const { authenticateToken } = require('../middleware/auth');
 require('dotenv').config();
 
