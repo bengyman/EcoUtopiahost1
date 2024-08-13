@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Post, Resident, Comment, User, PostLikes, Instructor } = require('../models');
+const { Post, Resident, Comment, User, PostLikes, Instructor, PostReports } = require('../models');
 const yup = require('yup');
 const fs = require('fs');
 const path = require('path'); // Import the path module
@@ -148,10 +148,10 @@ router.get('/instructors', async (req, res) => {
 
 
 
-router.get('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
+router.get('/:id', authenticateToken, async (req, res) => {
+  const { id } = req.params;
 
+  try {
     const post = await Post.findOne({
       where: { post_id: id },
       include: [
@@ -159,22 +159,30 @@ router.get('/:id', async (req, res) => {
           model: Comment,
           include: [
             {
-              model: Resident,
-              attributes: ['name'] // Include the resident's name in the comment
+              model: Resident, // Include resident details for comments
+              attributes: ['profile_pic', 'name'] // Ensure the profile_pic is included
             }
           ]
+        },
+        {
+          model: Resident, // Include resident details for the post
+          attributes: ['profile_pic', 'name'] // Ensure the profile_pic is included
+        },
+        {
+          model: Instructor, // If applicable, include instructor details
+          attributes: ['profile_pic', 'name'] // Ensure the profile_pic is included
         }
       ]
     });
 
     if (!post) {
-      return res.status(404).json({ error: 'Post not found' });
+      return res.status(404).json({ message: 'Post not found.' });
     }
 
-    res.status(200).json(post);
+    res.json(post);
   } catch (error) {
     console.error('Error fetching post:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ message: 'An error occurred while fetching the post.' });
   }
 });
 
@@ -234,12 +242,10 @@ router.post('/:id/report', authenticateToken, async (req, res) => {
     const userId = req.user.id;
     const postId = req.params.id;
 
-    if (!reportedPosts[postId]) {
-      reportedPosts[postId] = new Set();
-    }
-
     // Check if the user has already reported this post
-    if (reportedPosts[postId].has(userId)) {
+    const existingReport = await PostReports.findOne({ where: { postId, userId } });
+
+    if (existingReport) {
       return res.status(400).json({ error: 'You have already reported this post' });
     }
 
@@ -249,19 +255,20 @@ router.post('/:id/report', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Post not found' });
     }
 
-    // Add user to the set of users who reported this post
-    reportedPosts[postId].add(userId);
+    // Create a new report
+    await PostReports.create({ postId, userId });
 
-    // Increment the report count
-    post.reports += 1;
-    await post.save();
+    // Optionally, you can update the post's report count if you have such a field
+     post.reports += 1;
+     await post.save();
 
     res.json({ message: 'Post reported successfully' });
   } catch (error) {
     console.error('Error reporting post:', error);
-    res.status(500).json({ error: 'An error occurred while reporting the post' });
+    res.status(500).json({ error: error.message });
   }
 });
+
 
 
 
@@ -351,30 +358,6 @@ router.delete('/comments/:commentId', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/:id', authenticateToken, async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const post = await Post.findOne({
-      where: { post_id: id },
-      include: [
-        {
-          model: Comment,
-          include: [Resident] // Optional: Include resident details if needed
-        }
-      ]
-    });
-
-    if (!post) {
-      return res.status(404).json({ message: 'Post not found.' });
-    }
-
-    res.json(post);
-  } catch (error) {
-    console.error('Error fetching post:', error);
-    res.status(500).json({ message: 'An error occurred while fetching the post.' });
-  }
-});
 
 // routes/post.js
 router.post('/:postId/like', authenticateToken, async (req, res) => {
@@ -430,17 +413,21 @@ router.get('/admin/posts', authenticateToken, authorizeRoles('STAFF'), async (re
         {
           model: Resident,
           attributes: ['name']
+        },
+        {
+          model: Instructor,
+          attributes: ['name']
         }
       ],
-      attributes: ['post_id', 'title', 'content', 'tags', 'imageUrl', 'reports', 'resident_id', 'createdAt', 'updatedAt']
+      attributes: ['post_id', 'title', 'content', 'tags', 'imageUrl', 'reports', 'resident_id', 'instructor_id', 'createdAt', 'updatedAt', 'likesCount']
     });
 
-    const postsWithResidentName = posts.map(post => ({
+    const postsWithNames = posts.map(post => ({
       ...post.toJSON(),
-      residentName: post.Resident ? post.Resident.name : null
+      name: post.resident_id ? (post.Resident ? post.Resident.name : null) : (post.Instructor ? post.Instructor.name : null),
     }));
 
-    res.status(200).json(postsWithResidentName);
+    res.status(200).json(postsWithNames);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

@@ -17,7 +17,7 @@ cron.schedule('*/1 * * * * *', async () => {
         model: Course,
         where: {
           course_end_date: {
-            [Op.lt]: currentDate // Assuming `course_end_date` is the field name in Course model
+            [Op.lt]: currentDate
           }
         }
       }

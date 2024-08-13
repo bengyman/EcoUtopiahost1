@@ -63,7 +63,9 @@ function PostTable() {
           post.title.toLowerCase().includes(search.toLowerCase()) ||
           post.content.toLowerCase().includes(search.toLowerCase()) ||
           post.tags.toLowerCase().includes(search.toLowerCase()) ||
-          post.residentName.toLowerCase().includes(search.toLowerCase())
+          post.resident_id.toString().includes(search.toLowerCase()) ||
+          (post.instructor_id && post.instructor_id.toString().includes(search.toLowerCase())) ||
+          (post.name && post.name.toLowerCase().includes(search.toLowerCase()))
       );
     }
 
@@ -158,7 +160,9 @@ function PostTable() {
               <th>Media URL</th>
               <th>Reports</th>
               <th>Resident ID</th>
-              <th>Resident Name</th>
+              <th>Instructor ID</th>
+              <th>Likes Count</th>
+              <th>Name</th>
               <th>Date Created</th>
               <th>Date Updated</th>
               <th>Actions</th>
@@ -237,7 +241,13 @@ function PostTable() {
                     {post.resident_id}
                   </td>
                   <td style={{ border: "1px solid #e0e0e0", padding: "8px" }}>
-                    {post.residentName}
+                    {post.instructor_id || "N/A"}
+                  </td>
+                  <td style={{ border: "1px solid #e0e0e0", padding: "8px" }}>
+                    {post.likesCount}
+                  </td>
+                  <td style={{ border: "1px solid #e0e0e0", padding: "8px" }}>
+                    {post.name || "N/A"}
                   </td>
                   <td style={{ border: "1px solid #e0e0e0", padding: "8px" }}>
                     {new Date(post.createdAt).toLocaleString()}
@@ -257,27 +267,20 @@ function PostTable() {
               ))
             ) : (
               <tr>
-                <td
-                  colSpan="11"
-                  style={{
-                    textAlign: "center",
-                    border: "1px solid #e0e0e0",
-                    padding: "8px",
-                  }}
-                >
+                <td colSpan="13" align="center">
                   No posts found
                 </td>
               </tr>
             )}
           </tbody>
         </Table>
-        <Group position="center" mt="md">
+        {displayedPosts.length > 0 && (
           <Pagination
             page={page}
             onChange={setPage}
             total={Math.ceil(posts.length / itemsPerPage)}
           />
-        </Group>
+        )}
       </Paper>
     </Container>
   );
