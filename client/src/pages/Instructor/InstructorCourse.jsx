@@ -38,6 +38,10 @@ function InstructorCourse() {
   if (loading) return <Text>Loading...</Text>;
   if (error) return <Text>Error: {error.message}</Text>;
 
+  if (courses.length === 0) {
+    return <Text align="center">No courses assigned yet.</Text>;
+  }
+
   const rows = courses.map(course => (
     <Table.Tr key={course.course_id}>
       <Table.Td>{course.course_name}</Table.Td>
