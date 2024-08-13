@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Text, TextInput, Button, Paper, Modal, Group, Center, useMantineTheme } from '@mantine/core';
+import { Container, Text, TextInput, Button, Paper, Modal, Group, Center, useMantineTheme, Box } from '@mantine/core';
 
 const WORDS = ["apple", "baker", "candy", "delta", "eagle", "flame", "grape", "house", "input", "jolly"];
 const MAX_ATTEMPTS = 6;
@@ -8,7 +8,7 @@ const WORD_LENGTH = 5;
 const LOCKOUT_KEY = 'wordleLockout';
 const POINTS_KEY = 'userPoints';
 const LEADERBOARD_KEY = 'leaderboard';
-const VALID_WORD_REGEX = /^[a-zA-Z]{5}$/; // Regex for validating a 5-letter word
+const VALID_WORD_REGEX = /^[a-zA-Z]{5}$/;
 
 const getRandomWord = () => {
   const shuffledWords = WORDS.sort(() => Math.random() - 0.5);
@@ -24,7 +24,7 @@ const WordleGrid = ({ guesses }) => {
           key={rowIndex}
           position="center"
           style={{
-            marginBottom: '10px', // Add margin to separate rows
+            marginBottom: '10px',
           }}
         >
           {Array.from({ length: WORD_LENGTH }).map((_, letterIndex) => (
@@ -38,8 +38,8 @@ const WordleGrid = ({ guesses }) => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginRight: '5px', // Separate the letters horizontally
-                backgroundColor: guess[letterIndex]?.color || theme.colors.gray[0], // Assuming guess contains color info
+                marginRight: '5px',
+                backgroundColor: guess[letterIndex]?.color || theme.colors.gray[0],
                 fontSize: '20px',
                 fontWeight: 'bold',
                 color: theme.colors.dark[9],
@@ -94,13 +94,13 @@ function EcoWordleGame() {
 
   const handleInputChange = (e) => {
     const value = e.target.value;
-    if (VALID_WORD_REGEX.test(value)) { // Ensure the input is a valid 5-letter word
+    if (value.length <= WORD_LENGTH) {
       setCurrentGuess(value.toLowerCase());
     }
   };
 
   const handleSubmitGuess = () => {
-    if (VALID_WORD_REGEX.test(currentGuess) && WORDS.includes(currentGuess)) { // Validate the guess
+    if (VALID_WORD_REGEX.test(currentGuess) && WORDS.includes(currentGuess)) {
       const updatedGuesses = [...guesses];
       const guessArray = Array.from(currentGuess).map((char, index) => ({
         char,
@@ -112,7 +112,7 @@ function EcoWordleGame() {
       if (currentGuess === word) {
         setWin(true);
         setGameOver(true);
-        const newPoints = points + 5;
+        const newPoints = hintUsed ? points + 19 : points + 20;
         setPoints(newPoints);
         localStorage.setItem(POINTS_KEY, newPoints);
         updateLeaderboard(newPoints);
@@ -154,8 +154,9 @@ function EcoWordleGame() {
         }
       }
       setHintUsed(true);
-      setPoints((prev) => prev - 1);
-      localStorage.setItem(POINTS_KEY, points - 1);
+      const newPoints = points - 1;
+      setPoints(newPoints);
+      localStorage.setItem(POINTS_KEY, newPoints);
     }
   };
 
@@ -200,14 +201,14 @@ function EcoWordleGame() {
       )}
       {gameOver && (
         <Paper padding="md" style={{ textAlign: 'center', marginTop: '20px', borderRadius: '10px', backgroundColor: theme.colors.green[1] }}>
-          {win ? <Text size="lg" weight={700} color={theme.colors.green[9]}>Congratulations! You guessed the word and earned 5 points!</Text> : <Text size="lg" weight={700} color={theme.colors.red[7]}>Game Over! The word was: {word}</Text>}
+          {win ? <Text size="lg" weight={700} color={theme.colors.green[9]}>Congratulations! You guessed the word and earned {hintUsed ? 19 : 20} points!</Text> : <Text size="lg" weight={700} color={theme.colors.red[7]}>Game Over! The word was: {word}</Text>}
           <Button onClick={handleRestart} style={{ marginTop: '10px' }}>Play Again</Button>
         </Paper>
       )}
-      <Modal opened={showLeaveModal} onClose={() => setShowLeaveModal(false)} title="Leave Game" centered>
-        <Text>Are you sure you want to leave the game? You will be locked out for 4 hours.</Text>
-        <Group position="right" style={{ marginTop: '20px' }}>
-          <Button onClick={confirmLeaveGame} color="red">Leave</Button>
+      <Modal opened={showLeaveModal} onClose={() => setShowLeaveModal(false)} title="Confirm Exit" centered>
+        <Text>Are you sure you want to leave? The game will be locked for 4 hours.</Text>
+        <Group position="center" style={{ marginTop: '20px' }}>
+          <Button onClick={confirmLeaveGame} color="red">Yes, Leave</Button>
           <Button onClick={() => setShowLeaveModal(false)}>Cancel</Button>
         </Group>
       </Modal>
