@@ -85,11 +85,11 @@ const Posts = () => {
     document.title = "Posts - EcoUtopia";
   }, []);
 
-  const handleReport = async (postId) => {
+  const handleReport = async () => {
     try {
       const token = sessionStorage.getItem("token");
-      const response = await axios.post(
-        `/posts/${postId}/report`,
+      await axios.post(
+        `/posts/${selectedPostId}/report`,
         {},
         {
           headers: {
@@ -97,7 +97,6 @@ const Posts = () => {
           },
         }
       );
-      console.log(response.data);
       setIsReportModalOpen(false);
     } catch (error) {
       console.error("Error reporting post:", error);
@@ -273,7 +272,7 @@ const Posts = () => {
                         }}
                         onClick={(e) => e.stopPropagation()} // Prevent click from navigating
                       >
-                        <video width="400" controls  style={{ display: 'block', width: '100%', height: 'auto' }}>
+                        <video width="400" controls style={{ display: 'block', width: '100%', height: 'auto' }}>
                           <source
                             src={post.imageUrl}
                             type="video/mp4"
@@ -290,11 +289,11 @@ const Posts = () => {
                     variant="light"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleReport(post.post_id);
+                      setSelectedPostId(post.post_id);
                       setIsReportModalOpen(true);
                     }}
                   >
-                    Report 
+                    Report
                   </Button>
                   <Button
                     variant="light"
@@ -342,9 +341,9 @@ const Posts = () => {
             Report
           </Button>
         </Group>
-        </Modal>
+      </Modal>
 
-      
+
 
       {/* Button to toggle iframe visibility */}
       <Button
