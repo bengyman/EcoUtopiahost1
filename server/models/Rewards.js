@@ -26,6 +26,15 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: true
         },
+        reward_value: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
+        reward_type: {
+            type: DataTypes.ENUM,
+            values: ['Discount_Voucher', 'Cash_Voucher', 'Others'],
+            allowNull: false
+        },
         is_deleted: {
             type: DataTypes.BOOLEAN,
             allowNull: true,
@@ -35,9 +44,10 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         tableName: 'rewards'
     });
+
     Rewards.associate = (models) => {
-        Rewards.belongsTo(models.Resident, { foreignKey: 'resident_id'})
+        Rewards.belongsTo(models.Resident, { foreignKey: 'resident_id' });
     };
 
-    return Rewards;
-}
+    return Rewards;
+};

@@ -56,5 +56,5 @@ module.exports = (sequelize, DataTypes) => {
         Course.belongsTo(models.Instructor, { foreignKey: 'instructorid', onDelete: 'CASCADE' });
     };
 
-    return Course;
+    return Course;
 };

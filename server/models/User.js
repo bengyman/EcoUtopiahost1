@@ -1,3 +1,4 @@
+
 // models/User.js
 module.exports = (sequelize, DataTypes) => {
     const User = sequelize.define("User", {
@@ -55,6 +56,9 @@ module.exports = (sequelize, DataTypes) => {
         User.hasMany(models.Resident, { foreignKey: 'user_id' });
         User.hasMany(models.Instructor, { foreignKey: 'user_id' });
         User.belongsToMany(models.Post, { through: 'PostLikes', as: 'likedPosts', foreignKey: 'userId' });
+        User.belongsToMany(models.User, { through: models.Follow, as: 'Followers', foreignKey: 'following_id'});
+        User.belongsToMany(models.User, { through: models.Follow, as: 'Following', foreignKey: 'follower_id'});
+        User.hasMany(models.PostReports, { foreignKey: 'userId' });
     };
 
     return User;

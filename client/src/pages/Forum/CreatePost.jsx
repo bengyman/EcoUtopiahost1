@@ -95,6 +95,19 @@ function CreatePost() {
     return <LoaderComponent />;
   }
 
+  // Determine tag options based on user role
+  const tagOptions = [
+    { value: "Advice", label: "Advice" },
+    { value: "Discussion", label: "Discussion" },
+    { value: "Tips", label: "Tips" },
+    { value: "Question", label: "Question" },
+  ];
+
+  // Only instructors can use the "Announcement" tag
+  if (user?.instructor) {
+    tagOptions.push({ value: "Announcement", label: "Announcement" });
+  }
+
   return (
     <Container size="md" my={40}>
       <Paper withBorder shadow="md" p={30} radius="md">
@@ -145,13 +158,7 @@ function CreatePost() {
               label="Tag"
               value={tags}
               onChange={setTags}
-              data={[
-                { value: "Advice", label: "Advice" },
-                { value: "Discussion", label: "Discussion" },
-                { value: "Tips", label: "Tips" },
-                { value: "Question", label: "Question" },
-                { value: "Announcement", label: "Announcement" },
-              ]}
+              data={tagOptions} // Use the determined tag options
               mb="md"
               error={tagsError ? "Required" : null}
               styles={(theme) => ({
