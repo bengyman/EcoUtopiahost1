@@ -110,6 +110,10 @@ function Login() {
           <Anchor component="button" type="button" color="dimmed" size="xs" onClick={() => navigate('/register')}>
             Create an account
           </Anchor>
+          {/* Explore as guest */}
+          <Anchor component="button" type="button" color="dimmed" size="xs" onClick={() => navigate('/explore')}>
+            Explore as guest
+          </Anchor>
         </Group>
       </Paper>
     </Container>
