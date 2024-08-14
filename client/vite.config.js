@@ -14,5 +14,14 @@ export default defineConfig({
     },
     host: 'localhost',
     port: 3000
+  },
+  build: {
+    outDir: 'dist', // Directory where the build output is placed
+    base: '/', // Base path for assets in production
+    rollupOptions: {
+      input: {
+        main: './src/index.jsx', // Main entry point
+      },
+    },
   }
 })
